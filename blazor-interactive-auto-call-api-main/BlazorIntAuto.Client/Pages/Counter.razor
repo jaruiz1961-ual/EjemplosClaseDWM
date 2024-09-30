@@ -1,8 +1,7 @@
 ﻿@page "/counter"
 @attribute [Authorize]
 @rendermode InteractiveAuto
-
-@inject HttpClient Http  
+@inject HttpClient Http
 
 <PageTitle>Counter</PageTitle>
 
@@ -14,10 +13,10 @@
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 <div>
-    <p>&nbsp;</p>
-    <button class="btn btn-primary" @onclick="CallInternalApi">Call internal API</button>
-    <button class="btn btn-primary" @onclick="CallExternalApi">Call external API</button>
-    <p>@ApiResponse</p>
+  <p>&nbsp;</p>
+  <button class="btn btn-primary" @onclick="CallInternalApi">Call internal API</button>
+  <button class="btn btn-primary" @onclick="CallExternalApi">Call external API</button>
+  <p>@ApiResponse</p>
 </div>
 
 @code {

@@ -1,4 +1,4 @@
-﻿using BlazorIntAuto.Client.Pages;
+using BlazorIntAuto.Client.Pages;
 using BlazorIntAuto.Components;
 using Auth0.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication;
@@ -13,15 +13,13 @@ builder.Services.AddScoped<AuthenticationStateProvider, PersistingRevalidatingAu
 builder.Services
     .AddAuth0WebAppAuthentication(options => {
       options.Domain = builder.Configuration["Auth0:Domain"];
-      options.ClientId = builder.Configuration["Auth0:ClientId"]; 
-        options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
-        // 👆 new code
+      options.ClientId = builder.Configuration["Auth0:ClientId"];
+      options.ClientSecret = builder.Configuration["Auth0:ClientSecret"];
     })
-    // 👇 new code
     .WithAccessToken(options =>
-    {
-        options.Audience = builder.Configuration["Auth0:Audience"];
-    });
+      {
+          options.Audience = builder.Configuration["Auth0:Audience"];
+      });
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
@@ -31,9 +29,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<TokenHandler>();
 
-//builder.Services.AddHttpClient(); //nuevo
-
-builder.Services.AddHttpClient("ExternalAPI",
+builder.Services.AddHttpClient("ExternalAPI", 
       client => client.BaseAddress = new Uri(builder.Configuration["ExternalApiBaseUrl"]))
       .AddHttpMessageHandler<TokenHandler>();
 
@@ -59,24 +55,24 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseAntiforgery();
 
-app.MapGet("/Account/Login", async (HttpContext httpContext, string returnUrl = "/") =>
+app.MapGet("/Account/Login", async (HttpContext httpContext, string redirectUri = "/") =>
 {
   var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-          .WithRedirectUri(returnUrl)
+          .WithRedirectUri(redirectUri)
           .Build();
 
   await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
 });
 
-app.MapGet("/Account/Logout", async (HttpContext httpContext) =>
+app.MapGet("/Account/Logout", async (HttpContext httpContext, string redirectUri = "/") =>
 {
   var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-          .WithRedirectUri("/")
+          .WithRedirectUri(redirectUri)
           .Build();
 
   await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
   await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-}) ;
+});
 
 app.MapGet("/api/internalData", () =>
 {
@@ -86,15 +82,13 @@ app.MapGet("/api/internalData", () =>
 
     return data;
 })
-.RequireAuthorization(); //nuevo
-
+.RequireAuthorization();
 
 app.MapGet("/api/externalData", async (HttpClient httpClient) =>
 {
     return await httpClient.GetFromJsonAsync<int[]>("data");
 })
-    .RequireAuthorization();
-
+.RequireAuthorization();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()

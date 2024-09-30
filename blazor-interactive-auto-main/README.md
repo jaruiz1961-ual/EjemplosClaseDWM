@@ -18,3 +18,6 @@ To run the Blazor Web application:
 - [.NET SDK 8.0](https://dotnet.microsoft.com/en-us/download/dotnet/8.0) installed on your machine
 - An [Auth0](https://auth0.com/) account.
 
+
+Segunda parte internal y external apis protegidas.
+https://auth0.com/blog/call-protected-api-from-blazor-web-app/
