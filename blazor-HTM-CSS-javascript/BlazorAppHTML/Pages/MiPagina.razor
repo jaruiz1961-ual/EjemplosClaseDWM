@@ -1,0 +1,41 @@
+﻿@page "/Mipagina"
+@using Microsoft.JSInterop
+@inject IJSRuntime jsRuntime
+
+<h3>MiPagina</h3>
+<p> Escribe el mensaje: </p>
+<input @bind="mensaje"  type="text" />
+<button @onclick="@(e=>MostrarAlerta(mensaje))">Show Alert</button>
+<button @onclick="@(e=>MostrarConfirmacion(mensaje))">Show confirm</button>
+@if (@result)
+{
+    <p>Confirmado</p>
+}
+else {<p>No Confirmado</p>}
+
+
+@code {
+    bool result;
+    string mensaje;
+    
+    IJSObjectReference jsmodule;
+    protected async override Task OnInitializedAsync()
+    {
+        jsmodule = await
+      jsRuntime.InvokeAsync<IJSObjectReference>("import",
+      "/Pages/MiPagina.razor.js"
+      );
+        
+    }
+
+    private async Task MostrarAlerta(string mensaje)
+    {
+         await jsmodule.InvokeVoidAsync("showAlert",   mensaje);
+    }
+
+    private async Task MostrarConfirmacion(string mensaje)
+    {
+         result = await jsmodule.InvokeAsync<bool>("showConfirm", mensaje);
+    }
+
+}
