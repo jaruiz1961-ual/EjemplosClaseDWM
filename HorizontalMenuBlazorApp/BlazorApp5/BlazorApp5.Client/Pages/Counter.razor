@@ -7,7 +7,43 @@
 
 <p role="status">Current count: @currentCount</p>
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+    <div class="container">
+        <h1 class="mb-5">Toasts</h1>
+
+        <button id="toastBtn" class="btn btn-primary">Show Toast</button>
+
+        <div class="toast-container position-fixed bottom-0 end-0 p-3">
+            <div class="toast" id="myToast">
+                <div class="toast-header text-bg-danger">
+                    <div class="me-auto">Bootstrap</div>
+                    <small>11 mins ago</small>
+                </div>
+                <div class="toast-body text-bg-danger">
+                    Hello World! This is a toast message!
+                </div>
+            </div>
+        </div>
+
+        <!-- Don't go past here -->
+    </div>
+    <div style="margin-top: 350px"></div>
+
+
+
+    <script>
+        const toastTrigger = document.querySelector('#toastBtn');
+        const toast = document.querySelector('#myToast');
+
+        if (toastTrigger) {
+            const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
+
+            toastTrigger.addEventListener('click', () => {
+                toastBootstrap.show();
+            });
+        }
+    </script>
+
+
 
 @code {
     private int currentCount = 0;
