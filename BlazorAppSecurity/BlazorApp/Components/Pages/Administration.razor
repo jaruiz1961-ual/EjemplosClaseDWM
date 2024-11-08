@@ -125,13 +125,13 @@
     System.Security.Claims.ClaimsPrincipal CurrentUser;
 
     // Property used to add or edit the currently selected user
-    IdentityUser objUser = new IdentityUser();
+    ApplicationUser objUser = new ApplicationUser();
 
     // Tracks the selected role for the currently selected user
     string CurrentUserRole { get; set; } = "Users";
 
     // Collection to display the existing users
-    List<IdentityUser> ColUsers = new List<IdentityUser>();
+    List<ApplicationUser> ColUsers = new List<ApplicationUser>();
 
     // Options to display in the roles dropdown when editing a user
     List<string> Options = new List<string>() { "Users", "Administrators" };
@@ -178,10 +178,10 @@
         strError = "";
 
         // Collection to hold users
-        ColUsers = new List<IdentityUser>();
+        ColUsers = new List<ApplicationUser>();
 
         // get users from _UserManager
-        var user = _UserManager.Users.Select(x => new IdentityUser
+        var user = _UserManager.Users.Select(x => new ApplicationUser
         {
             Id = x.Id,
             UserName = x.UserName,
@@ -348,11 +348,11 @@
         }
     }
 
-    async Task EditUser(IdentityUser _IdentityUser)
+    async Task EditUser(ApplicationUser _ApplicationUser)
     {
         // Set the selected user
         // as the current user
-        objUser = _IdentityUser;
+        objUser = _ApplicationUser;
 
         // Get the user
         var user = await _UserManager.FindByIdAsync(objUser.Id);

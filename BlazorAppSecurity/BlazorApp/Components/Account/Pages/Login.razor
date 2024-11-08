@@ -90,9 +90,11 @@
         // This doesn't count login failures towards account lockout
         // To enable password failures to trigger account lockout, set lockoutOnFailure: true
         var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+
+        ApplicationUser user = await SignInManager.UserManager.FindByEmailAsync(Input.Email);
         if (result.Succeeded)
         {
-            
+
 
 
             Logger.LogInformation("User logged in.");
@@ -108,6 +110,10 @@
         {
             Logger.LogWarning("User account locked out.");
             RedirectManager.RedirectTo("Account/Lockout");
+        }
+        else if (!user.EmailConfirmed)        
+        {
+            errorMessage = "Error: Tiene que confirmar su Emal.";
         }
         else
         {
