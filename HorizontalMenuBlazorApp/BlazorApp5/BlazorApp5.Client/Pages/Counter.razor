@@ -1,5 +1,5 @@
 ﻿@page "/counter"
-@rendermode InteractiveAuto
+
 
 <PageTitle>Counter</PageTitle>
 
@@ -7,49 +7,44 @@
 
 <p role="status">Current count: @currentCount</p>
 
-    <div class="container">
-        <h1 class="mb-5">Toasts</h1>
 
-        <button id="toastBtn" class="btn btn-primary">Show Toast</button>
-
-        <div class="toast-container position-fixed bottom-0 end-0 p-3">
-            <div class="toast" id="myToast">
-                <div class="toast-header text-bg-danger">
-                    <div class="me-auto">Bootstrap</div>
-                    <small>11 mins ago</small>
-                </div>
-                <div class="toast-body text-bg-danger">
-                    Hello World! This is a toast message!
-                </div>
-            </div>
-        </div>
-
-        <!-- Don't go past here -->
+<EditForm OnSubmit="IncrementCount" FormName="SearchForm" EditContext="editContext">
+    <div class="form-floating mb-3">
+        <input name="query" placeholder="number" value="@Query" />
+        <label>Title</label>
     </div>
-    <div style="margin-top: 350px"></div>
-
-
-
-    <script>
-        const toastTrigger = document.querySelector('#toastBtn');
-        const toast = document.querySelector('#myToast');
-
-        if (toastTrigger) {
-            const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toast);
-
-            toastTrigger.addEventListener('click', () => {
-                toastBootstrap.show();
-            });
-        }
-    </script>
-
+</EditForm>
 
 
 @code {
-    private int currentCount = 0;
-
+    private EditContext? editContext;
+    int currentCount { get; set; }
     private void IncrementCount()
     {
         currentCount++;
+        Query = currentCount.ToString();
+    }
+
+
+    [SupplyParameterFromQuery]
+    public string Query { get; set; }
+
+    protected override void OnInitialized()
+    {
+        if (Query == null) Query = "0";
+        else
+        {
+            currentCount = int.Parse(Query);
+            currentCount++;
+            Query = currentCount.ToString();
+        }
     }
 }
+
+
+
+@* <form action="" method="post" @formname="increment" data-enhance @onsubmit="IncrementCount">
+    <input name="query" placeholder="number" value="@Query" />
+    <button type="submit">Add</button>
+    <AntiforgeryToken />
+</form> *@
