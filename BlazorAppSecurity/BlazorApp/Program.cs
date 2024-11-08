@@ -31,7 +31,6 @@ builder.Services.AddAuthentication(options =>
 
 
 
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
@@ -70,8 +69,11 @@ app.MapRazorComponents<App>()
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.MapGet("/hello", () => "Hello world!")
-  .RequireAuthorization();
 
+//para que funcionen las apis//
+
+app.MapGet("/free", ()=>"Hola mundo");
+app.MapGet("/hello", [Authorize] () => "Hello world!");
+app.MapGet("/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
 
 app.Run();
