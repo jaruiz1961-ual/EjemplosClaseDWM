@@ -73,6 +73,7 @@ app.MapAdditionalIdentityEndpoints();
 
 //para que funcionen las apis//
 
+
 app.MapGet("/free", ()=>"Hola mundo");
 app.MapGet("/hello", [Authorize] () => "Hello world!");
 app.MapGet("/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
