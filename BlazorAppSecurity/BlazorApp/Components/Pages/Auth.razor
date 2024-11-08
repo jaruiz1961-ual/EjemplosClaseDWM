@@ -15,3 +15,8 @@
 <AuthorizeView Roles="Administrators">
     Hello @context.User.Identity?.Name!
 </AuthorizeView>
+
+@* En la base de datos el rol es Administrators 
+    Hay que crearlo en ASpNetRoles
+    Y en la tabla relacion: AspNetUserRoles
+*@
