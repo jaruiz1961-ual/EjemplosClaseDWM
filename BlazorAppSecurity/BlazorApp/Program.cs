@@ -102,16 +102,19 @@ app.MapAdditionalIdentityEndpoints();
 app.MapGet("/api/free", ()=>"Hola mundo");
 app.MapGet("/api/hello", [Authorize] () => "Hello world!");
 app.MapGet("/api/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
-app.MapGet("/api/register/{text}", async (string text, IServiceProvider serviceProvider) =>
+app.MapGet("/api/login/{text}", async (string text, IServiceProvider serviceProvider) =>
 {
     var texto = text.Split("&");
     var  service = (SignInManager <ApplicationUser>) serviceProvider.GetService(typeof(SignInManager<ApplicationUser>));
     var result = await service.PasswordSignInAsync(texto[0], texto[1], true, lockoutOnFailure: false);
-    return result;
+    if (result.Succeeded)
+        Results.Ok();
+    else
+        Results.Unauthorized();
 
 });
 
-app.MapGet("/api/logout", async (IServiceProvider serviceProvider) =>
+app.MapGet("/api/logout", async ( IServiceProvider serviceProvider) =>
 {
     var signInManager = (SignInManager<ApplicationUser>)serviceProvider.GetService(typeof(SignInManager<ApplicationUser>));
     await signInManager.SignOutAsync();
