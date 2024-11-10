@@ -1,11 +1,21 @@
 using BlazorApp.Components;
 using BlazorApp.Components.Account;
+using BlazorApp.Components.Account.Pages.Manage;
 using BlazorApp.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using System;
+using System.Net.Http;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Components;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -92,13 +102,20 @@ app.MapAdditionalIdentityEndpoints();
 app.MapGet("/api/free", ()=>"Hola mundo");
 app.MapGet("/api/hello", [Authorize] () => "Hello world!");
 app.MapGet("/api/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
-app.MapGet("/api/internalData", () =>
+app.MapGet("/api/register/{text}", async (string text, IServiceProvider serviceProvider) =>
 {
-    var data = Enumerable.Range(1, 5).Select(index =>
-        Random.Shared.Next(1, 100))
-        .ToArray();
+    var texto = text.Split("&");
+    var  service = (SignInManager <ApplicationUser>) serviceProvider.GetService(typeof(SignInManager<ApplicationUser>));
+    var result = await service.PasswordSignInAsync(texto[0], texto[1], true, lockoutOnFailure: false);
+    return result;
 
-    return data;
 });
 
+
 app.Run();
+
+
+static void Pepe (IServiceProvider serviceProvider)
+{
+    var service = serviceProvider.GetService(typeof(SignInManager<ApplicationUser>));
+};
