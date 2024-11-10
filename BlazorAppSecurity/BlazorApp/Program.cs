@@ -45,6 +45,21 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+
+builder.Services.AddHttpClient();  
+
+//("ServerAPI",
+//      client => client.BaseAddress = new Uri(@"https://localhost:7270/"));
+//builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
+//  .CreateClient("ServerAPI"));
+
+
+
+
+
+
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -74,8 +89,16 @@ app.MapAdditionalIdentityEndpoints();
 //para que funcionen las apis//
 
 
-app.MapGet("/free", ()=>"Hola mundo");
-app.MapGet("/hello", [Authorize] () => "Hello world!");
-app.MapGet("/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
+app.MapGet("/api/free", ()=>"Hola mundo");
+app.MapGet("/api/hello", [Authorize] () => "Hello world!");
+app.MapGet("/api/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
+app.MapGet("/api/internalData", () =>
+{
+    var data = Enumerable.Range(1, 5).Select(index =>
+        Random.Shared.Next(1, 100))
+        .ToArray();
+
+    return data;
+});
 
 app.Run();

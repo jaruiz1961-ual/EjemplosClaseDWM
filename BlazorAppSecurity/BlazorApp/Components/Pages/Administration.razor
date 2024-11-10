@@ -11,12 +11,14 @@
     <Authorized>
         @if (@context.User.IsInRole(ADMINISTRATION_ROLE))
         {
+
             <table class="table">
                 <thead>
                     <tr>
                         <th>Id</th>
                         <th>User Name</th>
                         <th>Email</th>
+                        <th>EmailConfirmed</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -26,6 +28,7 @@
                             <td>@user.Id.Substring(0, 5) ...</td>
                             <td>@user.UserName</td>
                             <td>@user.Email</td>
+                            <td>@user.EmailConfirmed</td>
                             <td>
                                 <!-- Edit the current forecast -->
                                 <button class="btn btn-primary"
@@ -75,6 +78,13 @@
                                 <input class="form-control" type="password"
                                        placeholder="Password"
                                        @bind="objUser.PasswordHash" />
+                                <div class="form-check">
+                                        <input class="form-check-input" @bind="objUser.EmailConfirmed" type="checkbox" value="" id="flexCheckDefault">
+                                        <label class="form-check-label" for="flexCheckDefault">
+                                        EmailConfirmed
+                                        </label>
+                                 </div>
+
                                 <select class="form-control"
                                         @bind="@CurrentUserRole">
                                     @foreach (var option in Options)
@@ -186,7 +196,8 @@
             Id = x.Id,
             UserName = x.UserName,
             Email = x.Email,
-            PasswordHash = "*****"
+            PasswordHash = "*****",
+            EmailConfirmed = x.EmailConfirmed
         });
 
         foreach (var item in user)
@@ -200,6 +211,7 @@
         // Make new user
         objUser = new ApplicationUser();
         objUser.PasswordHash = "*****";
+        objUser.EmailConfirmed = true;
 
         // Set Id to blank so we know it is a new record
         objUser.Id = "";
@@ -297,7 +309,9 @@
                     new ApplicationUser
                     {
                         UserName = objUser.UserName,
-                        Email = objUser.Email
+                        Email = objUser.Email,
+                        EmailConfirmed = objUser.EmailConfirmed
+                        
                     };
 
                 var CreateResult =
