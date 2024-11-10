@@ -111,6 +111,12 @@ app.MapGet("/api/register/{text}", async (string text, IServiceProvider serviceP
 
 });
 
+app.MapGet("/api/logout", async (IServiceProvider serviceProvider) =>
+{
+    var signInManager = (SignInManager<ApplicationUser>)serviceProvider.GetService(typeof(SignInManager<ApplicationUser>));
+    await signInManager.SignOutAsync();
+});
+
 
 app.Run();
 
