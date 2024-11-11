@@ -1,43 +1,66 @@
 ﻿@page "/counter"
+@page "/counter/{Query}"
 
 
 <PageTitle>Counter</PageTitle>
 
 <h1>Counter</h1>
 
-<p role="status">Current count: @currentCount</p>
+<p role="status">Current count: @mimodelo.currentCount</p>
 
 
-<EditForm OnSubmit="IncrementCount" FormName="SearchForm" EditContext="editContext">
-    <div class="form-floating mb-3">
+@if (@html)
+{
+    <form action="" method="post" @formname="IncrementFormHtml" data-enhance @onsubmit="IncrementCount">
+        <div class="form-floating mb-3">
         <input name="query" placeholder="number" value="@Query" />
-        <label>Title</label>
-    </div>
-</EditForm>
+        <button type="submit">Add</button>
+        <AntiforgeryToken />
+        </div>
+    </form>
+}
+else
+{
+
+    <EditForm  Model="mimodelo" FormName="IncrementForm" OnValidSubmit="@IncrementCount" EditContext="editContext">
+        <div class="form-floating mb-3">
+            <input type="text" name="query" placeholder="number" @bind="Query" />
+            <button type="submit">Add</button>
+        </div>
+    </EditForm>
+}
 
 
 @code {
+    bool html = true;
     private EditContext? editContext;
-    int currentCount { get; set; }
+
+    modelo mimodelo = new modelo();
     private void IncrementCount()
     {
-        currentCount++;
-        Query = currentCount.ToString();
+        mimodelo.currentCount++;
+        Query = mimodelo.currentCount.ToString();
     }
 
+    public class modelo()
+    {
+        public int currentCount { get; set; } = 0;
+        public string currentValue { get; set; } = "0";
+    }
 
-    [SupplyParameterFromQuery]
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "Query")]
     public string Query { get; set; }
 
     protected override void OnInitialized()
     {
-        if (Query == null) Query = "0";
-        else
-        {
-            currentCount = int.Parse(Query);
-            currentCount++;
-            Query = currentCount.ToString();
-        }
+         if (Query !=null)
+         {
+            mimodelo.currentCount = int.Parse(Query);
+            mimodelo.currentCount++;
+            Query = mimodelo.currentCount.ToString();
+         }
+        
     }
 }
 

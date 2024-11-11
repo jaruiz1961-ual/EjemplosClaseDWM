@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirmModal">   Eliminar Elemento  </button>
 <div class="modal fade" id="confirmModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -11,10 +12,27 @@
                 <p>¿Estás seguro de que deseas eliminar este elemento?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger">Eliminar</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" @onclick="@ModalCancel">Cancelar</button>
+                <button type="button" class="btn btn-danger" @onclick="@ModalOk">Eliminar</button>
             </div>
         </div>
     </div>
 </div>
+
+
+
+@code{
+    [Parameter]
+    public EventCallback<bool> OnClose { get; set; }
+
+    private Task ModalCancel()
+    {
+        return OnClose.InvokeAsync(false);
+    }
+
+    private Task ModalOk()
+    {
+        return OnClose.InvokeAsync(true);
+    }
+}
 
