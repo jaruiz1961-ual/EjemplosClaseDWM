@@ -14,8 +14,15 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Components;
+using System.Linq.Expressions;
+using System.Text.Json.Nodes;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 
+
+//CleanArchitecture CodeGenerator For Blazor App
+//https://marketplace.visualstudio.com/items?itemName=neozhu.247365
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,7 +106,7 @@ app.MapAdditionalIdentityEndpoints();
 //para que funcionen las apis//
 
 
-app.MapGet("/api/free", ()=>"Hola mundo");
+app.MapGet("/api/free", ()=>"Hola mundo").Produces(StatusCodes.Status200OK);
 app.MapGet("/api/hello", [Authorize] () => "Hello world!");
 app.MapGet("/api/admin", [Authorize(Roles = "Administrators")] () => "Hello administratos");
 app.MapGet("/api/login/{text}", async (string text, IServiceProvider serviceProvider) =>
@@ -113,6 +120,20 @@ app.MapGet("/api/login/{text}", async (string text, IServiceProvider serviceProv
         Results.Unauthorized();
 
 });
+app.MapGet("/api/weather", [Authorize (Roles ="Administrators,Users")] () =>
+{
+    WeatherForecast[]? forecasts;
+
+    var startDate = DateOnly.FromDateTime(DateTime.Now);
+    var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+    forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+    {
+        Date = startDate.AddDays(index),
+        TemperatureC = Random.Shared.Next(-20, 55),
+        Summary = summaries[Random.Shared.Next(summaries.Length)]
+    }).ToArray();
+    return Results.Ok(forecasts);
+});
 
 app.MapGet("/api/logout", async ( IServiceProvider serviceProvider) =>
 {
@@ -123,8 +144,10 @@ app.MapGet("/api/logout", async ( IServiceProvider serviceProvider) =>
 
 app.Run();
 
-
-static void Pepe (IServiceProvider serviceProvider)
+ class WeatherForecast
 {
-    var service = serviceProvider.GetService(typeof(SignInManager<ApplicationUser>));
-};
+    public DateOnly Date { get; set; }
+    public int TemperatureC { get; set; }
+    public string? Summary { get; set; }
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+}

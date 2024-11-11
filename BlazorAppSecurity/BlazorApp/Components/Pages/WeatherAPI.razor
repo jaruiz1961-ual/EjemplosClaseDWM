@@ -1,4 +1,9 @@
-﻿@page "/weather"
+﻿@using System.Net.Http
+@using System.Text.Json
+@using Newtonsoft.Json
+@inject HttpClient Http
+@inject IHttpClientFactory ClientFactory
+@page "/weatherAPI"
 
 <PageTitle>Weather</PageTitle>
 
@@ -22,6 +27,7 @@ else
             </tr>
         </thead>
         <tbody>
+            @if (forecasts != null)
             @foreach (var forecast in forecasts)
             {
                 <tr>
@@ -33,24 +39,33 @@ else
             }
         </tbody>
     </table>
+
+    <p class="text-black">@mensaje</p>
 }
 
 @code {
     private WeatherForecast[]? forecasts;
 
+    private string mensaje = "?";
+
     protected override async Task OnInitializedAsync()
     {
-        // Simulate asynchronous loading to demonstrate a loading indicator
-        await Task.Delay(500);
 
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
+        var request = new HttpRequestMessage(HttpMethod.Get, @"https://localhost:7270/api/weather");
+        var client = ClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if (response.IsSuccessStatusCode)
         {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
+            try
+            {
+                forecasts = await response.Content.ReadFromJsonAsync<WeatherForecast[]>();
+            }
+            catch (Exception ex)
+            {
+                forecasts = new WeatherForecast[] { new WeatherForecast { Date = DateOnly.FromDateTime(DateTime.Now), TemperatureC = 0, Summary = "NO data" } };
+            }
+        }
+
     }
 
     private class WeatherForecast
@@ -60,4 +75,7 @@ else
         public string? Summary { get; set; }
         public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
     }
+
+   
+
 }
