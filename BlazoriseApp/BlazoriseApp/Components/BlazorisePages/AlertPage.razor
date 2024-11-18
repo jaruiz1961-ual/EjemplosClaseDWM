@@ -1,0 +1,60 @@
+﻿@page "/AlertPage"
+
+<p> boton pulsado: @queboton </p>
+<Alert Color="Color.Info" @bind-Visible="@visible">
+    <Heading Size="HeadingSize.Is4" TextColor="TextColor.Success">
+        Big one!
+        <CloseButton />
+    </Heading>
+    <Paragraph>
+        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Cras mattis consectetur purus sit amet fermentum.
+    </Paragraph>
+    <Paragraph>
+        <Button Clicked="@OnThisButtonClick" Color="Color.Info">Wanna do this</Button>
+        <Button Clicked="@OnThatButtonClick" Color="Color.Light">Or do this</Button>
+    </Paragraph>
+</Alert>
+
+@if (visibleBadge)
+{
+    <Badge Color="Color.Primary" CloseClicked="@(()=>CloseBadge())">Primary</Badge>
+}
+
+
+<Button Color="Color.Primary" Clicked="@ShowLoading" Loading="@isLoading">
+Loading
+</Button>
+@code {
+    private bool isLoading= false;
+
+    private async Task ShowLoading()
+    {
+        isLoading = true;
+
+        await Task.Delay(TimeSpan.FromSeconds(3));
+
+        isLoading = false;
+    }
+}
+@code {
+    bool visibleBadge = true;
+    bool visible = true;
+    string queboton = "";
+    Task OnThisButtonClick()
+    {
+        visible = !visible;
+        queboton = "Wanna do this";
+        return Task.CompletedTask;
+    }
+    Task OnThatButtonClick()
+    {
+        visible = !visible;
+        queboton = "Or do this";
+        return Task.CompletedTask;
+    }
+    Task CloseBadge()
+    {
+        visibleBadge = false;
+        return Task.CompletedTask;
+    }
+}
