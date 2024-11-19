@@ -111,7 +111,7 @@
             Logger.LogWarning("User account locked out.");
             RedirectManager.RedirectTo("Account/Lockout");
         }
-        else if (!user.EmailConfirmed)        
+        else if (user != null && !user.EmailConfirmed)        
         {
             errorMessage = "Error: Tiene que confirmar su Emal.";
         }

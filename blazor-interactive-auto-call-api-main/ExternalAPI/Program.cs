@@ -24,7 +24,7 @@ app.MapGet("/data", () =>
 
     return data;
 })
-.WithName("GetWeatherForecast")
+
 .RequireAuthorization()
 .WithOpenApi();
 

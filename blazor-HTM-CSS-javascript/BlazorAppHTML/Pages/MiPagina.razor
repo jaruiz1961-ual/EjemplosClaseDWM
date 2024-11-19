@@ -2,6 +2,20 @@
 @using Microsoft.JSInterop
 @inject IJSRuntime jsRuntime
 
+
+
+
+
+@*
+@rendermode @(new InteractiveServerRenderMode(prerender: true)) "Static Server-Side Rendering" (por defecto)
+@attribute [StreamRendering(true)]"Static Server-Side Rendering  con Streaming"
+
+@rendermode @(new InteractiveServerRenderMode(prerender: false)) "RenderMode.InteractiveServer"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false)) "RenderMode.InteractiveWebAssembly"
+@rendermode @(new InteractiveAutoRenderMode(prerender: false)) "RenderMode.InteractiveAuto"
+
+*@
+
 <h3>MiPagina</h3>
 <p> Escribe el mensaje: </p>
 <input @bind="mensaje"  type="text" />
@@ -17,14 +31,11 @@ else {<p>No Confirmado</p>}
 @code {
     bool result;
     string mensaje;
-    
     IJSObjectReference jsmodule;
+
     protected async override Task OnInitializedAsync()
     {
-        jsmodule = await
-      jsRuntime.InvokeAsync<IJSObjectReference>("import",
-      "/Pages/MiPagina.razor.js"
-      );
+        jsmodule = await jsRuntime.InvokeAsync<IJSObjectReference>("import", "/Pages/MiPagina.razor.js");
         
     }
 
@@ -39,3 +50,5 @@ else {<p>No Confirmado</p>}
     }
 
 }
+
+
