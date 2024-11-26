@@ -1,0 +1,105 @@
+﻿@page "/DetalleUsuario"
+@page "/DetalleUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
+
+
+@inject IUsuarioServiceAsync UsuarioService
+@inject NavigationManager nav
+
+<h3>DetalleUsuario</h3>
+
+<div class="container">
+    <EditForm Model="@NewUser" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit">
+        <DataAnnotationsValidator />
+        <div class="row">
+            <div class="col-md-8">
+                <div class="row" style="margin-top:10px">
+                    <div class="col-md-12">
+                        <label for="Codigo">Codigo #</label>
+                        <input type="text" class="form-control" id="Codigo" @bind-value="NewUser.Codigo" placeholder="enter codigo ..." />
+                        <ValidationMessage For="@(()=>NewUser.Codigo)" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-md-12">
+                        <label for="UserName">UsertName #</label>
+                        <input type="text" class="form-control" id="UserName" @bind-value="NewUser.UserName" placeholder="enter UserName ..." />
+                        <ValidationMessage For="@(()=>NewUser.UserName)" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-md-12">
+                        <label for="NivelAcceso">NivelAcceso #</label>
+                        <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.NivelAcceso" placeholder="enter NivelAcceso ..." />
+                        <ValidationMessage For="@(()=>NewUser.NivelAcceso)" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-md-12">
+                        <label for="Password">Password #</label>
+                        <input type="text" class="form-control" id="Password" @bind-value="NewUser.Password" placeholder="enter Password ..." />
+                        <ValidationMessage For="@(()=>NewUser.Password)" />
+                    </div>
+                </div>
+
+                <div class="row" style="margin-top:10px">
+                    <div class="col-md-12">
+                        <label for="email">email #</label>
+                        <input type="text" class="form-control" id="email" @bind-value="NewUser.email" placeholder="enter email ..." />
+                        <ValidationMessage For="@(()=>NewUser.email)" />
+                    </div>
+                </div>
+               
+                <button type="submit" class="btn btn-info" Style="margin-top:10px">Save</button>
+                <button type="submit" class="btn btn-info" onclick="Cancel" Style="margin-top:10px">Cancel</button>
+            </div>
+            @if (displayValidationErrorMessages)
+            {
+                <div class="col-md-4" style="margin-top:10px">
+                    <label>Validation Messages: </label>
+                    <ValidationSummary />
+                </div>
+            }
+        </div>
+    </EditForm>
+
+</div>
+@code {
+    
+    bool displayValidationErrorMessages = false;
+    bool displayUserAddedToDB = false;
+    private void HandleValidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = false;
+        displayUserAddedToDB = true;
+        UsuarioService.SaveUserAsync(NewUser);
+        nav.NavigateTo("/ListaUsuarios");
+    }
+    private void HandleInvalidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = true;
+        displayUserAddedToDB = false;
+      //  nav.NavigateTo("/ListaUsuarios");
+    }
+
+
+    [Parameter]
+    public int Id { get; set; }
+
+
+    private UsuarioSet NewUser = new UsuarioSet();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != 0)
+            NewUser = await UsuarioService.FindIdAsync(Id);
+    }
+
+    protected void Cancel()
+    {
+        nav.NavigateTo("/ListaUsuarios");
+    }
+
+}
