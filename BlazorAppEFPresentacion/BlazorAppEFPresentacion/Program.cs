@@ -1,11 +1,15 @@
-using BlazorAppScaff.Components;
-using System.Reflection;
+using BlazorAppEFPresentacion.Components;
+using BlazorAppEFPresentacion.DataBase;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+.AddInteractiveServerComponents();
+
+builder.Services.AddDbContext<TestContext>(options => options.UseSqlServer());
 
 var app = builder.Build();
 
@@ -19,14 +23,6 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//PM> NuGet\Install-Package Microsoft.EntityFrameworkCore.Tools -Version 9.0.0
-//PM> Nuget\Install-Package  Microsoft.EntityFrameworkCore.Design
-//PM> dotnet tool install --global dotnet-ef
-//PM> Install-Package Microsoft.EntityFrameworkCore.SqlServer
-//
-//Scaffold-DbContext "Data Source=(localdb)\MssqlLocaldb;Initial Catalog=Test;AttachDbFileName=C:\\Temp\\TestDb.mdf ;Integrated Security=True" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Models
-//add-migration Inicial
-//update-database
 app.UseAntiforgery();
 
 app.MapStaticAssets();

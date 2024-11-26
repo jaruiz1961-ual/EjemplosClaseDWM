@@ -74,16 +74,20 @@ public partial class TestContext : DbContext
         modelBuilder.Entity<Alumno>().HasData(
        new Alumno { Id = 1, Nombre = "jose", Dni = "1234564", EmailUal = "jose@ual.es",
            UsernameUal = "jam3434", Apellidos = "moreno", Telefono = "67646376" },
-        new Alumno
-        {
-            Id = 2,
-            Nombre = "juan",
-            Dni = "9876564",
-            EmailUal = "juan@ual.es",
-            UsernameUal = "amt677",
-            Apellidos = "lopez",
-            Telefono = "67123408"
-        });
+        new Alumno {Id = 2, Nombre = "juan",Dni = "9876564", EmailUal = "juan@ual.es",UsernameUal = "amt677",
+            Apellidos = "lopez", Telefono = "67123408"  }
+        );
+
+        modelBuilder.Entity<Asignatura>().HasData(
+        new Asignatura { Id = 1, Nombre = "desasrrollo web movil", Clave = "DWM" },
+        new Asignatura { Id = 2, Nombre = "Programacion Servicios", Clave = "PSS" }
+        );
+
+        modelBuilder.Entity<AlumnosAsignatura>().HasData(
+new AlumnosAsignatura { Id = 1, AlumnosId=1, AsignaturaId=1 },
+new AlumnosAsignatura { Id = 2, AlumnosId = 1, AsignaturaId = 2 },
+new AlumnosAsignatura { Id = 3, AlumnosId = 2, AsignaturaId = 1 }
+);
 
     }
 }
