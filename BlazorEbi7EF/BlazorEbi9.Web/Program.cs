@@ -1,9 +1,9 @@
-using BlazorEbi7.Web;
+using BlazorEbi9.Web;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using BlazorEbi7.RestfullCore.Services;
-using BlazorEbi7.Data.Services;
-using BlazorEbi7.Model.IServices;
+using BlazorEbi9.RestfullCore.Services;
+using BlazorEbi9.Data.Services;
+using BlazorEbi9.Model.IServices;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");

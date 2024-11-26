@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Maui" Version="7.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="9.0.0" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
@@ -40,7 +40,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorEbi7.RestfullCore\BlazorEbi7.RestfullCore.csproj" />
+    <ProjectReference Include="..\BlazorEbi9.RestfullCore\BlazorEbi9.RestfullCore.csproj" />
   </ItemGroup>
 
 </Project>

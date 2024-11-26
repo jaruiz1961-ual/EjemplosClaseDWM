@@ -1,8 +1,8 @@
-using BlazorEbi7.Data;
-using BlazorEbi7.Data.DataBase;
-using BlazorEbi7.Data.Services;
-using BlazorEbi7.Model.IServices;
-using BlazorEbi7.RestfullCore.Services;
+using BlazorEbi9.Data;
+using BlazorEbi9.Data.DataBase;
+using BlazorEbi9.Data.Services;
+using BlazorEbi9.Model.IServices;
+using BlazorEbi9.RestfullCore.Services;
 using Microsoft.EntityFrameworkCore;
 
 IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();

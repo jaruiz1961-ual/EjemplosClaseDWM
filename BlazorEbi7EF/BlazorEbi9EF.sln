@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEbi9.ServerBlazorise"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEbi9.MauiBlazorApp", "BlazorEbi9.MauiBlazorApp\BlazorEbi9.MauiBlazorApp.csproj", "{F3AFED7C-4ECF-4D9C-BBA1-4788EA6C73E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEbi9.Web", "BlazorEbi9.Web\BlazorEbi9.Web.csproj", "{296BEBAC-B7EC-458E-A0FC-2C20E688E0D5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorEbi9.Server", "BlazorEbi9.Server\BlazorEbi9.Server.csproj", "{E7550473-EC8A-487D-885E-219B51E56ED2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +59,14 @@ Global
 		{F3AFED7C-4ECF-4D9C-BBA1-4788EA6C73E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F3AFED7C-4ECF-4D9C-BBA1-4788EA6C73E3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F3AFED7C-4ECF-4D9C-BBA1-4788EA6C73E3}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{296BEBAC-B7EC-458E-A0FC-2C20E688E0D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{296BEBAC-B7EC-458E-A0FC-2C20E688E0D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{296BEBAC-B7EC-458E-A0FC-2C20E688E0D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{296BEBAC-B7EC-458E-A0FC-2C20E688E0D5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7550473-EC8A-487D-885E-219B51E56ED2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7550473-EC8A-487D-885E-219B51E56ED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7550473-EC8A-487D-885E-219B51E56ED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7550473-EC8A-487D-885E-219B51E56ED2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

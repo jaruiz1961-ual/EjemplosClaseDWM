@@ -1,4 +1,4 @@
-﻿namespace BlazorEbi7.RestfullCore.Repositories
+﻿namespace BlazorEbi9.RestfullCore.Repositories
 {
     public class HttpsClientHandlerService : IHttpsClientHandlerService
     {
