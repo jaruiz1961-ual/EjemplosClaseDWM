@@ -1,5 +1,5 @@
-using BlazorEbi7.Model.IServices;
-using BlazorEbi7.RestfullCore.Services;
+using BlazorEbi9.Model.IServices;
+using BlazorEbi9.RestfullCore.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
