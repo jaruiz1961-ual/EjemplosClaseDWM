@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorEbi7.Data\BlazorEbi7.Data.csproj" />
-    <ProjectReference Include="..\BlazorEbi7.Model\BlazorEbi7.Model.csproj" />
+    <ProjectReference Include="..\BlazorEbi9.Data\BlazorEbi9.Data.csproj" />
+    <ProjectReference Include="..\BlazorEbi9.Model\BlazorEbi9.Model.csproj" />
   </ItemGroup>
 
 

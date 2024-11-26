@@ -1,13 +1,13 @@
 ﻿
-using BlazorEbi7.Data.DataBase;
-using BlazorEbi7.Data.Services;
-using BlazorEbi7.RestfullCore.Repositories;
-using BlazorEbi7.RestfullCore.Services;
+using BlazorEbi9.Data.DataBase;
+using BlazorEbi9.Data.Services;
+using BlazorEbi9.RestfullCore.Repositories;
+using BlazorEbi9.RestfullCore.Services;
 using MauiAppXalm.Views;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using CommunityToolkit.Maui;
-using BlazorEbi7.Model.IServices;
+using BlazorEbi9.Model.IServices;
 
 namespace MauiAppXalm
 {

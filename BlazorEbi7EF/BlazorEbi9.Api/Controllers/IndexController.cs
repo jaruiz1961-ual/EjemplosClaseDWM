@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using BlazorEbi7.Data;
-using BlazorEbi7.Model;
+using BlazorEbi9.Data;
+using BlazorEbi9.Model;
 
 
-namespace BlazorEbi7.API.Controllers
+namespace BlazorEbi9.API.Controllers
 {
     [Route("Index")]
     [ApiController]

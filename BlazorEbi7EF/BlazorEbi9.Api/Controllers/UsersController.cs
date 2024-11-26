@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
-using BlazorEbi7.Data;
-using BlazorEbi7.Data.DataBase;
-using BlazorEbi7.Model.Entidades;
-using BlazorEbi7.Model.IServices;
+using BlazorEbi9.Data;
+using BlazorEbi9.Data.DataBase;
+using BlazorEbi9.Model.Entidades;
+using BlazorEbi9.Model.IServices;
 
-namespace BlazorEbi7.API.Controllers
+namespace BlazorEbi9.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

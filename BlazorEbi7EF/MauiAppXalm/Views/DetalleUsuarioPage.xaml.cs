@@ -1,6 +1,6 @@
-﻿using BlazorEbi7.Data;
-using BlazorEbi7.Model.Entidades;
-using BlazorEbi7.Model.IServices;
+﻿using BlazorEbi9.Data;
+using BlazorEbi9.Model.Entidades;
+using BlazorEbi9.Model.IServices;
 
 namespace MauiAppXalm.Views
 {

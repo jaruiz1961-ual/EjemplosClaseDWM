@@ -10,13 +10,13 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using BlazorEbi7.Data;
+using BlazorEbi9.Data;
 using Microsoft.EntityFrameworkCore;
-using BlazorEbi7.Data.DataBase;
-using BlazorEbi7.Data.Services;
-using BlazorEbi7.Model.IServices;
+using BlazorEbi9.Data.DataBase;
+using BlazorEbi9.Data.Services;
+using BlazorEbi9.Model.IServices;
 
-namespace BlazorEbi7.API
+namespace BlazorEbi9.API
 {
     public class Startup
     {
