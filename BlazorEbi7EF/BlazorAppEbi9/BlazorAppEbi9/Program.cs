@@ -5,16 +5,17 @@ using BlazorEbi9.Data.Services;
 using BlazorEbi9.Model.IServices;
 using Microsoft.EntityFrameworkCore;
 
-
-
-IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
-
 var builder = WebApplication.CreateBuilder(args);
 
+IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+
+
+
 
 string provider = Configuration.GetValue(typeof(string), "SqlProvider").ToString();
 if (provider == "SqlServer")
