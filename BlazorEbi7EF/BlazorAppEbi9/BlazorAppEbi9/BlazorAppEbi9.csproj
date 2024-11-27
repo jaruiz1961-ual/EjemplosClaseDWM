@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\BlazorEbi9.Api\BlazorEbi9.Api.csproj" />
+    <ProjectReference Include="..\..\BlazorEbi9.Data\BlazorEbi9.Data.csproj" />
+    <ProjectReference Include="..\..\BlazorEbi9.Model\BlazorEbi9.Model.csproj" />
+    <ProjectReference Include="..\BlazorAppEbi9.Client\BlazorAppEbi9.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
+  </ItemGroup>
+
+</Project>

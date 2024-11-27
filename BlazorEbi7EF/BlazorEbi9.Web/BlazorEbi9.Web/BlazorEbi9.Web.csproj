@@ -10,8 +10,7 @@
     <ProjectReference Include="..\..\BlazorEbi9.Api\BlazorEbi9.Api.csproj" />
     <ProjectReference Include="..\..\BlazorEbi9.Data\BlazorEbi9.Data.csproj" />
     <ProjectReference Include="..\..\BlazorEbi9.Model\BlazorEbi9.Model.csproj" />
-    <ProjectReference Include="..\BlazorEbi8.Web.Client\BlazorEbi9.Web.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.0" />
   </ItemGroup>
 
 </Project>
