@@ -18,6 +18,20 @@
         </Style>
     </ContentPage.Resources>
 	<VerticalStackLayout Margin="20">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Text="Save" 
+        Clicked="OnSaveButtonClicked" />
+            <Button Grid.Column="1" Text="Delete"
+        Clicked="OnDeleteButtonClicked" />
+            <Button Grid.Column="2" Text="Cancel" 
+        Clicked="OnCancelButtonClicked" />
+        </Grid>
         <Label Text="Id" />
         <Entry IsReadOnly="True" Text="{Binding Path=UsuarioSet.Id}" 
            Placeholder="Enter Id" />
@@ -31,17 +45,11 @@
 		<Entry Text="{Binding Path=UsuarioSet.Password}"
                Placeholder="Enter Password" />
         <Label Text="NIvelAcceso" />
-        <Entry Text="{Binding Path=UsuarioSet.NIvelAcceso}" 
+        <Entry Text="{Binding Path=UsuarioSet.NivelAcceso}" 
                Placeholder="Enter NIvel Acceso" />
         <Label Text="Email" />
         <Entry Text="{Binding Path=UsuarioSet.email}"
                Placeholder="Enter email" />
-
-		<Button Text="Save" 
-                Clicked="OnSaveButtonClicked" />
-		<Button Text="Delete"
-                Clicked="OnDeleteButtonClicked" />
-		<Button Text="Cancel" 
-                Clicked="OnCancelButtonClicked" />
-	</VerticalStackLayout>
+        
+    </VerticalStackLayout>
 </ContentPage>

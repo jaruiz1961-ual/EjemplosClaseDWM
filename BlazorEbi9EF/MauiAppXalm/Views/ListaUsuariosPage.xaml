@@ -19,12 +19,13 @@
         <CollectionView.ItemTemplate>
             <DataTemplate>
                 <Grid Padding="20,0,0,0"
-                      ColumnDefinitions="0.7*, 0.5*">
-                    <Label Text="{Binding UserName}" HorizontalTextAlignment="Start"
+                      ColumnDefinitions="*, *,*">
+                    <Label Grid.Column="0" Text="{Binding UserName}" HorizontalTextAlignment="Start"
                            />
-                    <Label Text="{Binding Password}" HorizontalTextAlignment="Center"
+                    <Label Grid.Column="1" Text="{Binding Password}" HorizontalTextAlignment="Start"
                            VerticalTextAlignment="Center" />
-
+                    <Label Grid.Column="2" Text="{Binding NivelAcceso}" HorizontalTextAlignment="Start"
+                     VerticalTextAlignment="Center" />
                 </Grid>
             </DataTemplate>
         </CollectionView.ItemTemplate>
