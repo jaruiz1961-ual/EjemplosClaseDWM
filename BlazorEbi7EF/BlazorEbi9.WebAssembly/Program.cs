@@ -1,4 +1,4 @@
-using BlazorEbi9.Web;
+using BlazorEbi9.WebAssembly;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using BlazorEbi9.RestfullCore.Services;

@@ -3,7 +3,7 @@ using BlazorEbi9.Data.Services;
 using BlazorEbi9.Model.IServices;
 using BlazorEbi9.RestfullCore.Services;
 using BlazorEbi9.Web.Client.Pages;
-using BlazorEbi90.Web.Components;
+using BlazorEbi9.Web.Components;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
