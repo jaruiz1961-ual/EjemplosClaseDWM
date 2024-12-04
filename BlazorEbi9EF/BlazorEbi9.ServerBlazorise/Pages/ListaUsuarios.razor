@@ -20,27 +20,31 @@
     </FieldBody>
 </Field>
 <DataGrid @ref="@dataGridRef"
-    TItem="UsuarioSet"
-          Data="@users"
-          @bind-SelectedRow="@selectedUser"
-          ReadData="OnReadData"
-          UseInternalEditing
-          RowInserted="@OnRowInserted"
-          RowUpdated="@OnRowUpdated"
-          RowRemoved="@OnRowRemoved"
-         
-          NewItemDefaultSetter="@OnNewItemDefaultSetter"
-          Editable
-          Responsive
-          ShowPager
-          CommandMode="DataGridCommandMode.Default"
-          EditMode="editMode">
+TItem="UsuarioSet"
+Data="@users"
+          TotalItems="@totalUsers"
+@bind-SelectedRow="@selectedUser"
+ReadData="CarregarClientes"
+UseInternalEditing
+RowInserted="@OnRowInserted"
+RowUpdated="@OnRowUpdated"
+RowRemoved="@OnRowRemoved"
+
+NewItemDefaultSetter="@OnNewItemDefaultSetter"
+Editable
+Responsive
+ShowPager
+PageSize="3"
+CommandMode="DataGridCommandMode.Default"
+EditMode="editMode">
+
+
 
     <DataGridColumns>
 
-        
-         <DataGridCommandColumn  NewCommandAllowed="false"   EditCommandAllowed="true" DeleteCommandAllowed="true">
-     
+
+        <DataGridCommandColumn  NewCommandAllowed="false"   EditCommandAllowed="true" DeleteCommandAllowed="true">
+
             <SaveCommandTemplate>
                 <Button ElementId="btnSave" Type="ButtonType.Submit" PreventDefaultOnSubmit Color="Color.Primary" Clicked=@context.Clicked>@context.LocalizationString</Button>
             </SaveCommandTemplate>
@@ -48,11 +52,11 @@
                 <Button ElementId="btnCancel" Color="Color.Secondary" Clicked="@context.Clicked">@context.LocalizationString</Button>
             </CancelCommandTemplate>
             <DeleteCommandTemplate>
-    <Button Color="Color.Danger" Clicked="@(()=>OnDeleteClicked(context))">Delete</Button>
-</DeleteCommandTemplate>
+                <Button Color="Color.Danger" Clicked="@(()=>OnDeleteClicked(context))">Delete</Button>
+            </DeleteCommandTemplate>
 
         </DataGridCommandColumn>
-       
+
         <DataGridDateColumn Field="@nameof(UsuarioSet.Id)" Caption="#"  Sortable="false" Displayable="true" />
         <DataGridColumn  Field="@nameof(UsuarioSet.UserName)" Caption="UserName" Editable Sortable="false" Displayable="true" />
         <DataGridColumn  Field="@nameof(UsuarioSet.Codigo)" Caption="Codigo" Editable Sortable="false" Displayable="true" />
@@ -61,11 +65,11 @@
         <DataGridColumn Field="@nameof(UsuarioSet.email)" Caption="email" Editable Sortable="false" Displayable="true" />
 
     </DataGridColumns>
-   <ButtonRowTemplate>
+    <ButtonRowTemplate>
         <Button Color="Color.Success" Clicked="context.NewCommand.Clicked">New</Button>
-@*        <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="context.EditCommand.Clicked">Edit</Button>*@
-      @*  <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="@(()=>OnContextItemDeleteClicked(selectedUser))">Delete</Button>*@
-@*        <Button Color="Color.Link" Clicked="context.ClearFilterCommand.Clicked">Clear Filter</Button>*@
+        @*        <Button Color="Color.Primary" Disabled="(selectedUser is null)" Clicked="context.EditCommand.Clicked">Edit</Button>*@
+        @*  <Button Color="Color.Danger" Disabled="(selectedUser is null)" Clicked="@(()=>OnContextItemDeleteClicked(selectedUser))">Delete</Button>*@
+        @*        <Button Color="Color.Link" Clicked="context.ClearFilterCommand.Clicked">Clear Filter</Button>*@
 
 
     </ButtonRowTemplate>
@@ -73,6 +77,7 @@
 
 @code {
     static bool result;
+    int totalUsers;
 
     private UsuarioSet selectedUser;
     private DataGridEditMode editMode = DataGridEditMode.Inline;
@@ -85,6 +90,14 @@
     {
         base.OnInitialized();
 
+    }
+
+    async Task CarregarClientes(DataGridReadDataEventArgs<UsuarioSet> e)
+    {
+        var lista = await UsuarioService.FindAllAsync();
+        users = lista.Skip((e.Page - 1) * e.PageSize).Take(e.PageSize).ToList();
+        totalUsers = lista.Count();
+        await Task.FromResult(0);
     }
 
     private async Task OnReadData()
