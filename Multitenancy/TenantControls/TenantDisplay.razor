@@ -1,0 +1,23 @@
+﻿@inject ITenantService TenantService
+
+<div class="@TenantClass">@_tenant</div>
+
+@code
+{
+    private int? _tenant = null!;
+
+    [Parameter]
+    public int? TenantClass { get; set; } = null;
+
+    protected override void OnInitialized()
+    {
+        _tenant = TenantService.Tenant;
+        TenantService.OnTenantChanged += (o, e) =>
+        {
+            _tenant = e.NewTenant;
+            StateHasChanged();
+        };
+
+        base.OnInitialized();
+    }
+}
