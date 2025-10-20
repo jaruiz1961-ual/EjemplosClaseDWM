@@ -1,0 +1,75 @@
+﻿@page "/NETJavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+@implements IDisposable
+
+<h3>Llamar a  C# desde JS </h3>
+
+
+
+<textarea id="texto" @onkeypress="limita"> </textarea>
+
+<Toaster>
+    <Toast @bind-Visible="@toastVisible">
+        <ToastHeader>
+            <Strong Margin="Margin.IsAuto.FromEnd">Blazorise</Strong>
+            <Small>11 mins ago</Small>
+            <CloseButton />
+        </ToastHeader>
+        <ToastBody>
+            Has llegado al limite de caracteres ..!!
+        </ToastBody>
+    </Toast>
+</Toaster>
+
+@code {
+
+    bool toastVisible = false;
+
+    private DotNetObjectReference<NETJavaScript> _dotNetRef;
+
+    // 1. Inicializa y expone la referencia a JS
+    protected override void OnInitialized()
+    {
+        // Esto está bien, ya que es código C# puro
+        _dotNetRef = DotNetObjectReference.Create(this);
+    }
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Llama a una función JS para guardar esta referencia
+            await JSRuntime.InvokeVoidAsync("InteropSetters.setDotNetReference", _dotNetRef);
+        }
+
+    }
+
+
+
+    [JSInvokable]
+    public void EstablecerVariable(bool nuevoValor)
+    {
+        // Actualiza la variable C# con el valor recibido de JS
+        toastVisible = nuevoValor;
+
+        // **IMPORTANTE**: Llama a StateHasChanged para forzar la actualización de la UI
+        // (Esto es necesario porque el cambio se inició fuera del ciclo de vida normal de Blazor)
+        InvokeAsync(StateHasChanged);
+
+    }
+
+    // 4. Limpieza: Es crucial liberar la referencia cuando el componente es destruido
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
+    }
+
+    private async Task limita()
+    {
+        // El tipo genérico <bool> define el tipo de retorno esperado de JS.
+        var re = await JSRuntime.InvokeAsync<bool>("InteropSetters.limitaCaractares", "texto", 10);
+
+    }
+}

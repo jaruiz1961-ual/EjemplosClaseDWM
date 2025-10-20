@@ -1,0 +1,56 @@
+﻿@page "/JavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3>Llamar a JS desde C#</h3>
+
+<button class="btn btn-primary" @onclick="EjecutarAlerta">
+    Mostrar Alerta (void)
+</button>
+
+<button class="btn btn-success" @onclick="EjecutarSuma">
+    Calcular Suma (con retorno)
+</button>
+
+<p>Resultado de la suma: @resultadoSuma</p>
+
+<textarea id="texto" @onkeypress="limita"> </textarea>
+
+<Toaster>
+    <Toast @bind-Visible="@toastVisible">
+        <ToastHeader>
+            <Strong Margin="Margin.IsAuto.FromEnd">Blazorise</Strong>
+            <Small>11 mins ago</Small>
+            <CloseButton />
+        </ToastHeader>
+        <ToastBody>
+            Has llegado al limite de caracteres ..!!
+        </ToastBody>
+    </Toast>
+</Toaster>
+
+@code {
+    private int resultadoSuma = 0;
+    bool toastVisible = false;
+
+    // 1. Llamada a una función de JavaScript sin valor de retorno (void)
+    private async Task EjecutarAlerta()
+    {
+        await JSRuntime.InvokeVoidAsync("mostrarAlerta", "¡Hola desde C#! Esto es JS Interop.");
+    }
+
+    // 2. Llamada a una función de JavaScript con valor de retorno
+    private async Task EjecutarSuma()
+    {
+        // El tipo genérico <int> define el tipo de retorno esperado de JS.
+        resultadoSuma = await JSRuntime.InvokeAsync<int>("sumar", 10, 5);
+    }
+    private async Task limita()
+    {
+        // El tipo genérico <int> define el tipo de retorno esperado de JS.
+        var re = await JSRuntime.InvokeAsync<bool>("limitaCaractares", "texto", 10);
+        if (!re) toastVisible = true;
+    }
+
+
+}
