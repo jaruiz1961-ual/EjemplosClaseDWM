@@ -1,0 +1,58 @@
+﻿@page "/ListaUsuarios"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject NavigationManager nav
+@inject IUsuarioServiceAsync UsuarioService
+
+<h1>ListaUsuarios</h1>
+
+<p>Lista de usuarios de Ebi9Db web assembly http</p>
+
+<div>
+    <a href="/DetalleUsuario"><i>Añadir usuario</i></a>
+</div>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>UserName</th>
+                <th>Codigo</th>
+                <th>Nivel</th>
+                <th>Password</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Codigo</td>
+                    <td>@user.NivelAcceso</td>
+                    <td>@user.Password</td>
+                    <td><a href="/DetalleUsuario/@user.Id"><i>Edit</i></a></td>
+                    <td><a href="/DeleteUsuario/@user.Id"><i>Del</i></a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<UsuarioSet> users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        users = await UsuarioService.FindAllAsync();
+        StateHasChanged();
+    }
+}
+
+
+

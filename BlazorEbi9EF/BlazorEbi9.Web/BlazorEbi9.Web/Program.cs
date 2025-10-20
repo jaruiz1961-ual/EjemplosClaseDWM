@@ -1,9 +1,11 @@
 using BlazorEbi9.Data.DataBase;
 using BlazorEbi9.Data.Services;
 using BlazorEbi9.Model.IServices;
-//using BlazorEbi9.RestfullCore.Services;
-//using BlazorEbi9.Web.Client.Pages;
+using BlazorEbi9.RestfullCore.Services;
+using BlazorEbi9.Web.Client.Pages;
 using BlazorEbi9.Web.Components;
+using BlazorEbi9.Web.Components.Pages;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -16,19 +18,24 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
-string provider = Configuration.GetValue(typeof(string), "SqlProvider").ToString();
+string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
 if (provider == "SqlServer")
 {
     builder.Services.AddDbContext<SqlServerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SqlDbContext")));
     builder.Services.AddTransient<IUnitOfWorkAsync, UnitOfWorkAsync<SqlServerDbContext>>();
+    builder.Services.AddTransient<IUsuarioServiceAsync, UsuarioServiceAsync>();
 }
-else
+else if (provider == "SqLite")
 {
     builder.Services.AddDbContext<SqLiteDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqLiteDbContext")));
     builder.Services.AddTransient<IUnitOfWorkAsync, UnitOfWorkAsync<SqLiteDbContext>>();
+    builder.Services.AddTransient<IUsuarioServiceAsync, UsuarioServiceAsync>();
 }
-
-builder.Services.AddTransient<IUsuarioServiceAsync, UsuarioServiceAsync>();
+else if (provider == "Restful")
+{
+    var urlApi = Configuration.GetConnectionString("UrlApi");
+    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(new HttpClient(), urlApi));
+}
 
 var app = builder.Build();
 
@@ -46,12 +53,12 @@ else
 
 app.UseHttpsRedirection();
 
-app.UseStaticFiles();
+
 app.UseAntiforgery();
 
+app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
-    .AddInteractiveWebAssemblyRenderMode();
-    //.AddAdditionalAssemblies(typeof(Counter).Assembly);
-
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(BlazorEbi9.Web.Client._Imports).Assembly);
 app.Run();

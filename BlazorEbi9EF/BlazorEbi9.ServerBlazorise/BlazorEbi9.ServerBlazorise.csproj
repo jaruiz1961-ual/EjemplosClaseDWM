@@ -7,15 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazorise" Version="1.7.0" />
-    <PackageReference Include="Blazorise.Bootstrap" Version="1.7.0" />
-    <PackageReference Include="Blazorise.DataGrid" Version="1.7.0" />
-    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.7.0" />
+    <PackageReference Include="Blazorise.Bootstrap" Version="1.8.5" />
+    <PackageReference Include="Blazorise.DataGrid" Version="1.8.5" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.8.5" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\BlazorEbi9.Data\BlazorEbi9.Data.csproj" />
     <ProjectReference Include="..\BlazorEbi9.Model\BlazorEbi9.Model.csproj" />
+    <ProjectReference Include="..\BlazorEbi9.RestfullCore\BlazorEbi9.RestfullCore.csproj" />
   </ItemGroup>
 
 </Project>

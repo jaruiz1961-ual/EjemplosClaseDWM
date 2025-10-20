@@ -22,13 +22,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Migrations\" />
-    <Folder Include="Migrations\MigrationsSQLite\" />
-    <Folder Include="Migrations\MigrationsSqlServer\" />
+    <ProjectReference Include="..\BlazorEbi9.Model\BlazorEbi9.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BlazorEbi9.Model\BlazorEbi9.Model.csproj" />
+    <Folder Include="Migrations\" />
+    <Folder Include="Migrations\MigrationsSQLite\" />
+    <Folder Include="Migrations\MigrationsSqlServer\" />
   </ItemGroup>
 
 </Project>

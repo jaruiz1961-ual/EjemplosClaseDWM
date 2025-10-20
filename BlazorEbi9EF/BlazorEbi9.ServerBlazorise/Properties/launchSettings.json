@@ -8,7 +8,7 @@
     }
   },
   "profiles": {
-    "BlazorEbi9.ServerBlazorise": {
+    "BlazorEbi7.ServerBlazorise": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,

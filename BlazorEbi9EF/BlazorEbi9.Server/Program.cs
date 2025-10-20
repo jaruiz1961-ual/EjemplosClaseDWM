@@ -13,22 +13,24 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor().AddCircuitOptions(o => o.DetailedErrors = true);
 
 
-string provider = Configuration.GetValue(typeof(string),"SqlProvider").ToString();
+string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
 if (provider == "SqlServer")
 {
     builder.Services.AddDbContext<SqlServerDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("SqlDbContext")));
     builder.Services.AddTransient<IUnitOfWorkAsync, UnitOfWorkAsync<SqlServerDbContext>>();
+    builder.Services.AddTransient<IUsuarioServiceAsync, UsuarioServiceAsync>();
 }
-else
+else if (provider == "SqLite")
 {
     builder.Services.AddDbContext<SqLiteDbContext>(options => options.UseSqlite(Configuration.GetConnectionString("SqLiteDbContext")));
     builder.Services.AddTransient<IUnitOfWorkAsync, UnitOfWorkAsync<SqLiteDbContext>>();
+    builder.Services.AddTransient<IUsuarioServiceAsync, UsuarioServiceAsync>();
 }
-
-builder.Services.AddTransient<IUsuarioServiceAsync, UsuarioServiceAsync>();
-
-
-
+else if (provider == "Restful")
+{
+    var urlApi = Configuration.GetConnectionString("UrlApi");
+    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(new HttpClient(), urlApi));
+}
 
 
 
