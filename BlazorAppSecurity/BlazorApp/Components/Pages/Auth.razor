@@ -9,12 +9,12 @@
 <h1>You are authenticated</h1>
 
 <AuthorizeView>
-    Hello @context.User.Identity?.Name!
-    @context.
+    Hola usuario autorizado @context.User.Identity?.Name!
+    
 </AuthorizeView>
 
 <AuthorizeView Roles="Administrators">
-    Hello administrator @context.User.Identity?.Name!
+    Hola administrador @context.User.Identity?.Name!
 </AuthorizeView>
 
 @* En la base de datos el rol es Administrators 

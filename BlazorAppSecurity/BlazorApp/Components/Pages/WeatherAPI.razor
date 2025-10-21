@@ -50,17 +50,19 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-
-        var request = new HttpRequestMessage(HttpMethod.Get, @"https://localhost:7270/api/weather");
-        var client = ClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            try
+            var request = new HttpRequestMessage(HttpMethod.Get, @"https://localhost:7002/api/WeatherForecast");
+            var client = ClientFactory.CreateClient();
+            var response = await client.SendAsync(request);
+            if (response == null) return;
+            if (response.IsSuccessStatusCode)
             {
+
                 forecasts = await response.Content.ReadFromJsonAsync<WeatherForecast[]>();
             }
-            catch (Exception ex)
+        }
+        catch (Exception ex)
             {
                 forecasts = new WeatherForecast[] { new WeatherForecast { Date = DateOnly.FromDateTime(DateTime.Now), TemperatureC = 0, Summary = "NO data" } };
             }
@@ -68,13 +70,6 @@ else
 
     }
 
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
 
    
 
