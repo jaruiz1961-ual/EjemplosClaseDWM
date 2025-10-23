@@ -154,25 +154,22 @@ window.InteropSetters =  {
         const maxNum = Number(maximoCaracteres);
         const valor = raw.replace(/\r/g, '');
 
-        if (isNaN(maxNum)) {
-            console.warn('[InteropSetters.limitaCaractares] maximoCaracteres no es numérico:', maximoCaracteres);
-        }
 
-        if (valor.length >= maxNum) {
+
+        let limita = valor.length >= maxNum;
+    
             if (this.dotNetReference) {
-                this.dotNetReference.invokeMethodAsync('EstablecerVariable', true)
+                this.dotNetReference.invokeMethodAsync('EstablecerVariable', limita)
                     .catch(error => {
                         console.error("[JS] Error al invocar el método C#:", error);
                     });
             } else {
                 console.error("[JS] La referencia de .NET no está disponible.");
             }
-
+            if (limita)
             el.value = valor.substring(0, valor.length - 1);
-            return false;
-        } else {
-            return true;
-        }
+            
+     
     }
 }
 

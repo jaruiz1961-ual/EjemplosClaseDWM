@@ -7,7 +7,7 @@
 
 
 
-<textarea id="texto" @onkeypress="limita"> </textarea>
+<textarea id="texto" @oninput="@(e => OnInputHandler(e))"> </textarea>
 
 @if (limiteAlcanzado)
 {
@@ -42,7 +42,7 @@ else
 
     }
 
-
+    //este método es llamado desde JS
 
     [JSInvokable]
     public void EstablecerVariable(bool nuevoValor)
@@ -62,10 +62,9 @@ else
         _dotNetRef?.Dispose();
     }
 
-    private async Task limita()
+    private async Task OnInputHandler(ChangeEventArgs e)
     {
-        // El tipo genérico <bool> define el tipo de retorno esperado de JS.
-        var re = await JSRuntime.InvokeAsync<bool>("InteropSetters.limitaCaractares", "texto", 10);
+        await JSRuntime.InvokeVoidAsync("InteropSetters.limitaCaractares", "texto", 10);
 
     }
 }
