@@ -1,0 +1,35 @@
+﻿@page "/AmpliaTextoJavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3>Llamar a JS desde C#</h3>
+<p> 3. Amplia texto</p>
+
+<div class="slidecontainer">
+    <input type="range" min="1" max="100" value="50" class="slider" id="myRange">
+    <p>Value: <span id="demo"></span></p>
+</div>
+
+<div class="mb-3">
+
+    <input id="texto1" onkeyup="ampliaTexto('texto1','texto2','myRange')" />
+    <label id="texto2" />
+</div>
+
+
+
+
+@code {
+    
+    
+
+   
+    private async Task limita()
+    {
+        // El tipo genérico <bool> define el tipo de retorno esperado de JS.
+        var re = await JSRuntime.InvokeAsync<bool>("DuplicaTexto", "texto1", "texto2");
+      
+    }
+
+
+}

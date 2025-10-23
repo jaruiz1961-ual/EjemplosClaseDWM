@@ -1,0 +1,30 @@
+﻿@page "/DuplicaTextoJavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3>Llamar a JS desde C#</h3>
+<p> 3. Duplica texto</p>
+
+<div class="mb-3">
+
+    <input id="texto1" onkeyup="duplicaTexto('texto1','texto2')" />
+    <label id="texto2" />
+</div>
+
+
+
+
+@code {
+    
+    
+
+   
+    private async Task limita()
+    {
+        // El tipo genérico <bool> define el tipo de retorno esperado de JS.
+        var re = await JSRuntime.InvokeAsync<bool>("DuplicaTexto", "texto1", "texto2");
+      
+    }
+
+
+}

@@ -1,0 +1,29 @@
+﻿@page "/SumaJavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3>Llamar a JS desde C#</h3>
+
+ <p> 2. Llamada a una función de JavaScript con valor de retorno </p>
+
+<button class="btn btn-success" @onclick="EjecutarSuma">
+    Calcular Suma 10+5 (con retorno)
+</button>
+
+<p>Resultado de la suma: @resultadoSuma</p>
+
+
+
+
+@code {
+    private int resultadoSuma = 0;
+     
+    private async Task EjecutarSuma()
+    {
+        // El tipo genérico <int> define el tipo de retorno esperado de JS.
+        resultadoSuma = await JSRuntime.InvokeAsync<int>("suma", 10, 5);
+    }
+
+
+
+}

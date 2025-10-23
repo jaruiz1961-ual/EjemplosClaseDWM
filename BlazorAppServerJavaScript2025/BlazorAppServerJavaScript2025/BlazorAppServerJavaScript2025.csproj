@@ -6,16 +6,4 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="Blazorise">
-      <HintPath>..\..\Blazorise\Source\Extensions\Blazorise.Icons.FontAwesome\bin\Release\net9.0\Blazorise.dll</HintPath>
-    </Reference>
-    <Reference Include="Blazorise.Bootstrap5">
-      <HintPath>..\..\Blazorise\Source\Blazorise.Bootstrap5\bin\Release\net9.0\Blazorise.Bootstrap5.dll</HintPath>
-    </Reference>
-    <Reference Include="Blazorise.Icons.FontAwesome">
-      <HintPath>..\..\Blazorise\Source\Extensions\Blazorise.Icons.FontAwesome\bin\Release\net9.0\Blazorise.Icons.FontAwesome.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>

@@ -1,0 +1,27 @@
+﻿@page "/AlertaJavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3>Llamar a JS desde C#</h3>
+<p>1. Llamada a una función de JavaScript sin valor de retorno (void)</p>
+
+<button class="btn btn-primary" @onclick="EjecutarAlerta">
+    Mostrar Alerta (void)
+</button>
+
+
+
+
+@code {
+  
+    bool limiteAlcanzado = false;
+
+    
+    private async Task EjecutarAlerta()
+    {
+        await JSRuntime.InvokeVoidAsync("mostrarAlerta", "¡Hola desde C#! Esto es JS Interop.");
+    }
+
+    
+
+}

@@ -1,0 +1,38 @@
+﻿@page "/LimiteJavaScript"
+@rendermode InteractiveServer
+@inject IJSRuntime JSRuntime
+
+<h3>Llamar a JS desde C#</h3>
+<p> 3. Limite de 10 caracteres en un campo de Area de Texto</p>
+
+
+
+<textarea id="texto" @onkeypress="limita"> </textarea>
+@if (limiteAlcanzado) {
+    <p style="color:red;">¡Límite de caracteres alcanzado!</p>
+}
+else {
+    <p>Escribe hasta 10 caracteres.</p>
+}
+
+
+@code {
+    
+    bool limiteAlcanzado = false;
+
+   
+    private async Task limita()
+    {
+        // El tipo genérico <bool> define el tipo de retorno esperado de JS.
+        var re = await JSRuntime.InvokeAsync<bool>("limitaCaractares", "texto", 10);
+        if (re != limiteAlcanzado) 
+        {
+            limiteAlcanzado = re;
+            StateHasChanged();
+        }
+        
+        
+    }
+
+
+}

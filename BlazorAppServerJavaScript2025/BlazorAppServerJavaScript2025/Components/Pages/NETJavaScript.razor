@@ -9,22 +9,18 @@
 
 <textarea id="texto" @onkeypress="limita"> </textarea>
 
-<Toaster>
-    <Toast @bind-Visible="@toastVisible">
-        <ToastHeader>
-            <Strong Margin="Margin.IsAuto.FromEnd">Blazorise</Strong>
-            <Small>11 mins ago</Small>
-            <CloseButton />
-        </ToastHeader>
-        <ToastBody>
-            Has llegado al limite de caracteres ..!!
-        </ToastBody>
-    </Toast>
-</Toaster>
+@if (limiteAlcanzado)
+{
+    <p style="color:red;">¡Límite de caracteres alcanzado!</p>
+}
+else
+{
+    <p>Escribe hasta 10 caracteres.</p>
+}
 
 @code {
 
-    bool toastVisible = false;
+    bool limiteAlcanzado = false;
 
     private DotNetObjectReference<NETJavaScript> _dotNetRef;
 
@@ -52,7 +48,7 @@
     public void EstablecerVariable(bool nuevoValor)
     {
         // Actualiza la variable C# con el valor recibido de JS
-        toastVisible = nuevoValor;
+        limiteAlcanzado = nuevoValor;
 
         // **IMPORTANTE**: Llama a StateHasChanged para forzar la actualización de la UI
         // (Esto es necesario porque el cambio se inició fuera del ciclo de vida normal de Blazor)
