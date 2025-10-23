@@ -3,33 +3,20 @@
 @inject IJSRuntime JSRuntime
 
 <h3>Llamar a JS desde C#</h3>
-<p> 3. Limite de 10 caracteres en un campo de Area de Texto</p>
+<p>3. Límite de 10 caracteres en un textarea</p>
 
-
-
-<textarea id="texto" @onkeypress="@(e => OnKeyPressHandler(e, 10))"> </textarea>
-@if (limiteAlcanzado) {
-    <p style="color:red;">¡Límite de caracteres alcanzado!</p>
-}
-else {
-    <p>Escribe hasta 10 caracteres.</p>
-}
-
+<textarea id="texto" @oninput="@(e => OnInputHandler(e, max))"></textarea>
+    <p>quedan @quedan caracteres.</p>
 
 @code {
+    static int limite = 10;
+    int max = limite;
+    int quedan = limite;
 
-    bool limiteAlcanzado = false;
-    int caracteresRestantes = 10;
-    int parametro = 10;
-
-
-    private async void OnKeyPressHandler(KeyboardEventArgs e, int parametro)
+    private async Task OnInputHandler(ChangeEventArgs e, int parametro)
     {
-        // El tipo genérico <bool> define el tipo de retorno esperado de JS.
-        var re =  await JSRuntime.InvokeAsync<bool>("limitaCaractares", "texto", 10);
-        limiteAlcanzado = re;
-
+        quedan = await JSRuntime.InvokeAsync<int>("quedanCaractares", "texto", parametro);
+        StateHasChanged();
+       
     }
-
-
 }

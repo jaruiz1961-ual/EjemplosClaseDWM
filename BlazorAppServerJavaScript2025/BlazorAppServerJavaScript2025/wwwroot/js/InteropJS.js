@@ -17,31 +17,17 @@ window.suma2 = (n1, n2) => {
 
 window.limitaCaractares = (campo, maximoCaracteres) => {
     const el = document.getElementById(campo);
-    if (!el) {
-        console.warn(`[limitaCaractares] elemento "${campo}" no encontrado.`);
-        return true;
-    }
 
     const raw = el.value ?? '';
     const maxNum = Number(maximoCaracteres);
-    if (isNaN(maxNum)) {
-        console.warn('[limitaCaractares] maximoCaracteres no es numérico:', maximoCaracteres);
-        return true;
-    }
+
 
     // Normalizar: eliminar retornos de carro (\r) si vienen como CRLF desde textarea
     const valor = raw.replace(/\r/g, '');
 
     const longitud = valor.length;
-    // Comprueba longitud y recorta si excede
-    if (1 > maxNum) {
-        console.warn('[limitaCaractares] maximoCaracteres debe ser mayor que 0:', maximoCaracteres);
-    }
-    if (longitud > 10) {
-        console.warn('[longitud] longitud  debe ser mayor que 0:', longitud);
-    }
 
-    if (longitud > maxNum)
+    if (longitud >= maxNum)
     {
         el.value = valor.substring(0, valor.length - 1);
         return true;
@@ -50,6 +36,29 @@ window.limitaCaractares = (campo, maximoCaracteres) => {
     {
         return false;
     }
+}
+
+window.quedanCaractares = (campo, maximoCaracteres) => {
+    const el = document.getElementById(campo);
+
+    const raw = el.value ?? '';
+    const maxNum = Number(maximoCaracteres);
+
+    // Normalizar: eliminar retornos de carro (\r) si vienen como CRLF desde textarea
+    const valor = raw.replace(/\r/g, '');
+
+    const longitud = valor.length;
+    if (longitud == maxNum) {
+        el.style.backgroundColor = "red";
+    }
+    else {
+        el.style.backgroundColor = "white";
+    }
+    if (longitud > maxNum) {
+        el.value = valor.substring(0, valor.length - 1);
+        return 0;
+    }
+    else return maxNum - longitud;
 }
 
 window.duplicaTexto = (entrada, salida) => {
