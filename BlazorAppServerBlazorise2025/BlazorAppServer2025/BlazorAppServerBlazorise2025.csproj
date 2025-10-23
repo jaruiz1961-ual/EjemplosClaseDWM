@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Blazorise" Version="1.8.5" />
+    <PackageReference Include="Blazorise.Bootstrap5" Version="1.8.5" />
+    <PackageReference Include="Blazorise.Icons.FontAwesome" Version="1.8.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Blazorise">
+      <HintPath>..\..\Blazorise\Source\Extensions\Blazorise.Icons.FontAwesome\bin\Release\net9.0\Blazorise.dll</HintPath>
+    </Reference>
+    <Reference Include="Blazorise.Bootstrap5">
+      <HintPath>..\..\Blazorise\Source\Blazorise.Bootstrap5\bin\Release\net9.0\Blazorise.Bootstrap5.dll</HintPath>
+    </Reference>
+    <Reference Include="Blazorise.Icons.FontAwesome">
+      <HintPath>..\..\Blazorise\Source\Extensions\Blazorise.Icons.FontAwesome\bin\Release\net9.0\Blazorise.Icons.FontAwesome.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

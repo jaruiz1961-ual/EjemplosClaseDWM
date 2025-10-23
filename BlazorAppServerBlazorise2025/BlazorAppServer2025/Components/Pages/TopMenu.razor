@@ -1,0 +1,54 @@
+﻿@page "/TopMenu"
+@rendermode InteractiveServer
+
+
+<Bar Breakpoint="Breakpoint.Desktop"
+     Background="Background.Light"
+     ThemeContrast="ThemeContrast.Light">
+    <BarBrand>
+        Brandname
+    </BarBrand>
+    <BarToggler />
+    <BarMenu>
+        <BarStart>
+            <BarItem>
+                <BarLink To="#home">Home</BarLink>
+            </BarItem>
+            <BarItem>
+                <BarLink To="#docs">Documentation</BarLink>
+            </BarItem>
+            <BarItem>
+                <BarDropdown>
+                    <BarDropdownToggle>Dropdown</BarDropdownToggle>
+                    <BarDropdownMenu>
+                        <BarDropdownItem @onclick="ActionClick">Action</BarDropdownItem>
+                        <BarDropdownDivider />
+                        <BarDropdownItem>Another action</BarDropdownItem>
+                    </BarDropdownMenu>
+                </BarDropdown>
+            </BarItem>
+        </BarStart>
+        <BarEnd>
+            <BarItem>
+                <Button @onclick= "@(()=>SignUpClick("hola"))" Color="Color.Primary">Sign up</Button>
+                <Button @onclick= "LogInClick" Color="Color.Secondary">Log in</Button>
+            </BarItem>
+        </BarEnd>
+    </BarMenu>
+</Bar>
+
+@code{
+
+    void ActionClick()
+    {
+        Console.WriteLine("Action");
+    }
+    void SignUpClick(string mensaje)
+    {
+        Console.WriteLine(mensaje);
+    }
+    void LogInClick()
+    {
+        Console.WriteLine("Log in");
+    }
+}
