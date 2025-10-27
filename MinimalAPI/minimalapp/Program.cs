@@ -1,17 +1,25 @@
 var builder = WebApplication.CreateBuilder(args);
+
 builder.Services.AddRazorPages();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
 var app = builder.Build();
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-
-//app.MapGet("/", () => "Hello World!");
+// Minimal API endpoints
 app.MapGet("/hello", () => "Hello World!");
 app.MapGet("/todos", () => new { TodoItem = "Learn about routing", Complete = false });
-app.MapGet("/hello/{name:int}", (string name) => $"Hello {name}");
+app.MapGet("/hello/{name}", (string name) => $"Hello {name}");
 
+// Exponer Razor Pages (.cshtml)
 app.MapRazorPages();
 
 app.Run();
