@@ -10,6 +10,18 @@ using System.Text;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 var builder = WebApplication.CreateBuilder(args);
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("https://localhost:7041")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var connectionString = builder.Configuration.GetConnectionString("todos")
     ?? "Data Source=todos.db";
 
@@ -76,7 +88,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCors();
 // Minimal API endpoints
 app.MapGet("/hello", () => "Hello World!");
 app.MapGet("/todo", () => new { TodoItem = "Learn about routing", Complete = false });
@@ -120,11 +132,11 @@ app.MapDelete("/todos/{id}", async (TodoDb db, int id) =>
 app.MapGet("secured-route", () => "Hello, you are authorized to see this!").RequireAuthorization();
 
 // Login: recibir DTO desde el body y TokenService desde DI ([FromServices])
-app.MapPost("/login", ([FromBody] LoginRequest login, [FromServices] TokenService tokenService) =>
+app.MapPost("/login", ([FromBody] string login, [FromServices] TokenService tokenService) =>
 {
-    if (login?.Username != "admin") return Results.Unauthorized();
+    if (login != "admin") return Results.Unauthorized();
 
-    var token = tokenService.GenerateToken(login.Username);
+    var token = tokenService.GenerateToken(login);
     return Results.Ok(new { Token = token });
 });
 

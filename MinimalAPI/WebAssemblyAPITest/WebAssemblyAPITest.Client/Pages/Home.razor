@@ -1,0 +1,69 @@
+﻿@page "/"
+@rendermode InteractiveWebAssembly
+@inject HttpClient Http
+
+
+<h3>Login para obtener token JWT</h3>
+
+<div>
+    <input @bind="username" placeholder="Usuario" />
+</div>
+
+<button @onclick="LoginAsync">Acceder</button>
+
+@if (!string.IsNullOrEmpty(token))
+{
+    <p>Token recibido: @token</p>
+    <button @onclick="CallProtectedApi">Llamar API protegida</button>
+    <p>@protectedApiResponse</p>
+}
+
+@code {
+    string username = "";
+    string password = "";
+    string token = "";
+
+    string protectedApiResponse = "";
+
+    async Task LoginAsync()
+    {
+
+        var response = await Http.PostAsJsonAsync("https://localhost:7242/login", username);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var json = await response.Content.ReadFromJsonAsync<LoginResult>();
+            token = json.Token;
+        }
+        else
+        {
+            token = "Acceso denegado.";
+        }
+    }
+
+    async Task CallProtectedApi()
+    {
+        if (!string.IsNullOrEmpty(token))
+        {
+            Http.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await Http.GetAsync("https://localhost:7242/secured-route");
+
+            if (response.IsSuccessStatusCode)
+            {
+                protectedApiResponse = await response.Content.ReadAsStringAsync();
+            }
+            else
+            {
+                protectedApiResponse = "No autorizado";
+            }
+        }
+    }
+
+    class LoginResult
+    {
+        public string Token { get; set; }
+    }
+}
+
