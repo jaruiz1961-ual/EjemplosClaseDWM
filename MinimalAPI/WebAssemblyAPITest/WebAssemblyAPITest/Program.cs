@@ -1,3 +1,4 @@
+using WebAssemblyAPITest.Client.Services;
 using WebAssemblyAPITest.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,7 @@ builder.Services.AddScoped(sp => new HttpClient
 {
     BaseAddress = new Uri(builder.Configuration["BaseAddress"] ?? "https://localhost:7041")
 });
+builder.Services.AddScoped<CookieService>();
 
 
 var app = builder.Build();

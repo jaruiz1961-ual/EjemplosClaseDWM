@@ -14,6 +14,55 @@
 <body>
     <Routes @rendermode="InteractiveWebAssembly" />
     <script src="_framework/blazor.web.js"></script>
+
+    <script>
+        // Función para obtener el valor de una cookie
+        // Asegúrate de que este es el código que se está ejecutando en tu cliente
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+
+            if (parts.length === 2)
+                // 🎯 Esto asegura que capturamos todo hasta el siguiente punto y coma (;)
+                // que es el separador de cookies.
+                return parts.pop().split(';').shift();
+
+            return null;
+        }
+
+              
+         // Establece el valor de una cookie en el navegador.
+         // {string} name - El nombre de la cookie (ej: 'jwt_auth_token').
+         //  {string} value - El valor que contendrá la cookie (ej: el token JWT).
+         //  {number} days - El número de días que durará la cookie.
+         
+        function setCookie(name, value, days) {
+            let expires = "";
+
+            // 1. Calcula la fecha de expiración si se proporcionan días.
+            if (days) {
+                const date = new Date();
+                // Convierte días a milisegundos para sumarlos al tiempo actual
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+
+            // 2. Construye la cadena de la cookie.
+            // Usamos 'document.cookie' para escribir la cookie.
+
+            // Opciones recomendadas para el esquema Blazor WASM/Minimal API:
+            // - path=/ : Hace que la cookie esté disponible en toda la aplicación.
+            // - SameSite=Lax (o None, si Strict falla) : Necesario para comunicaciones Cross-Port.
+            // - Secure : Obligatorio si usas SameSite=None, y buena práctica con HTTPS.
+            // - HttpOnly NO se incluye aquí, ya que queremos que JS (Blazor) acceda.
+
+            document.cookie = name + "=" + (value || "")  + expires +  "; path=/; SameSite=Lax; Secure";
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Max-Age=-99999999; path=/';
+        }
+    </script>
 </body>
 
 </html>

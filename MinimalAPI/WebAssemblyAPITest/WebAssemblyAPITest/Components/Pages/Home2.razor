@@ -1,5 +1,5 @@
-﻿@page "/"
-@rendermode InteractiveWebAssembly
+﻿@page "/Home2"
+@rendermode InteractiveServer
 @using WebAssemblyAPITest.Client.Services
 @inject HttpClient Http
 @inject CookieService CookieService
@@ -42,33 +42,10 @@
 
         if (response.IsSuccessStatusCode)
         {
-            tokenCookie = await CookieService.GetTokenAsync();
             var json = await response.Content.ReadFromJsonAsync<LoginResult>();
-            token = json.Token.Trim();
-            if (!string.IsNullOrEmpty(tokenCookie))
-            {
-                // 1. Limpiar espacios
-                var cleanCookieToken = tokenCookie.Trim();
-
-                // 🎯 2. Descodificar URL el valor leído del navegador (¡CRUCIAL!)
-                // Esto revierte cualquier codificación (%3D, %2F, etc.) que el navegador haya aplicado.
-                var finalCookieToken = System.Net.WebUtility.UrlDecode(cleanCookieToken);
-
-                protectedApiResponse = await response.Content.ReadAsStringAsync();
-
-                // 3. Comparar con el valor de referencia
-                if (token != finalCookieToken)
-                {
-                    // Si el token aún es diferente después de descodificar,
-                    // el problema es que el servidor generó dos tokens diferentes o hay un error de Path/Domain.
-
-                    // Muestra ambos tokens para depuración final:
-                    Console.WriteLine($"JSON: {token}");
-                    Console.WriteLine($"COOKIE: {finalCookieToken}");
-                }
-                
-            }
-
+            token = json.Token;
+            var tokenCookie = await CookieService.GetTokenAsync();
+            await CookieService.SetTokenAsync(tokenCookie, 1);
         }
         else
         {
@@ -100,7 +77,7 @@
     {
         if (!string.IsNullOrEmpty(token))
         {
-            // var tokenCookie = await CookieService.GetTokenAsync();
+            var tokenCookie = await CookieService.GetTokenAsync();
              Http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
 
@@ -108,11 +85,11 @@
 
             if (response.IsSuccessStatusCode)
             {
-                protectedApiResponseCookie = await response.Content.ReadAsStringAsync();
+                protectedApiResponse = await response.Content.ReadAsStringAsync();
             }
             else
             {
-                protectedApiResponseCookie = "No autorizado";
+                protectedApiResponse = "No autorizado";
             }
         }
     }

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -12,15 +12,23 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 var builder = WebApplication.CreateBuilder(args);
 
 
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+// Agrega los servicios CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.WithOrigins("https://localhost:7041")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-    });
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+                      policy =>
+                      {
+                      
+                          policy.WithOrigins("https://localhost:7041", "http://localhost:5090") // <- Ajusta ESTOS puertos
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials(); // Importante para las cookies
+                      });
 });
+
+// ... resto de servicios
 
 var connectionString = builder.Configuration.GetConnectionString("todos")
     ?? "Data Source=todos.db";
@@ -78,6 +86,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseRouting();              // <- IMPORTANTE: routing antes de auth
 app.UseAuthentication();
@@ -88,7 +97,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseCors();
+
 // Minimal API endpoints
 app.MapGet("/hello", () => "Hello World!");
 app.MapGet("/todo", () => new { TodoItem = "Learn about routing", Complete = false });
@@ -132,11 +141,25 @@ app.MapDelete("/todos/{id}", async (TodoDb db, int id) =>
 app.MapGet("secured-route", () => "Hello, you are authorized to see this!").RequireAuthorization();
 
 // Login: recibir DTO desde el body y TokenService desde DI ([FromServices])
-app.MapPost("/login", ([FromBody] string login, [FromServices] TokenService tokenService) =>
+app.MapPost("/login", ([FromBody] string login, [FromServices] TokenService tokenService , HttpContext httpContext)=>
 {
     if (login != "admin") return Results.Unauthorized();
 
     var token = tokenService.GenerateToken(login);
+
+    var cookieOptions = new CookieOptions
+    {
+        // 🚨 IMPORTANTE: HttpOnly = false permite que JS (Blazor) acceda.
+        // Esto es lo que solicitaste, pero es MENOS seguro.
+        HttpOnly = false,
+        Secure = true, // Debe ser 'true' si usas HTTPS (recomendado)
+        SameSite = SameSiteMode.None,
+        Expires = DateTimeOffset.UtcNow.AddHours(1) // La cookie expira en 1 hora
+    };
+
+    // 4. Agregar la Cookie a la respuesta HTTP
+    // El nombre de la cookie ("jwt_auth_token") debe coincidir con el usado en Blazor (CookieService.cs).
+    httpContext.Response.Cookies.Append("jwt_auth_token", token,cookieOptions);
     return Results.Ok(new { Token = token });
 });
 
@@ -172,5 +195,5 @@ class LoginRequest
 //curl - i http://localhost:5063/secured-route -H "Authorization: Bearer %TOKEN%"
 
 
-//�	Si usas HTTPS local con certificado dev, a�ade -k a curl o usa Invoke-RestMethod -SkipCertificateCheck en entornos de prueba.
+//•	Si usas HTTPS local con certificado dev, añade -k a curl o usa Invoke-RestMethod -SkipCertificateCheck en entornos de prueba.
 
