@@ -147,19 +147,7 @@ app.MapPost("/login", ([FromBody] string login, [FromServices] TokenService toke
 
     var token = tokenService.GenerateToken(login);
 
-    var cookieOptions = new CookieOptions
-    {
-        // 🚨 IMPORTANTE: HttpOnly = false permite que JS (Blazor) acceda.
-        // Esto es lo que solicitaste, pero es MENOS seguro.
-        HttpOnly = false,
-        Secure = true, // Debe ser 'true' si usas HTTPS (recomendado)
-        SameSite = SameSiteMode.None,
-        Expires = DateTimeOffset.UtcNow.AddHours(1) // La cookie expira en 1 hora
-    };
-
-    // 4. Agregar la Cookie a la respuesta HTTP
-    // El nombre de la cookie ("jwt_auth_token") debe coincidir con el usado en Blazor (CookieService.cs).
-    httpContext.Response.Cookies.Append("jwt_auth_token", token,cookieOptions);
+    
     return Results.Ok(new { Token = token });
 });
 

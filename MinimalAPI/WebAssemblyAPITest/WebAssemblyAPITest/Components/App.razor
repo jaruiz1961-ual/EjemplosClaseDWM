@@ -18,15 +18,28 @@
     <script>
         // Función para obtener el valor de una cookie
         // Asegúrate de que este es el código que se está ejecutando en tu cliente
+              // La función DEBE estar en tu index.html o App.razor
         function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
+            // Escapa caracteres especiales para usar en la expresión regular
+            const nameEQ = name.replace(/([.*+?^=!:;${}()|[\]/\\])/g, '\\$1') + "=";
 
-            if (parts.length === 2)
-                // 🎯 Esto asegura que capturamos todo hasta el siguiente punto y coma (;)
-                // que es el separador de cookies.
-                return parts.pop().split(';').shift();
+            // Busca la cookie en la cadena document.cookie
+            const ca = document.cookie.split(';');
 
+            for(let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+
+                // Limpia espacios en blanco
+                while (c.charAt(0) === ' ') {
+                    c = c.substring(1, c.length);
+                }
+
+                // Si el valor comienza con el nombre de la cookie...
+                if (c.indexOf(nameEQ) === 0) {
+                    // Devuelve el valor, descodificando URL (por si el navegador codificó el =)
+                    return decodeURIComponent(c.substring(nameEQ.length, c.length));
+                }
+            }
             return null;
         }
 

@@ -34,41 +34,30 @@
 
     string protectedApiResponse = "";
     string protectedApiResponseCookie = "";
-
     async Task LoginAsync()
     {
-
         var response = await Http.PostAsJsonAsync("https://localhost:7242/login", username);
 
         if (response.IsSuccessStatusCode)
         {
-            tokenCookie = await CookieService.GetTokenAsync();
+    
             var json = await response.Content.ReadFromJsonAsync<LoginResult>();
             token = json.Token.Trim();
-            if (!string.IsNullOrEmpty(tokenCookie))
+
+            if (!string.IsNullOrEmpty(token))
             {
-                // 1. Limpiar espacios
-                var cleanCookieToken = tokenCookie.Trim();
+                await CookieService.SetTokenAsync(token, 1);
 
-                // 🎯 2. Descodificar URL el valor leído del navegador (¡CRUCIAL!)
-                // Esto revierte cualquier codificación (%3D, %2F, etc.) que el navegador haya aplicado.
-                var finalCookieToken = System.Net.WebUtility.UrlDecode(cleanCookieToken);
-
-                protectedApiResponse = await response.Content.ReadAsStringAsync();
-
-                // 3. Comparar con el valor de referencia
-                if (token != finalCookieToken)
+                // 3. Opcional: Verificar que la cookie se escribió correctamente
+                var verificationToken = await CookieService.GetTokenAsync();
+                if (token != verificationToken)
                 {
-                    // Si el token aún es diferente después de descodificar,
-                    // el problema es que el servidor generó dos tokens diferentes o hay un error de Path/Domain.
-
-                    // Muestra ambos tokens para depuración final:
-                    Console.WriteLine($"JSON: {token}");
-                    Console.WriteLine($"COOKIE: {finalCookieToken}");
+                    // Si incluso este token escrito por JS es diferente, el problema es irresoluble
+                    // y se debe usar otro método (ej. LocalStorage).
+                    Console.WriteLine("Advertencia: El token escrito por JS no coincide con la fuente.");
                 }
-                
-            }
 
+            }
         }
         else
         {
@@ -100,7 +89,7 @@
     {
         if (!string.IsNullOrEmpty(token))
         {
-            // var tokenCookie = await CookieService.GetTokenAsync();
+             var tokenCookie = await CookieService.GetTokenAsync();
              Http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
 
