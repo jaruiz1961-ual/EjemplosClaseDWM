@@ -1,0 +1,43 @@
+﻿@page "/PaginaCliente"
+@using WebAssemblyAPITest.Client.Services
+
+
+
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject ClientCodeService CodeService
+
+<h3>Código de Cliente Actual: @currentClientCode</h3>
+
+<input type="text" @bind="newCodeInput" />
+<button @onclick="UpdateCode">Actualizar Código</button>
+
+@code {
+    private string? currentClientCode;
+    private string newCodeInput = string.Empty;
+
+    // Se llama cuando el componente es inicializado.
+    protected override async Task OnInitializedAsync()
+    {
+        // Suscribirse a los cambios de estado
+        CodeService.OnChange += StateHasChanged; // Llama a StateHasChanged cuando hay un evento
+
+        // Obtener el valor inicial (lo carga desde la Cookie si es la primera vez)
+        currentClientCode = await CodeService.GetCodeAsync();
+    }
+
+    // Método para actualizar el código
+    private async Task UpdateCode()
+    {
+        currentClientCode = newCodeInput;
+        await CodeService.SetCodeAsync(newCodeInput);
+        // El evento OnChange se dispara y actualizará la UI
+        
+       
+    }
+
+    // 🛑 LIMPIEZA: CRUCIAL para evitar pérdidas de memoria (memory leaks)
+    public void Dispose()
+    {
+        CodeService.OnChange -= StateHasChanged;
+    }
+}

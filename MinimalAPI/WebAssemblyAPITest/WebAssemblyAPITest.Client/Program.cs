@@ -15,6 +15,10 @@ builder.Services.AddHttpClient("ApiCliente", client =>
 })
     .AddHttpMessageHandler<CookieBearerTokenHandler>();
 
+// ?? Program.cs (Cliente WASM)
+builder.Services.AddScoped<CookieService>();
+builder.Services.AddScoped<ClientCodeService>();
+
 
 
 await builder.Build().RunAsync();

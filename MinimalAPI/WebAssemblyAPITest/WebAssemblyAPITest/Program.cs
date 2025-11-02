@@ -14,8 +14,11 @@ builder.Services.AddScoped(sp => new HttpClient
     BaseAddress = new Uri(builder.Configuration["BaseAddress"] ?? "https://localhost:7041")
 });
 builder.Services.AddScoped<CookieService>();
-  // lo que hace es añadir automaticamente el header a cada peticion Http SendAsync
 
+
+// Debes registrarlo también aquí para el Prerendering y el modo InteractiveServer
+builder.Services.AddScoped<WebAssemblyAPITest.Client.Services.CookieService>();
+builder.Services.AddScoped<WebAssemblyAPITest.Client.Services.ClientCodeService>();
 
 var app = builder.Build();
 
