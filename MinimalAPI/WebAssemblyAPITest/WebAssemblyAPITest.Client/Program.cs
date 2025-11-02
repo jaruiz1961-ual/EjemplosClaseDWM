@@ -14,7 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient
     BaseAddress = new Uri("https://localhost:7242")
 });
 
-builder.Services.AddSingleton<CookieService>();
+builder.Services.AddScoped<CookieService>();
 
 await builder.Build().RunAsync();
 

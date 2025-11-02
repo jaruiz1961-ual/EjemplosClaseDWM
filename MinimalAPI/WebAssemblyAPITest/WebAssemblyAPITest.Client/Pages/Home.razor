@@ -1,10 +1,10 @@
 ﻿@page "/"
-@rendermode InteractiveWebAssembly
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using WebAssemblyAPITest.Client.Services
 @inject HttpClient Http
 @inject CookieService CookieService
 
-<h3>Login para obtener token JWT</h3>
+<h3>Login para obtener token JWT  desde el cliente</h3>
 
 <div>
     <input @bind="username" placeholder="Usuario" />
@@ -19,12 +19,11 @@
     <p>@protectedApiResponse</p>
 }
 
-@if (!string.IsNullOrEmpty(token))
-{
+
     <p>Token recibido: @tokenCookie</p>
     <button @onclick="CallProtectedApiCookie">Llamar API protegida Cookie</button>
     <p>@protectedApiResponseCookie</p>
-}
+
 
 @code {
     string username = "";
@@ -37,27 +36,14 @@
     async Task LoginAsync()
     {
         var response = await Http.PostAsJsonAsync("https://localhost:7242/login", username);
+        tokenCookie = await CookieService.GetTokenAsync();
 
         if (response.IsSuccessStatusCode)
         {
-    
+
             var json = await response.Content.ReadFromJsonAsync<LoginResult>();
             token = json.Token.Trim();
 
-            if (!string.IsNullOrEmpty(token))
-            {
-                await CookieService.SetTokenAsync(token, 1);
-
-                // 3. Opcional: Verificar que la cookie se escribió correctamente
-                var verificationToken = await CookieService.GetTokenAsync();
-                if (token != verificationToken)
-                {
-                    // Si incluso este token escrito por JS es diferente, el problema es irresoluble
-                    // y se debe usar otro método (ej. LocalStorage).
-                    Console.WriteLine("Advertencia: El token escrito por JS no coincide con la fuente.");
-                }
-
-            }
         }
         else
         {
@@ -70,13 +56,15 @@
         if (!string.IsNullOrEmpty(token))
         {
             Http.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+               new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await Http.GetAsync("https://localhost:7242/secured-route");
 
             if (response.IsSuccessStatusCode)
             {
                 protectedApiResponse = await response.Content.ReadAsStringAsync();
+                await CookieService.SetTokenAsync(token, 1);
+                tokenCookie = token;
             }
             else
             {
@@ -87,9 +75,7 @@
 
     async Task CallProtectedApiCookie()
     {
-        if (!string.IsNullOrEmpty(token))
-        {
-             var tokenCookie = await CookieService.GetTokenAsync();
+              var tokenCookie = await CookieService.GetTokenAsync();
              Http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
 
@@ -103,7 +89,7 @@
             {
                 protectedApiResponseCookie = "No autorizado";
             }
-        }
+        
     }
 
     class LoginResult

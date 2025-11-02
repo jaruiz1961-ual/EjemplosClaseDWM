@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
 
 // Configure the HTTP request pipeline.
@@ -13,6 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient
     BaseAddress = new Uri(builder.Configuration["BaseAddress"] ?? "https://localhost:7041")
 });
 builder.Services.AddScoped<CookieService>();
+builder.Services.AddTransient<CookieService>();  // lo que hace es añadir automaticamente el header a cada peticion Http SendAsync
 
 
 var app = builder.Build();
@@ -37,7 +39,10 @@ app.UseAntiforgery();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(WebAssemblyAPITest.Client._Imports).Assembly);
+
+
 
 app.Run();

@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="CookieBearerTokenHandler.cs" />
+    <Content Remove="Routes.razor" />
   </ItemGroup>
 
   <ItemGroup>

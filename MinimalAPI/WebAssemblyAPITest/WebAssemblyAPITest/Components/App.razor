@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8,11 +10,12 @@
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["WebAssemblyAPITest.styles.css"]" />
     <ImportMap />
-    <HeadOutlet @rendermode="InteractiveWebAssembly" />
+    <HeadOutlet />
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveWebAssembly" />
+   <Routes />
+
     <script src="_framework/blazor.web.js"></script>
 
     <script>

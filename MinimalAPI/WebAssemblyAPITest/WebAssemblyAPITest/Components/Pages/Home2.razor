@@ -4,7 +4,7 @@
 @inject HttpClient Http
 @inject CookieService CookieService
 
-<h3>Login para obtener token JWT</h3>
+<h3>Login para obtener token JWT  desde el servidor</h3>
 
 <div>
     <input @bind="username" placeholder="Usuario" />
@@ -16,15 +16,14 @@
 {
     <p>Token recibido: @token</p>
     <button @onclick="CallProtectedApi">Llamar API protegida</button>
-    <p>@protectedApiResponse</p>
+    <p>@protectedResponse</p>
 }
 
-@if (!string.IsNullOrEmpty(token))
-{
-    <p>Token recibido: @tokenCookie</p>
+
+    <p>Token API : @tokenCookie</p>
     <button @onclick="CallProtectedApiCookie">Llamar API protegida Cookie</button>
     <p>@protectedApiResponseCookie</p>
-}
+
 
 @code {
     string username = "";
@@ -32,6 +31,7 @@
     string token = "";
     string tokenCookie = "";
 
+    string protectedResponse = "";
     string protectedApiResponse = "";
     string protectedApiResponseCookie = "";
 
@@ -39,13 +39,14 @@
     {
 
         var response = await Http.PostAsJsonAsync("https://localhost:7242/login", username);
+        tokenCookie = await CookieService.GetTokenAsync();
 
         if (response.IsSuccessStatusCode)
         {
             var json = await response.Content.ReadFromJsonAsync<LoginResult>();
             token = json.Token;
-            var tokenCookie = await CookieService.GetTokenAsync();
-            await CookieService.SetTokenAsync(tokenCookie, 1);
+            
+           // await CookieService.SetTokenAsync(tokenCookie, 1);
         }
         else
         {
@@ -64,20 +65,19 @@
 
             if (response.IsSuccessStatusCode)
             {
-                protectedApiResponse = await response.Content.ReadAsStringAsync();
+                protectedResponse = await response.Content.ReadAsStringAsync();
             }
             else
             {
-                protectedApiResponse = "No autorizado";
+                protectedResponse = "No autorizado";
             }
         }
     }
 
     async Task CallProtectedApiCookie()
     {
-        if (!string.IsNullOrEmpty(token))
-        {
-            var tokenCookie = await CookieService.GetTokenAsync();
+
+             tokenCookie = await CookieService.GetTokenAsync();
              Http.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
 
@@ -85,13 +85,13 @@
 
             if (response.IsSuccessStatusCode)
             {
-                protectedApiResponse = await response.Content.ReadAsStringAsync();
+                protectedApiResponseCookie = await response.Content.ReadAsStringAsync();
             }
             else
             {
-                protectedApiResponse = "No autorizado";
+                protectedApiResponseCookie = "No autorizado";
             }
-        }
+        
     }
 
     class LoginResult
