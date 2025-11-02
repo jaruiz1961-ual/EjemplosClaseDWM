@@ -6,15 +6,16 @@ using WebAssemblyAPITest.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
-
-builder.Services.AddScoped(sp => new HttpClient
-{
-    // ¡DEBE APUNTAR AL PUERTO DE TU MINIMAL API (SERVIDOR)!
-    BaseAddress = new Uri("https://localhost:7242")
-});
-
 builder.Services.AddScoped<CookieService>();
+builder.Services.AddTransient<CookieBearerTokenHandler>();
+
+builder.Services.AddHttpClient("ApiCliente", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7242"); //  API
+})
+    .AddHttpMessageHandler<CookieBearerTokenHandler>();
+
+
 
 await builder.Build().RunAsync();
 

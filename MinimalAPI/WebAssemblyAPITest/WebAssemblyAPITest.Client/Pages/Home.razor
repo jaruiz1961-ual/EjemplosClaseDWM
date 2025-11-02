@@ -1,7 +1,9 @@
 ﻿@page "/"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using WebAssemblyAPITest.Client.Services
+@inject IHttpClientFactory HttpClientFactory
 @inject HttpClient Http
+
 @inject CookieService CookieService
 
 <h3>Login para obtener token JWT  desde el cliente</h3>
@@ -35,8 +37,9 @@
     string protectedApiResponseCookie = "";
     async Task LoginAsync()
     {
+        
         var response = await Http.PostAsJsonAsync("https://localhost:7242/login", username);
-        tokenCookie = await CookieService.GetTokenAsync();
+
 
         if (response.IsSuccessStatusCode)
         {
@@ -57,6 +60,7 @@
         {
             Http.DefaultRequestHeaders.Authorization =
                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+           
 
             var response = await Http.GetAsync("https://localhost:7242/secured-route");
 
@@ -75,11 +79,10 @@
 
     async Task CallProtectedApiCookie()
     {
-              var tokenCookie = await CookieService.GetTokenAsync();
-             Http.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
 
-            var response = await Http.GetAsync("https://localhost:7242/secured-route");
+            var httpFact = HttpClientFactory.CreateClient("ApiCliente");
+
+        var response = await httpFact.GetAsync("https://localhost:7242/secured-route");
 
             if (response.IsSuccessStatusCode)
             {

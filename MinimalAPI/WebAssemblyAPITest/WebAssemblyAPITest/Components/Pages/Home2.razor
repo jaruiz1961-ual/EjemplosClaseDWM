@@ -39,7 +39,7 @@
     {
 
         var response = await Http.PostAsJsonAsync("https://localhost:7242/login", username);
-        tokenCookie = await CookieService.GetTokenAsync();
+        // tokenCookie = await CookieService.GetTokenAsync();
 
         if (response.IsSuccessStatusCode)
         {
@@ -58,8 +58,8 @@
     {
         if (!string.IsNullOrEmpty(token))
         {
-            Http.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+             Http.DefaultRequestHeaders.Authorization =
+                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await Http.GetAsync("https://localhost:7242/secured-route");
 
@@ -77,9 +77,9 @@
     async Task CallProtectedApiCookie()
     {
 
-             tokenCookie = await CookieService.GetTokenAsync();
-             Http.DefaultRequestHeaders.Authorization =
-                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
+              tokenCookie = await CookieService.GetTokenAsync();
+              Http.DefaultRequestHeaders.Authorization =
+                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenCookie);
 
             var response = await Http.GetAsync("https://localhost:7242/secured-route");
 

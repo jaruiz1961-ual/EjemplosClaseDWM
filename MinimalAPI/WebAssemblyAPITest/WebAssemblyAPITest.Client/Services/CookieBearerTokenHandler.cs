@@ -31,6 +31,8 @@ namespace WebAssemblyAPITest.Client.Services
             // 3. Devolver el control: permite que la solicitud se envíe a la API
             return await base.SendAsync(request, cancellationToken);
         }
+
+
     }
 }
 
