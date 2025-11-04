@@ -1,0 +1,21 @@
+﻿@page "/modalModificaParametro"
+@using PasoParametrosBlazor.Client.Components
+
+<button @onclick="MostrarModal">Mostrar modal Modifica Parametro</button>
+<input @bind="dato" />
+
+@if (modalVisible)
+{
+    <MiModalModificaParametro ValorAMostrar="@dato" ValorEditadoChanged="@ActualizarDato" OnCerrar="@CerrarModal" />
+}
+
+@code {
+    string dato = "Texto inicial";
+    bool modalVisible = false;
+
+
+    void MostrarModal() => modalVisible = true;
+    void CerrarModal() => modalVisible = false;
+
+    void ActualizarDato(string nuevoValor) => dato = nuevoValor;
+}

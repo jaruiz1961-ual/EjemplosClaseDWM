@@ -1,0 +1,23 @@
+﻿<!-- ModalBootstrap.razor -->
+<div class="modal fade show" tabindex="-1" style="display:block;" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+              
+                <button type="button" class="btn-close" @onclick="OnCerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Contenido o dato: @ValorAMostrar</p>
+                             
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="OnCerrar">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string ValorAMostrar { get; set; }
+    [Parameter] public EventCallback OnCerrar { get; set; }
+}

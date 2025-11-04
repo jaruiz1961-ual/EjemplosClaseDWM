@@ -1,0 +1,19 @@
+﻿@page "/modalParametro"
+@using PasoParametrosBlazor.Client.Components
+
+<button @onclick="MostrarModal">Mostrar modal con parametro</button>
+<input @bind="valor" />
+
+@if (modalVisible)
+{
+    <MiModalParametro  ValorAMostrar="@valor" OnCerrar="@CerrarModal" />
+}
+
+@code {
+    string valor = "Inicial";
+    bool modalVisible = false;
+
+    void MostrarModal() => modalVisible = true;
+    void CerrarModal() => modalVisible = false;
+}
+

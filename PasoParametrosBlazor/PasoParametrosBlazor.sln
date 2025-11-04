@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36616.10 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasoParametrosBlazor", "PasoParametrosBlazor\PasoParametrosBlazor\PasoParametrosBlazor.csproj", "{4369C014-3767-4254-9320-0631EDE865C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PasoParametrosBlazor.Client", "PasoParametrosBlazor\PasoParametrosBlazor.Client\PasoParametrosBlazor.Client.csproj", "{F7A9E811-1033-4669-AB5B-7559C59870AA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4369C014-3767-4254-9320-0631EDE865C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4369C014-3767-4254-9320-0631EDE865C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4369C014-3767-4254-9320-0631EDE865C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4369C014-3767-4254-9320-0631EDE865C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7A9E811-1033-4669-AB5B-7559C59870AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7A9E811-1033-4669-AB5B-7559C59870AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7A9E811-1033-4669-AB5B-7559C59870AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7A9E811-1033-4669-AB5B-7559C59870AA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4551F766-CAEA-418C-AC69-AAF3CABA4FA5}
+	EndGlobalSection
+EndGlobal

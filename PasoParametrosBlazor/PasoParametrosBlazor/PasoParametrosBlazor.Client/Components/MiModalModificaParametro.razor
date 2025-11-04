@@ -1,0 +1,33 @@
+﻿<!-- ModalBootstrap.razor -->
+<div class="modal fade show" tabindex="-1" style="display:block;" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Valor recibido: @ValorAMostrar</h5>
+                <button type="button" class="btn-close" @onclick="OnCerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>Contenido o dato: @ValorAMostrar</p>
+                <input type="text" class="form-control" @bind=@ValorAMostrar placeholder="Escribe aquí..." />
+
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" @onclick="OnCerrar">Cerrar</button>
+                <button class="btn btn-primary" @onclick="Guardar">Guardar y cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string ValorAMostrar { get; set; }
+    [Parameter] public EventCallback OnCerrar { get; set; }
+    [Parameter] public EventCallback<string> ValorEditadoChanged { get; set; }
+
+    async Task Guardar()
+    {
+        await ValorEditadoChanged.InvokeAsync(ValorAMostrar);
+        await OnCerrar.InvokeAsync();
+    }
+}
