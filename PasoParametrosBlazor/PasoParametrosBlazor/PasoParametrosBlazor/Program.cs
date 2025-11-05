@@ -1,5 +1,7 @@
 using PasoParametrosBlazor.Client.Pages;
 using PasoParametrosBlazor.Components;
+using Blazored.LocalStorage;
+using LibreriaCompartida;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +9,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddSingleton<LocalStorageSyncService>();
+builder.Services.AddHttpContextAccessor();
+
+
+
 
 var app = builder.Build();
 
