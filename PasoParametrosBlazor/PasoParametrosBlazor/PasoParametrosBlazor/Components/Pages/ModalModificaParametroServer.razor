@@ -2,39 +2,58 @@
 @rendermode InteractiveServer
 @using PasoParametrosBlazor.Client.Components
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject AppState State
 
 
 
 <button @onclick="MostrarModal">Mostrar modal Modifica Parametro</button>
-<input @bind="dato" />
+<input @bind=dato @oninput="GuardarAppState" />
 
 @if (modalVisible)
 {
-    <MiModalModificaParametro ValorAMostrar="@dato" ValorEditadoChanged="@ActualizarDato" OnCerrar="@CerrarModal" />
+    <MiModalModificaParametro ValorAMostrar="@dato"  ValorEditadoChanged="@ActualizarDato" OnCerrar="@CerrarModal" />
 }
 
 @code {
     string dato = "";
     bool modalVisible = false;
 
+    protected override void OnInitialized()
+    {
+        dato = State.ValorCompartido;
+    }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            dato = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;
-            StateHasChanged();
+            var valorGuardado = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;
+            if (valorGuardado != dato)
+            {
+                dato = valorGuardado;
+                StateHasChanged();
+            }
+
+
         }
     }
-
 
     void MostrarModal() => modalVisible = true;
     void CerrarModal() => modalVisible = false;
 
-     async Task ActualizarDato(string nuevoValor) 
+    async Task ActualizarDato(string nuevoValor) 
     {
         dato = nuevoValor;
         await LocalStorage.SetItemAsync("valor-compartido", dato);
+        State.ValorCompartido = dato;
+    }
+
+    async Task GuardarAppState(ChangeEventArgs e)
+    {
+        var texto = e.Value?.ToString() ?? "";
+        State.ValorCompartido = texto;
+
     }
 
 

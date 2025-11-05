@@ -2,6 +2,9 @@ using PasoParametrosBlazor.Client.Pages;
 using PasoParametrosBlazor.Components;
 using Blazored.LocalStorage;
 using LibreriaCompartida;
+using PasoParametrosBlazor;
+using PasoParametrosBlazor.Components;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +15,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<PasoParametrosBlazor.Client.AppState>();
 
 
 
@@ -37,7 +40,7 @@ app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
+app.MapRazorComponents<PasoParametrosBlazor.Components.App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(PasoParametrosBlazor.Client._Imports).Assembly);
