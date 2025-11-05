@@ -11,7 +11,7 @@ builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddBlazoredLocalStorage();
-builder.Services.AddSingleton<LocalStorageSyncService>();
+
 builder.Services.AddHttpContextAccessor();
 
 

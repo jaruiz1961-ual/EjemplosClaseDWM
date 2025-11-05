@@ -4,7 +4,7 @@
 
 @using PasoParametrosBlazor.Client.Components
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
-@inject LocalStorageSyncService SyncService
+
 
 
 <button @onclick="MostrarModal">Mostrar modal Modifica Parametro</button>
@@ -16,7 +16,7 @@
 }
 
 @code {
-    string dato = "Texto inicial";
+    string dato = "";
     bool modalVisible = false;
 
 
@@ -24,8 +24,8 @@
     {
         if (firstRender)
         {
-            dato = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? "Texto inicial";
-            SyncService.OnValorChanged += ActualizarValor;
+            dato = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;
+
             StateHasChanged();
         }
     }
@@ -40,16 +40,4 @@
         await LocalStorage.SetItemAsync("valor-compartido", dato);
     }
 
-    void ActualizarValor()
-    {
-        InvokeAsync(async () =>
-        {
-            dato = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;
-            StateHasChanged();
-        });
-    }
-    public void Dispose()
-    {
-        SyncService.OnValorChanged -= ActualizarValor;
-    }
 }
