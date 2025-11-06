@@ -12,7 +12,7 @@ namespace BlazorAppEFPresentacion.DataBase
         public virtual DbSet<AlumnoAsignatura> AlumnosAsignaturas { get; set; }
         public virtual DbSet<Asignatura> Asignaturas { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-            => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MssqlLocaldb;Initial Catalog=Test;AttachDbFileName=C:\\Temp\\TestDb.mdf ;Integrated Security=True");
+            => optionsBuilder.UseSqlServer("Data Source=(localdb)\\MssqlLocaldb;Initial Catalog=Test2;AttachDbFileName=C:\\Temp\\Test2Db.mdf ;Integrated Security=True");
          protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Alumno>(entity => { entity.Property(e => e.Id).UseIdentityColumn(); });
