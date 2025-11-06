@@ -30,16 +30,21 @@
 
 @code {
     [CascadingParameter(Name = "ValorEntrada")] public string ValorAMostrar { get; set; }
-    [CascadingParameter(Name = "CallBack")] public Action OnCerrar { get; set; }
+    [CascadingParameter(Name = "Cerrar")] public Action OnCerrar { get; set; }
+    [CascadingParameter(Name = "Guardar")] public Action OnGuardar { get; set; }
     [CascadingParameter(Name = "Indice")] public int IndiceMostrar { get; set; }
 
     [Parameter] public EventCallback<string> ValorEditadoChanged { get; set; }
     [Parameter] public bool Ultimo { get; set; }
 
-
     async Task Guardar()
     {
         await ValorEditadoChanged.InvokeAsync(ValorAMostrar);
+        OnGuardar?.Invoke();
+    }
+
+    async Task Cerrar()
+    {
         OnCerrar?.Invoke();
     }
 }

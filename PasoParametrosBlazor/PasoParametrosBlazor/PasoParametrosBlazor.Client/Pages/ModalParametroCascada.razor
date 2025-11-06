@@ -8,25 +8,27 @@
 @if (modalVisible)
 {
     <CascadingValue Value="dato" Name="ValorEntrada">
-        <CascadingValue Value="(Action)CerrarModal" Name="CallBack" >
+        <CascadingValue Value="(Action)CerrarModal" Name="Cerrar" >
+            <CascadingValue Value="(Action)GuardarModal" Name="Guardar">
             <CascadingValue Value="inx" Name="Indice">
             @if (inx == 1)
             {
-                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato" Ultimo=false />
+                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato1" Ultimo=false />
             }
 
             @if (inx == 2)
             {
-                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato" Ultimo=false />
+                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato2" Ultimo=false />
             }
 
             @if (inx == 3)
             {
-                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato" Ultimo=true />
+                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato3" Ultimo=true />
             }
 
             </CascadingValue>
         </CascadingValue>
+    </CascadingValue>
     </CascadingValue>
 }
 
@@ -35,7 +37,15 @@
     bool modalVisible = false;
     int inx = 0;
 
-    async Task ActualizarDato(string nuevoValor)
+    async Task ActualizarDato1(string nuevoValor)
+    {
+        dato = nuevoValor;
+    }
+    async Task ActualizarDato2(string nuevoValor)
+    {
+        dato = nuevoValor;
+    }
+    async Task ActualizarDato3(string nuevoValor)
     {
         dato = nuevoValor;
     }
@@ -45,10 +55,15 @@
         inx = 1;
         modalVisible = true;
     }
-    void CerrarModal()
+    void GuardarModal()
     {
         inx++;
         if (inx == 4) modalVisible = false;
+    }
+    void CerrarModal()
+    {
+        inx = 0;
+        modalVisible = false;
     }
 }
 
