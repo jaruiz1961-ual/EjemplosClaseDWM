@@ -1,4 +1,5 @@
-﻿<!-- ModalBootstrap.razor -->
+﻿@using static PasoParametrosBlazor.Client.Pages.ModalParametroCascada
+<!-- ModalBootstrap.razor -->
 <div class="modal fade show" tabindex="-1" style="display:block;" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -29,12 +30,12 @@
 </div>
 
 @code {
-    [CascadingParameter(Name = "ValorEntrada")] public string ValorAMostrar { get; set; }
+    [CascadingParameter(Name = "ValorEntrada")] public ClaseDato ValorAMostrar { get; set; }
     [CascadingParameter(Name = "Cerrar")] public Action OnCerrar { get; set; }
     [CascadingParameter(Name = "Guardar")] public Action OnGuardar { get; set; }
     [CascadingParameter(Name = "Indice")] public int IndiceMostrar { get; set; }
 
-    [Parameter] public EventCallback<string> ValorEditadoChanged { get; set; }
+    [Parameter] public EventCallback<ClaseDato> ValorEditadoChanged { get; set; }
     [Parameter] public bool Ultimo { get; set; }
 
     async Task Guardar()
