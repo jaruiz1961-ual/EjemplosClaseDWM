@@ -3,18 +3,52 @@
 @rendermode InteractiveWebAssembly
 
 <button @onclick="MostrarModal">Mostrar modal con parametro</button>
-<input @bind="valor" />
+<input @bind="dato" />
 
 @if (modalVisible)
 {
-    <MiModalParametro  ValorAMostrar="@valor" OnCerrar="@CerrarModal" />
+    <CascadingValue Value="dato" Name="ValorEntrada">
+        <CascadingValue Value="(Action)CerrarModal" Name="CallBack" >
+            <CascadingValue Value="inx" Name="Indice">
+            @if (inx == 1)
+            {
+                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato" Ultimo=false />
+            }
+
+            @if (inx == 2)
+            {
+                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato" Ultimo=false />
+            }
+
+            @if (inx == 3)
+            {
+                    <MiModalParametroCascada ValorEditadoChanged="@ActualizarDato" Ultimo=true />
+            }
+
+            </CascadingValue>
+        </CascadingValue>
+    </CascadingValue>
 }
 
 @code {
-    string valor = "Inicial";
+    string dato = "Inicial";
     bool modalVisible = false;
+    int inx = 0;
 
-    void MostrarModal() => modalVisible = true;
-    void CerrarModal() => modalVisible = false;
+    async Task ActualizarDato(string nuevoValor)
+    {
+        dato = nuevoValor;
+    }
+
+    void MostrarModal() 
+    {
+        inx = 1;
+        modalVisible = true;
+    }
+    void CerrarModal()
+    {
+        inx++;
+        if (inx == 4) modalVisible = false;
+    }
 }
 
