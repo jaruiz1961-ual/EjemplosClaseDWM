@@ -27,7 +27,8 @@
 
     async Task Guardar()
     {
-        await ValorEditadoChanged.InvokeAsync(ValorAMostrar);
         OnCerrar?.Invoke();
+        await ValorEditadoChanged.InvokeAsync(ValorAMostrar);
+        
     }
 }

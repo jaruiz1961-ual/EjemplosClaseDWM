@@ -1,9 +1,13 @@
 ﻿@page "/modalParametroCascada"
 @using PasoParametrosBlazor.Client.Components
+@using System.ComponentModel
+@using System.Globalization
+@using System.Text.Json
 @rendermode InteractiveWebAssembly
+@inject AppState State
 
-<button @onclick="MostrarModal">Mostrar modal con parametro</button>
-<input @bind="dato" />
+<button @onclick="MostrarModal">Mostrar modal con parametro en cascada</button>
+<input @bind="dato" maxlength="100" />
 
 @if (modalVisible)
 {
@@ -37,17 +41,22 @@
     bool modalVisible = false;
     int inx = 0;
 
+    protected override void OnInitialized()
+    {
+        dato = State.DatoCascada;
+    }
+
     async Task ActualizarDato1(ClaseDato nuevoValor)
     {
-        dato.Valor1 = nuevoValor.Valor1;
+        dato.Valor1 = nuevoValor?.Valor1;
     }
     async Task ActualizarDato2(ClaseDato nuevoValor)
     {
-        dato.Valor2 = nuevoValor.Valor2;
+        dato.Valor2 = nuevoValor?.Valor2;
     }
     async Task ActualizarDato3(ClaseDato nuevoValor)
     {
-        dato.Valor3 = nuevoValor.Valor3;
+        dato.Valor3 = nuevoValor?.Valor3;
     }
 
     void MostrarModal() 
@@ -59,18 +68,16 @@
     {
         inx++;
         if (inx == 4) modalVisible = false;
+        State.DatoCascada = dato;
+        StateHasChanged();
     }
     void CerrarModal()
     {
         inx = 0;
         modalVisible = false;
+        StateHasChanged();
     }
 
-    public class ClaseDato
-    {
-        public string Valor1 { get; set; }
-        public string Valor2 { get; set; }
-        public string Valor3 { get; set; }
-    }
+   
 }
 

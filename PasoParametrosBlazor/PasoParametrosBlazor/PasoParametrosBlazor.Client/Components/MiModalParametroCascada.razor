@@ -4,18 +4,46 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Valor recibido: @ValorAMostrar</h5>
-                <button type="button" class="btn-close" @onclick="OnCerrar"></button>
+                
+                
+   
+                @if (Indice>1)
+                {
+                    <button class="btn btn-primary" title="<" @onclick="Anterior"/>
+                }
+                <h5 class="modal-title">Valor recibido: @MostrarValor(@ValorDatoEntrada) </h5>
+                @if (Indice < 3)
+                {
+                    <button class="btn btn-primary" @onclick="Siguiente" title=">" />
+                }
+
+                <button type="button" class="btn-close" @onclick="Cerrar"></button>
             </div>
             <div class="modal-body">
-                <p>Contenido o dato: @ValorAMostrar</p>
-                <p>Indice: @IndiceMostrar</p>
-                <input type="text" class="form-control" @bind=@ValorAMostrar placeholder="Escribe aquí..." />
+
+                @if (Indice == 1)
+                {
+                    <p>Contenido o dato: @ValorDatoEntrada?.Valor1</p>
+                    <p>Indice: @Indice</p>
+                    <input type="text" class="form-control" @bind=@ValorDatoModificado.Valor1 placeholder="Escribe aquí..." />
+                }
+                @if (Indice == 2)
+                {
+                    <p>Contenido o dato: @ValorDatoEntrada?.Valor2</p>
+                    <p>Indice: @Indice</p>
+                    <input type="text" class="form-control" @bind=@ValorDatoModificado.Valor2 placeholder="Escribe aquí..." />
+                }
+                @if (Indice == 3)
+                {
+                    <p>Contenido o dato: @ValorDatoEntrada?.Valor3</p>
+                    <p>Indice: @Indice</p>
+                    <input type="text" class="form-control" @bind=@ValorDatoModificado.Valor3 placeholder="Escribe aquí..." />
+                }
 
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @onclick="OnCerrar">Cerrar</button>
+                <button type="button" class="btn btn-secondary" @onclick="Cerrar">Cerrar</button>
                 @if (Ultimo)
                 {
                     <button class="btn btn-primary" @onclick="Guardar">Final y cerrar</button>
@@ -30,22 +58,47 @@
 </div>
 
 @code {
-    [CascadingParameter(Name = "ValorEntrada")] public ClaseDato ValorAMostrar { get; set; }
+    [CascadingParameter(Name = "ValorEntrada")] public ClaseDato ValorDatoEntrada { get; set; }
     [CascadingParameter(Name = "Cerrar")] public Action OnCerrar { get; set; }
     [CascadingParameter(Name = "Guardar")] public Action OnGuardar { get; set; }
-    [CascadingParameter(Name = "Indice")] public int IndiceMostrar { get; set; }
+    [CascadingParameter(Name = "Indice")] public int Indice { get; set; }
 
     [Parameter] public EventCallback<ClaseDato> ValorEditadoChanged { get; set; }
     [Parameter] public bool Ultimo { get; set; }
 
+    public ClaseDato ValorDatoModificado { get; set; } = new ClaseDato();
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        ValorDatoModificado.Valor1 = ValorDatoEntrada.Valor1;
+        ValorDatoModificado.Valor2 = ValorDatoEntrada.Valor2;
+        ValorDatoModificado.Valor2 = ValorDatoEntrada.Valor3;
+    }
+
     async Task Guardar()
     {
-        await ValorEditadoChanged.InvokeAsync(ValorAMostrar);
+        ValorDatoEntrada = ValorDatoModificado;
         OnGuardar?.Invoke();
+        await ValorEditadoChanged.InvokeAsync(ValorDatoEntrada);
+
+    }
+    void Siguiente()
+    {
+        Indice++;
+    }
+    void Anterior()
+    {
+        Indice--;
     }
 
     async Task Cerrar()
     {
         OnCerrar?.Invoke();
+    }
+
+    private string MostrarValor(ClaseDato dato)
+    {
+        return dato.Valor1 + " " + dato.Valor2 + " " + dato.Valor3;
     }
 }
