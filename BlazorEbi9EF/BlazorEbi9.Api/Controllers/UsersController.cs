@@ -9,6 +9,9 @@ using BlazorEbi9.Data.DataBase;
 using BlazorEbi9.Model.Entidades;
 using BlazorEbi9.Model.IServices;
 
+
+//https://localhost:5001/api/users
+
 namespace BlazorEbi9.API.Controllers
 {
     [Route("api/[controller]")]

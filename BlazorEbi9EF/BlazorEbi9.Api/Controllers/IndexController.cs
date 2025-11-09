@@ -23,7 +23,7 @@ namespace BlazorEbi9.API.Controllers
         [HttpGet]
         public async Task<string> Get()
         {
-            var users = @"Well come to the API/Users";
+            var users = @"Wellcome to the API/Users";
             return users;
         }
 
