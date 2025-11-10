@@ -58,6 +58,8 @@
     [CascadingParameter(Name = "ValorEntrada")] public ClaseDato ValorDatoEntrada { get; set; }
     [CascadingParameter(Name = "Cerrar")] public Action OnCerrar { get; set; }
     [CascadingParameter(Name = "Guardar")] public Action OnGuardar { get; set; }
+    [CascadingParameter(Name = "Avanzar")] public Action OnAvanzar { get; set; }
+    [CascadingParameter(Name = "Retroceder")] public Action OnRetroceder { get; set; }
     [CascadingParameter(Name = "Indice")] public int Indice { get; set; }
 
     [Parameter] public EventCallback<ClaseDato> ValorEditadoChanged { get; set; }
@@ -78,17 +80,6 @@
         ValorDatoEntrada = ValorDatoModificado;
         OnGuardar?.Invoke();
         await ValorEditadoChanged.InvokeAsync(ValorDatoEntrada);
-
-    }
-    void Siguiente()
-    {
-        Indice++;
-        StateHasChanged();
-    }
-    void Anterior()
-    {
-        Indice--;
-        StateHasChanged();
     }
 
     async Task Cerrar()
@@ -96,6 +87,20 @@
         OnCerrar?.Invoke();
     }
 
+    void Siguiente()
+    {
+        //Indice++;
+        OnAvanzar?.Invoke();
+        StateHasChanged();
+    }
+    void Anterior()
+    {
+        //Indice--;
+        OnRetroceder?.Invoke();
+        StateHasChanged();
+    }
+
+ 
     private bool ValidarValor(ClaseDato dato, int indice)
     {
         switch (indice)

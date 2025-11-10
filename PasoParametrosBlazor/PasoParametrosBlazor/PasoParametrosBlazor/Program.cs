@@ -28,9 +28,6 @@ builder.Services.AddScoped<PasoParametrosBlazor.Client.AppState>();
 
 var app = builder.Build();
 
-app.UseAuthentication();
-app.UseAuthorization();
-// GET endpoint para recuperar el valor
 
 
 // Configure the HTTP request pipeline.

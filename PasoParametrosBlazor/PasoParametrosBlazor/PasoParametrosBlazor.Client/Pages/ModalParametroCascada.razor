@@ -14,6 +14,8 @@
     <CascadingValue Value="dato" Name="ValorEntrada">
         <CascadingValue Value="(Action)CerrarModal" Name="Cerrar" >
             <CascadingValue Value="(Action)GuardarModal" Name="Guardar">
+                <CascadingValue Value="(Action)AvanzarModal" Name="Avanzar">
+                    <CascadingValue Value="(Action)RetrocederModal" Name="Retroceder">
             <CascadingValue Value="inx" Name="Indice">
             @if (inx == 1)
             {
@@ -33,6 +35,8 @@
             </CascadingValue>
         </CascadingValue>
     </CascadingValue>
+    </CascadingValue>
+        </CascadingValue>
     </CascadingValue>
 }
 
@@ -66,8 +70,8 @@
     }
     void GuardarModal()
     {
-        inx++;
-        if (inx == 4) modalVisible = false;
+        if (inx == 3) modalVisible = false;
+        else inx++;
         State.DatoCascada = dato;
         StateHasChanged();
     }
@@ -75,6 +79,19 @@
     {
         inx = 0;
         modalVisible = false;
+        StateHasChanged();
+    }
+
+    void AvanzarModal()
+    {
+        if (inx > 3) modalVisible = false;
+        else inx++;
+        StateHasChanged();
+    }
+
+    void RetrocederModal()
+    {
+        if (inx > 0) inx--;
         StateHasChanged();
     }
 
