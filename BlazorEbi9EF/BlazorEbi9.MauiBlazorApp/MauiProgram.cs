@@ -34,10 +34,10 @@ namespace BlazorEbi9.MauiBlazorApp
             {
                 builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
                 var HttpsClientHandS = builder.Services.BuildServiceProvider().GetService<IHttpsClientHandlerService>() as IHttpsClientHandlerService;
-                builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(HttpsClientHandS, RestUrl));
+                builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceAsyncR(HttpsClientHandS, RestUrl));
             }
             else
-                builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(new HttpClient(),RestUrl));
+                builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceAsyncR(new HttpClient(),RestUrl));
 
                 return builder.Build();
         }

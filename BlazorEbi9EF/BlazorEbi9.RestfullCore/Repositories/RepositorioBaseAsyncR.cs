@@ -25,7 +25,7 @@ namespace BlazorEbi9.RestfullCore.Repositories
     {
         HttpMessageHandler GetPlatformMessageHandler();
     }
-    public class RepositorioBaseR<T> : IRepositoryBaseAsync<T> where T : class
+    public class RepositorioBaseAsyncR<T> : IRepositoryBaseAsync<T> where T : class
     {
         //https://restclient.dalsoft.io/
 
@@ -34,14 +34,14 @@ namespace BlazorEbi9.RestfullCore.Repositories
         IHttpsClientHandlerService _httpsClientHandlerService;
         string _url;
 
-        public RepositorioBaseR(HttpClient httpClient, string baseAddress, string url)
+        public RepositorioBaseAsyncR(HttpClient httpClient, string baseAddress, string url)
         {
             this.httpClient = httpClient;
             _baseAddress = baseAddress;
             _url = url;
         }
 
-        public RepositorioBaseR(IHttpsClientHandlerService service, string baseAddress, string url)
+        public RepositorioBaseAsyncR(IHttpsClientHandlerService service, string baseAddress, string url)
         {
 #if DEBUG
            

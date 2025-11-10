@@ -64,7 +64,7 @@ namespace MauiAppXalm
                     RestUrl = $"{Scheme}://{LocalhostUrl}:{Port}/api/";
                     builder.Services.AddSingleton<IHttpsClientHandlerService, HttpsClientHandlerService>();
                     var HttpsClientHandS = builder.Services.BuildServiceProvider().GetService<IHttpsClientHandlerService>() as IHttpsClientHandlerService;
-                    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(HttpsClientHandS, RestUrl));
+                    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceAsyncR(HttpsClientHandS, RestUrl));
                 }
                 else
                 {
@@ -72,7 +72,7 @@ namespace MauiAppXalm
                     Scheme = "https";
                     Port = "5001";
                     RestUrl = $"{Scheme}://{LocalhostUrl}:{Port}/api/";
-                    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(new HttpClient(), RestUrl));
+                    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceAsyncR(new HttpClient(), RestUrl));
                 }
             }
             else if (tipoAcceso == "SQLITE")

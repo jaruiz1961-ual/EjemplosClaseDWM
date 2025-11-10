@@ -34,7 +34,7 @@ else if (provider == "SqLite")
 else if (provider == "Restful")
 {
     var urlApi = Configuration.GetConnectionString("UrlApi");
-    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceR(new HttpClient(), urlApi));
+    builder.Services.AddScoped<IUsuarioServiceAsync>(sp => new UsuarioServiceAsyncR(new HttpClient(), urlApi));
 }
 
 var app = builder.Build();

@@ -20,18 +20,16 @@ using BlazorEbi9.Model.IServices;
 
 namespace BlazorEbi9.RestfullCore.Services
 {
-    public class UsuarioServiceR : RepositorioBaseR<UsuarioSet>,  IUsuarioServiceAsync
+    public class UsuarioServiceAsyncR : RepositorioBaseAsyncR<UsuarioSet>,  IUsuarioServiceAsync
     {
         //https://restclient.dalsoft.io/
 
-   
-
-        public UsuarioServiceR(HttpClient httpClient,string baseAddress) : base(httpClient, baseAddress, "users")
+        public UsuarioServiceAsyncR(HttpClient httpClient,string baseAddress) : base(httpClient, baseAddress, "users")
         {
        
         }
 
-        public UsuarioServiceR(IHttpsClientHandlerService service, string baseAddress) : base(service, baseAddress, "users")
+        public UsuarioServiceAsyncR(IHttpsClientHandlerService service, string baseAddress) : base(service, baseAddress, "users")
         {
             
         }
