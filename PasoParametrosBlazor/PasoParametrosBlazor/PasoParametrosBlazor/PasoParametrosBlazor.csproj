@@ -7,9 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <ProjectReference Include="..\..\LibreriaCompartida\LibreriaCompartida.csproj" />
+=======
+    <ProjectReference Include="..\..\RazorClassLibrary\RazorClassLibrary.csproj" />
+>>>>>>> actualizacion desde universidad pasoParametrosBlazor
     <ProjectReference Include="..\PasoParametrosBlazor.Client\PasoParametrosBlazor.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.10" />
+    <PackageReference Include="StackExchange.Redis" Version="2.9.32" />
   </ItemGroup>
 
 </Project>

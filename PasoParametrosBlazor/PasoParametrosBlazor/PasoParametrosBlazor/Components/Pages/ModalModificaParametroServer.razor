@@ -1,10 +1,16 @@
 ﻿@page "/modalModificaParametroServer"
 @rendermode InteractiveServer
 @using PasoParametrosBlazor.Client.Components
+<<<<<<< HEAD
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
 @inject AppState State
 
 
+=======
+@using RazorClassLibrary
+@inject AppState appState
+@inject HttpClient Http
+>>>>>>> actualizacion desde universidad pasoParametrosBlazor
 
 <button @onclick="MostrarModal">Mostrar modal Modifica Parametro</button>
 <input @bind=dato @oninput="GuardarAppState" />
@@ -15,8 +21,13 @@
 }
 
 @code {
+<<<<<<< HEAD
     string dato = "";
+=======
+    string dato;
+>>>>>>> actualizacion desde universidad pasoParametrosBlazor
     bool modalVisible = false;
+    string valor;
 
     protected override void OnInitialized()
     {
@@ -42,6 +53,7 @@
     void MostrarModal() => modalVisible = true;
     void CerrarModal() => modalVisible = false;
 
+<<<<<<< HEAD
     async Task ActualizarDato(string nuevoValor) 
     {
         dato = nuevoValor;
@@ -57,4 +69,21 @@
     }
 
 
+=======
+    void ActualizarDato(string nuevoValor)
+    {
+        dato = nuevoValor;
+        appState.StateInfo = nuevoValor;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        dato = appState.StateInfo;
+        valor = await Http.GetStringAsync("/user/value");
+    }
+    async Task Guardar()
+    {
+        await Http.PostAsJsonAsync("/user/value", valor);
+    }
+>>>>>>> actualizacion desde universidad pasoParametrosBlazor
 }
