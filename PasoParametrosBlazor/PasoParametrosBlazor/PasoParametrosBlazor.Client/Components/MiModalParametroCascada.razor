@@ -43,11 +43,11 @@
                 <button type="button" class="btn btn-secondary" @onclick="Cerrar">Cerrar</button>
                 @if (Ultimo)
                 {
-                    <button class="btn btn-primary" @onclick="Guardar">Final y cerrar</button>
+                    <button class="btn btn-primary" disabled="@DeshabilitarBoton" @onclick ="Guardar">Final y cerrar</button>
                 }
                 else
                 {
-                    <button class="btn btn-primary" @onclick="Guardar">Guardar y cerrar</button>
+                    <button class="btn btn-primary" disabled="@DeshabilitarBoton" @onclick="Guardar">Guardar y seguir</button>
                 }
             </div>
         </div>
@@ -61,16 +61,16 @@
     [CascadingParameter(Name = "Indice")] public int Indice { get; set; }
 
     [Parameter] public EventCallback<ClaseDato> ValorEditadoChanged { get; set; }
-    [Parameter] public bool Ultimo { get; set; }
+    public bool Ultimo { get { return Indice == 3; } }
 
     public ClaseDato ValorDatoModificado { get; set; } = new ClaseDato();
+
+    bool DeshabilitarBoton => ValidarValor(ValorDatoModificado,Indice);
 
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        ValorDatoModificado.Valor1 = ValorDatoEntrada.Valor1;
-        ValorDatoModificado.Valor2 = ValorDatoEntrada.Valor2;
-        ValorDatoModificado.Valor2 = ValorDatoEntrada.Valor3;
+        ValorDatoModificado = ValorDatoEntrada;
     }
 
     async Task Guardar()
@@ -83,10 +83,12 @@
     void Siguiente()
     {
         Indice++;
+        StateHasChanged();
     }
     void Anterior()
     {
         Indice--;
+        StateHasChanged();
     }
 
     async Task Cerrar()
@@ -94,8 +96,23 @@
         OnCerrar?.Invoke();
     }
 
+    private bool ValidarValor(ClaseDato dato, int indice)
+    {
+        switch (indice)
+        {
+            case 1:
+                return string.IsNullOrEmpty(dato.Valor1);
+            case 2:
+                return string.IsNullOrEmpty(dato.Valor2);
+            case 3:
+                return string.IsNullOrEmpty(dato.Valor3);
+            default:
+                return false;
+        }
+    }
+
     private string MostrarValor(ClaseDato dato)
     {
-        return dato.Valor1 + " " + dato.Valor2 + " " + dato.Valor3;
+        return "1:"+dato.Valor1 + " 2:" + dato.Valor2 + " 3:" + dato.Valor3;
     }
 }
