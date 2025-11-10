@@ -13,11 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-    <ProjectReference Include="..\..\LibreriaCompartida\LibreriaCompartida.csproj" />
-=======
-    <ProjectReference Include="..\..\RazorClassLibrary\RazorClassLibrary.csproj" />
->>>>>>> actualizacion desde universidad pasoParametrosBlazor
+   <ProjectReference Include="..\..\LibreriaCompartida\LibreriaCompartida.csproj" />
   </ItemGroup>
 
 </Project>
