@@ -23,26 +23,32 @@
     bool modalVisible = false;
     string valor;
 
-    protected override void OnInitialized()
+    protected override async void OnInitialized()
     {
         dato = State.ValorCompartido;
-    }
-
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
+        var valorGuardado = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;  // solo aqui
+        if (valorGuardado != dato)
         {
-            var valorGuardado = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;
-            if (valorGuardado != dato)
-            {
-                dato = valorGuardado;
-                StateHasChanged();
-            }
-
-
+            dato = valorGuardado;
+            StateHasChanged();
         }
     }
+
+
+    //protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         var valorGuardado = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;  // solo aqui
+    //         if (valorGuardado != dato)
+    //         {
+    //             dato = valorGuardado;
+    //             StateHasChanged();
+    //         }
+
+
+    //     }
+    //}
 
     void MostrarModal() => modalVisible = true;
     void CerrarModal() => modalVisible = false;

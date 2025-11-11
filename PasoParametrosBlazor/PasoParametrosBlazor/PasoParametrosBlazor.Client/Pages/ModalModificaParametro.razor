@@ -30,7 +30,7 @@
     {
         if (firstRender)
         {
-            var valorGuardado = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato;
+            var valorGuardado = await LocalStorage.GetItemAsync<string>("valor-compartido") ?? dato; //solo aqui en el cliente
             if (valorGuardado != dato)
             {
                 dato = valorGuardado;
