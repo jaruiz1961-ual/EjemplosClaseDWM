@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LibreriaCompartida
 {
-    // MyApp.Shared/LocalStorageSyncService.cs
+    
     public class LocalStorageSyncService
     {
         public event Action? OnValorChanged;
