@@ -72,14 +72,16 @@
     protected override void OnParametersSet()
     {
         base.OnParametersSet();
-        ValorDatoModificado = ValorDatoEntrada;
+        ValorDatoModificado.Valor1 = ValorDatoEntrada.Valor1;
+        ValorDatoModificado.Valor2 = ValorDatoEntrada.Valor2;
+        ValorDatoModificado.Valor3 = ValorDatoEntrada.Valor3;
     }
 
     async Task Guardar()
     {
-        ValorDatoEntrada = ValorDatoModificado;
+       // ValorDatoEntrada = ValorDatoModificado;
         OnGuardar?.Invoke();
-        await ValorEditadoChanged.InvokeAsync(ValorDatoEntrada);
+        await ValorEditadoChanged.InvokeAsync(ValorDatoModificado);
     }
 
     async Task Cerrar()
