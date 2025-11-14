@@ -55,18 +55,31 @@
 
     protected override async Task OnInitializedAsync()
     {
-        usuarioSet.TenantId = Service.Tenant;
-        var context = await Factory.CreateDbContextAsync();
+        Service.OnTenantChanged += async (o, e) =>
+        {
+            var context = await Factory.CreateDbContextAsync();
+            var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+            UsuarioService = new UsuarioServiceAsync(uow);
+            var user = await UsuarioService.FindIdAsync(Id);
+            if (user != null) usuarioSet = user;
+            usuarioSet.TenantId = Service.Tenant;
+            StateHasChanged();
+        };
 
+        var context = await Factory.CreateDbContextAsync();
         var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
         UsuarioService = new UsuarioServiceAsync(uow);
         if (Id != 0)
-            usuarioSet = await UsuarioService.FindIdAsync(Id);
+        {
+            var user = await UsuarioService.FindIdAsync(Id);
+            if (user != null) usuarioSet = user;            
+        }
+        usuarioSet.TenantId = Service.Tenant;
     }
 
     protected async Task SaveUsuario()
     {
-        await UsuarioService.SaveUserAsync(usuarioSet);
+        await UsuarioService.SaveUserAsyncTenant(usuarioSet,Service);
         nav.NavigateTo("/ListaUsuarios");
     }
 
