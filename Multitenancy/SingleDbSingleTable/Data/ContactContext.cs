@@ -25,12 +25,12 @@ namespace SingleDbSingleTable.Data
                     var tenant = (i % 2) + 1;
                     var contact = $"Contact {i} (Tenant {tenant})";
                     var cc = new Contact();
-                    cc.TenanId = tenant;
+                    cc.TenantId = tenant;
                     cc.Name = contact;
                     if (i == 3)
                     {
                         cc.Name = "Alice";
-                        cc.TenanId = 0;
+                        cc.TenantId = 0;
                     }
                     Contacts.Add(cc);
                 }
@@ -41,6 +41,6 @@ namespace SingleDbSingleTable.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
             => modelBuilder.Entity<Contact>()
-                .HasQueryFilter(mt => mt.TenanId == _tenant || mt.TenanId==0);
+                .HasQueryFilter(mt => mt.TenantId == _tenant || mt.TenantId==0);
     }
 }

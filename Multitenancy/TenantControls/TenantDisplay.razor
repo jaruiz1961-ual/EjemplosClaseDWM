@@ -12,7 +12,7 @@
     protected override void OnInitialized()
     {
         _tenant = TenantService.Tenant;
-        TenantService.OnTenantChanged += (o, e) =>
+        TenantService.OnTenantChanged += (o,e) =>
         {
             _tenant = e.NewTenant;
             StateHasChanged();

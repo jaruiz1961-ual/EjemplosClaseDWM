@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SingleDbSingleTable", "Sing
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TenantControls", "..\TenantControls\TenantControls.csproj", "{BB014658-C50A-4A8B-A1D1-DD52BB41B4F8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\..\..\jaruiz1961-ual\EntityFramework.Docs\samples\core\Miscellaneous\Multitenancy\Common\Common.csproj", "{877F8EAC-77EE-B486-B934-216D7F1D58E9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "..\Common\Common.csproj", "{9F0601AB-EA31-A20F-1B21-30C901BDC579}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +23,10 @@ Global
 		{BB014658-C50A-4A8B-A1D1-DD52BB41B4F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BB014658-C50A-4A8B-A1D1-DD52BB41B4F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BB014658-C50A-4A8B-A1D1-DD52BB41B4F8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{877F8EAC-77EE-B486-B934-216D7F1D58E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{877F8EAC-77EE-B486-B934-216D7F1D58E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{877F8EAC-77EE-B486-B934-216D7F1D58E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{877F8EAC-77EE-B486-B934-216D7F1D58E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F0601AB-EA31-A20F-1B21-30C901BDC579}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F0601AB-EA31-A20F-1B21-30C901BDC579}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F0601AB-EA31-A20F-1B21-30C901BDC579}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F0601AB-EA31-A20F-1B21-30C901BDC579}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

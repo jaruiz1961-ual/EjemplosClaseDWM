@@ -1,0 +1,25 @@
+﻿@page "/counter"
+
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<video width="800" height="450" controls muted autoplay>
+    <source src="https://www.w3schools.com/html/mov_bbb.mp4" type="video/mp4" />
+</video>
+
+
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
