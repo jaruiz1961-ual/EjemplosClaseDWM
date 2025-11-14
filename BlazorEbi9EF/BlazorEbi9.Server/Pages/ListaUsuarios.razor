@@ -1,9 +1,13 @@
 ﻿@page "/ListaUsuarios"
+@using BlazorEbi9.Data.DataBase
 @using BlazorEbi9.Model.Entidades
 @using BlazorEbi9.Model.IServices
+@using BlazorEbi9.Model.TenantService
+@using Microsoft.EntityFrameworkCore
+@inject ITenantService Service
+@inject IDbContextFactory<SqLiteDbContext> Factory
 
 
-@inject IUsuarioServiceAsync UsuarioService
 
 <h1>ListaUsuarios</h1>
 
@@ -25,7 +29,7 @@ else
                 <th>Codigo</th>
                 <th>Nivel</th>
                 <th>Password</th>
-                <th>email</th>
+                <th>Tenant</th>
             </tr>
         </thead>
         <tbody>
@@ -37,7 +41,7 @@ else
                     <td>@user.Codigo</td>
                     <td>@user.NivelAcceso</td>
                     <td>@user.Password</td>
-                    <td>@user.email</td>
+                    <td>@user.TenantId</td>
                     <td><a href="/DetalleUsuario/@user.Id"><i>Edit</i></a></td>
                     <td><a href="/DeleteUsuario/@user.Id"><i>Del</i></a></td>
                 </tr>
@@ -47,11 +51,25 @@ else
 }
 @code {
     private List<UsuarioSet> users;
+    UsuarioServiceAsync UsuarioService;
 
     protected override async Task OnInitializedAsync()
     {
+
+        Service.OnTenantChanged += async (o, e) =>
+        {
+            var context = await Factory.CreateDbContextAsync();
+            var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+            UsuarioService = new UsuarioServiceAsync(uow);
+            users = await UsuarioService.FindAllAsync();
+            StateHasChanged();
+        };
+        var context = await Factory.CreateDbContextAsync();
+        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        UsuarioService = new UsuarioServiceAsync(uow);
         users = await UsuarioService.FindAllAsync();
-        StateHasChanged();
+ 
+    
     }
 }
 

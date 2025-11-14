@@ -1,8 +1,13 @@
 ﻿@page "/DeleteUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
+@using BlazorEbi9.Data.DataBase
+@using BlazorEbi9.Model.TenantService
+@using Microsoft.EntityFrameworkCore
 
 
 @inject IUsuarioServiceAsync UsuarioService
 @inject NavigationManager nav
+@inject ITenantService Service
+@inject IDbContextFactory<SqLiteDbContext> Factory
 
 <h3>Eliminar Usuario</h3>
 <p styp="color:red;text-align:center">¿Estas seguro ?</p>
@@ -47,10 +52,14 @@
     [Parameter]
     public int Id { get; set; }
 
-    private UsuarioSet usuarioSet = new UsuarioSet();
+    private UsuarioSet usuarioSet;
 
     protected override async Task OnInitializedAsync()
     {
+        var context = await Factory.CreateDbContextAsync();
+
+        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        UsuarioService = new UsuarioServiceAsync(uow);
         if (Id != 0)
             usuarioSet = await UsuarioService.FindIdAsync(Id);
     }

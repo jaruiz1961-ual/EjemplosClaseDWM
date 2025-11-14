@@ -16,7 +16,7 @@ namespace BlazorEbi9.Data.DataBase
         int SaveChanges();
     }
 
-    public class UnitOfWork<T> : IUnitOfWork where T : DbContext, IDisposable, new()
+    public class UnitOfWork<T> : IUnitOfWork where T : DbContext, IDisposable
     {
         private bool _disposed;
         private string _errorMessage = string.Empty;

@@ -17,12 +17,16 @@ namespace BlazorEbi9.Data.DataBase
         Task<int> SaveChangesAsync();
     }
 
-    public class UnitOfWorkAsync<T> : IUnitOfWorkAsync where T : DbContext, IDisposable, new()
+    public class UnitOfWorkAsync<T> : IUnitOfWorkAsync where T : DbContext, IDisposable
     {
         private bool _disposed;
         private string _errorMessage = string.Empty;
         private Task<IDbContextTransaction>? _dbContextTransaction;
-        public DbContext DataBaseContext { get; set; }
+        public DbContext? DataBaseContext { get; set; }
+
+        public UnitOfWorkAsync() 
+        {
+        }
         public UnitOfWorkAsync(T context)
         {
             DataBaseContext = context;
