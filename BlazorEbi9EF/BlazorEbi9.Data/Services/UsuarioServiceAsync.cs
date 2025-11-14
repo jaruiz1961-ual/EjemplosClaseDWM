@@ -1,12 +1,13 @@
 ﻿using BlazorEbi9.Data.DataBase;
 using BlazorEbi9.Data.Repositories;
+using BlazorEbi9.Model.Entidades;
+using BlazorEbi9.Model.IServices;
+using BlazorEbi9.Model.TenantService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BlazorEbi9.Model.Entidades;
-using BlazorEbi9.Model.IServices;
 
 namespace BlazorEbi9.Data.Services
 {
@@ -32,6 +33,15 @@ namespace BlazorEbi9.Data.Services
         public async Task<UsuarioSet> SaveUserAsync(UsuarioSet user)
         {
             if (user == null) return null;
+            if (user.Id == default)
+                return await this.InsertAsync(user);
+            else
+                return await this.UpdateAsync(user);
+        }
+        public async Task<UsuarioSet> SaveUserAsyncTenant(UsuarioSet user, ITenantService service)
+        {
+            if (user == null) return null;
+            user.TenantId = service.Tenant;
             if (user.Id == default)
                 return await this.InsertAsync(user);
             else
