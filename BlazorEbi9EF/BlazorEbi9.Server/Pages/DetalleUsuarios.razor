@@ -1,9 +1,13 @@
 ﻿@page "/DetalleUsuario"
 @page "/DetalleUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
+@using BlazorEbi9.Data.DataBase
+@using BlazorEbi9.Model.TenantService
+@using Microsoft.EntityFrameworkCore
 
 
-@inject IUsuarioServiceAsync UsuarioService
 @inject NavigationManager nav
+@inject ITenantService Service
+@inject IDbContextFactory<SqLiteDbContext> Factory
 
 <h3>DetalleUsuario</h3>
 
@@ -28,8 +32,8 @@
         <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.Password" /> </td>
     </tr>
     <tr>
-        <td>email:</td>
-        <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.email" /> </td>
+        <td>TenantId</td>
+        <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.TenantId" /> </td>
     </tr>
 
     <tr>
@@ -45,10 +49,17 @@
     [Parameter]
     public int Id { get; set; }
 
+    UsuarioServiceAsync UsuarioService;
+
     private UsuarioSet usuarioSet = new UsuarioSet();
 
     protected override async Task OnInitializedAsync()
     {
+        usuarioSet.TenantId = Service.Tenant;
+        var context = await Factory.CreateDbContextAsync();
+
+        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        UsuarioService = new UsuarioServiceAsync(uow);
         if (Id != 0)
             usuarioSet = await UsuarioService.FindIdAsync(Id);
     }

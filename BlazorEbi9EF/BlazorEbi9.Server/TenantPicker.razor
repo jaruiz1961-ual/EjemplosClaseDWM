@@ -1,0 +1,28 @@
+﻿@using BlazorEbi9.Model.TenantService
+@inject ITenantService TenantService
+
+<p>Choose your tenant:
+    <select @onchange="OnTenantChanged">
+        @foreach(var tenant in TenantService.GetTenants())
+        {
+            <option value="@tenant" selected="@(tenant == _tenant)">@tenant</option>
+        }
+    </select>        
+</p>
+
+@code
+{
+    private int? _tenant = null!;
+
+    protected override void OnInitialized()
+    {
+        _tenant = TenantService.Tenant;
+        base.OnInitialized();
+    }
+
+    private void OnTenantChanged(ChangeEventArgs e) 
+    {
+        var _t = int.Parse((e.Value as string) ?? "0");
+        TenantService.SetTenant(_t);
+    }
+}

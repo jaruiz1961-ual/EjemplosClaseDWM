@@ -13,6 +13,7 @@ namespace BlazorEbi9.Model.Entidades
         public int NivelAcceso { get; set; }
         public string Password { get; set; }
         public string? email { get; set; }
+        public int TenantId { get; set; }
     }
 
 }
