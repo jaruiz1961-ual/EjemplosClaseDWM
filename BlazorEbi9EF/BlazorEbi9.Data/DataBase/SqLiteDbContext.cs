@@ -8,13 +8,13 @@ using System;
 //Add-Migration InitialSQlite -outputDir "Migrations/MigrationsSQLite -context SqLiteDbContext"
 public partial class SqLiteDbContext : DbContext
 {
-    private readonly int? _tenant = null;
+   public int? CurrentTenant = null;
 
 
     public SqLiteDbContext (
             DbContextOptions<SqLiteDbContext> opts,
             ITenantService service)
-            : base(opts) => _tenant = service.Tenant;
+            : base(opts) => CurrentTenant = service.Tenant;
 
     
     //entidades del context 
@@ -23,7 +23,7 @@ public partial class SqLiteDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         modelBuilder.Entity<UsuarioSet>()
-               .HasQueryFilter(mt => mt.TenantId == _tenant || mt.TenantId == 0);
+               .HasQueryFilter(mt => mt.TenantId == CurrentTenant || mt.TenantId == 0);
 
         modelBuilder.Entity<UsuarioSet>(entity =>
         {
