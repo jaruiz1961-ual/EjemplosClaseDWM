@@ -51,25 +51,56 @@ else
 }
 @code {
     private List<UsuarioSet> users;
-    UsuarioServiceAsync UsuarioService;
+    private IUsuarioServiceAsync UsuarioService;
+    private bool _disposed;
 
     protected override async Task OnInitializedAsync()
     {
+        // Suscribirse una vez al evento
+        Service.OnTenantChanged += TenantChangedHandler;
 
-        Service.OnTenantChanged += async (o, e) =>
+        await LoadUsersAsync();
+    }
+
+    private async void TenantChangedHandler(object? sender, EventArgs e)
+    {
+        // handler async-void está bien para eventos; crea su propio contexto
+        await LoadUsersAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        // Crear y disponer el DbContext por cada operación.
+        await using var context = await Factory.CreateDbContextAsync();
+
+        // Asignar el tenant a la instancia del contexto (evita inyectarlo en el ctor).
+        if (context is SqLiteDbContext sqliteCtx)
         {
-            var context = await Factory.CreateDbContextAsync();
-            var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-            UsuarioService = new UsuarioServiceAsync(uow);
-            users = await UsuarioService.FindAllAsync();
-            StateHasChanged();
-        };
-        var context = await Factory.CreateDbContextAsync();
-        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+            sqliteCtx.CurrentTenant = Service.Tenant;
+        }
+
+        using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context as SqLiteDbContext);
         UsuarioService = new UsuarioServiceAsync(uow);
         users = await UsuarioService.FindAllAsync();
- 
-    
     }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        Service.OnTenantChanged -= TenantChangedHandler;
+
+        // Si UsuarioService/uow necesita DisposeAsync, dispón aquí. Ejemplo:
+        if (UsuarioService is IAsyncDisposable asyncDisp)
+        {
+            await asyncDisp.DisposeAsync();
+        }
+        else if (UsuarioService is IDisposable disp)
+        {
+            disp.Dispose();
+        }
+    }
+}
 }
 

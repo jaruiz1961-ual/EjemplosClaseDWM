@@ -48,6 +48,7 @@
 @code {
     [Parameter]
     public int Id { get; set; }
+    private bool _disposed;
 
     UsuarioServiceAsync UsuarioService;
 
@@ -86,5 +87,21 @@
     protected void Cancel()
     {
         nav.NavigateTo("/ListaUsuarios");
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        Service.OnTenantChanged -= TenantChangedHandler;
+
+        // Si UsuarioService/uow necesita DisposeAsync, dispón aquí. Ejemplo:
+        if (UsuarioService is IAsyncDisposable asyncDisp)
+        {
+            await asyncDisp.DisposeAsync();
+        }
+        else if (UsuarioService is IDisposable disp)
+        {
+            disp.Dispose();
+        }
     }
 }

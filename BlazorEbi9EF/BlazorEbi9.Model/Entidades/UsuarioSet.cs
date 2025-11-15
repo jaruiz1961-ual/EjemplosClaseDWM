@@ -2,7 +2,7 @@
 
 namespace BlazorEbi9.Model.Entidades
 {
-    public partial class UsuarioSet
+    public partial class UsuarioSet:ITenantEntity
     {
         public int Id { get; set; }
         public string Codigo { get; set; }
@@ -13,6 +13,7 @@ namespace BlazorEbi9.Model.Entidades
         public int NivelAcceso { get; set; }
         public string Password { get; set; }
         public string? email { get; set; }
+        [Required(ErrorMessage = "TenantId is required")]
         public int TenantId { get; set; }
     }
 
