@@ -41,6 +41,7 @@
     [Parameter] public int Id { get; set; }
 
     private UsuarioSet usuarioSet = new UsuarioSet();
+    UsuarioServiceAsync usuarioService;
 
     protected override async Task OnInitializedAsync()
     {
@@ -59,9 +60,9 @@
     private async Task LoadUserAsync()
     {
         // Crear y disponer contexto/UoW/servicio por operación
-        await using var context = await Factory.CreateDbContextAsync();
-        using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-        var usuarioService = new UsuarioServiceAsync(uow);
+         var context = await Factory.CreateDbContextAsync();
+        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        usuarioService = new UsuarioServiceAsync(uow);
 
         if (Id != 0)
         {
@@ -76,9 +77,9 @@
     protected async Task SaveUsuario()
     {
             // Crear contexto/UoW/servicio aquí también (no reutilizar uno creado antes)
-        await using var context = await Factory.CreateDbContextAsync();
-        using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-        var usuarioService = new UsuarioServiceAsync(uow);
+        // await using var context = await Factory.CreateDbContextAsync();
+        // using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        // var usuarioService = new UsuarioServiceAsync(uow);
 
         await usuarioService.SaveUserAsyncTenant(usuarioSet, Service);
         nav.NavigateTo("/ListaUsuarios");
