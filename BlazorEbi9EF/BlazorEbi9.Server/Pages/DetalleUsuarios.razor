@@ -90,8 +90,16 @@
         nav.NavigateTo("/ListaUsuarios");
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         Service.OnTenantChanged -= TenantChangedHandler;
+        if (usuarioService is IAsyncDisposable asyncDisp)
+        {
+            await asyncDisp.DisposeAsync();
+        }
+        else if (usuarioService is IDisposable disp)
+        {
+            disp.Dispose();
+        }
     }
 }
