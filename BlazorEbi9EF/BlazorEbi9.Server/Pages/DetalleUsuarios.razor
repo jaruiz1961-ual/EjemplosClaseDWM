@@ -1,17 +1,13 @@
 ﻿@page "/DetalleUsuario"
-@page "/DetalleUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
+@page "/DetalleUsuario/{Id:int}"
 @using BlazorEbi9.Data.DataBase
 @using BlazorEbi9.Model.TenantService
-@using Microsoft.EntityFrameworkCore
-
-
 @inject NavigationManager nav
 @inject ITenantService Service
-@inject IDbContextFactory<SqLiteDbContext> Factory
+@inject BlazorEbi9.Data.DataBase.ITenantDbContextFactory Factory
 
 <h3>DetalleUsuario</h3>
 
-@*<EditForm Model="@usuarioSet" />*@
 <table class="table">
     <tr>
         <td>Codigo:</td>
@@ -21,12 +17,10 @@
         <td>UserName:</td>
         <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.UserName" /> </td>
     </tr>
-
     <tr>
         <td>NivelAcceso:</td>
         <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.NivelAcceso" /> </td>
     </tr>
-
     <tr>
         <td>Password:</td>
         <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.Password" /> </td>
@@ -35,56 +29,68 @@
         <td>TenantId</td>
         <td><input class="form-control" col-sm-4 type="text" @bind="usuarioSet.TenantId" /> </td>
     </tr>
-
     <tr>
         <td colspan="2" style="text-align:center">
             <input type="submit" value="Save" @onclick="SaveUsuario" />
             <input type="button" value="Cancel" @onclick="Cancel" />
-
         </td>
     </tr>
-
 </table>
-@code {
-    [Parameter]
-    public int Id { get; set; }
 
-    UsuarioServiceAsync UsuarioService;
+@code {
+    [Parameter] public int Id { get; set; }
 
     private UsuarioSet usuarioSet = new UsuarioSet();
 
     protected override async Task OnInitializedAsync()
     {
-        Service.OnTenantChanged += async (o, e) =>
-        {
-            var context = await Factory.CreateDbContextAsync();
-            var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-            UsuarioService = new UsuarioServiceAsync(uow);
-            var user = await UsuarioService.FindIdAsync(Id);
-            if (user != null) usuarioSet = user;
-            usuarioSet.TenantId = Service.Tenant;
-            StateHasChanged();
-        };
+        // Suscribir a cambios de tenant -> recargar
+        Service.OnTenantChanged += TenantChangedHandler;
 
-        var context = await Factory.CreateDbContextAsync();
-        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-        UsuarioService = new UsuarioServiceAsync(uow);
+        await LoadUserAsync();
+    }
+
+    private async void TenantChangedHandler(object? sender, EventArgs e)
+    {
+        await LoadUserAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadUserAsync()
+    {
+        // Crear y disponer contexto/UoW/servicio por operación
+        await using var context = await Factory.CreateDbContextAsync();
+        using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        var usuarioService = new UsuarioServiceAsync(uow);
+
         if (Id != 0)
         {
-            var user = await UsuarioService.FindIdAsync(Id);
-            if (user != null) usuarioSet = user;            
+            var user = await usuarioService.FindIdAsync(Id);
+            if (user != null) usuarioSet = user;
         }
+
+        // asegurar tenant correcto en el modelo para el formulario
         usuarioSet.TenantId = Service.Tenant;
     }
 
     protected async Task SaveUsuario()
     {
-        await UsuarioService.SaveUserAsyncTenant(usuarioSet,Service);
+            // Crear contexto/UoW/servicio aquí también (no reutilizar uno creado antes)
+        await using var context = await Factory.CreateDbContextAsync();
+        using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        var usuarioService = new UsuarioServiceAsync(uow);
+
+        await usuarioService.SaveUserAsyncTenant(usuarioSet, Service);
         nav.NavigateTo("/ListaUsuarios");
     }
 
     protected void Cancel()
     {
         nav.NavigateTo("/ListaUsuarios");
+    }
+
+    public void Dispose()
+    {
+        Service.OnTenantChanged -= TenantChangedHandler;
     }
 }

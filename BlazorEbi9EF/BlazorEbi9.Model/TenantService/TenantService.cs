@@ -3,11 +3,15 @@
     public delegate void TenantChangedEventHandler(object source, TenantChangedEventArgs args);
     public class TenantService : ITenantService
     {
-        public TenantService() => _tenant = GetTenants()[0];
-
-        public TenantService(int tenant) => _tenant = tenant;
-
+        private readonly ITenantProvider _tenantProvider;
         private int _tenant;
+
+        public TenantService(ITenantProvider tenantProvider)
+        {
+            _tenantProvider = tenantProvider;
+            _tenant = GetTenants()[0];
+            _tenantProvider.SetTenant(_tenant);
+        }
 
         public event TenantChangedEventHandler OnTenantChanged = null!;
 
@@ -18,8 +22,8 @@
             if (tenant != _tenant)
             {
                 _tenant = tenant;
-                TenantChangedEventArgs args = new TenantChangedEventArgs(tenant);
-                OnTenantChanged?.Invoke(this, args);
+                _tenantProvider.SetTenant(tenant);
+                OnTenantChanged?.Invoke(this, new TenantChangedEventArgs(tenant));
             }
         }
         

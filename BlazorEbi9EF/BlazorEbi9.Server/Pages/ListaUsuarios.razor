@@ -3,10 +3,8 @@
 @using BlazorEbi9.Model.Entidades
 @using BlazorEbi9.Model.IServices
 @using BlazorEbi9.Model.TenantService
-@using Microsoft.EntityFrameworkCore
 @inject ITenantService Service
-@inject IDbContextFactory<SqLiteDbContext> Factory
-
+@inject BlazorEbi9.Data.DataBase.ITenantDbContextFactory Factory
 
 
 <h1>ListaUsuarios</h1>
@@ -51,25 +49,43 @@ else
 }
 @code {
     private List<UsuarioSet> users;
-    UsuarioServiceAsync UsuarioService;
+    private IUsuarioServiceAsync UsuarioService;
+    private bool _disposed;
 
     protected override async Task OnInitializedAsync()
     {
+        Service.OnTenantChanged += TenantChangedHandler;
+        await LoadUsersAsync();
+    }
 
-        Service.OnTenantChanged += async (o, e) =>
-        {
-            var context = await Factory.CreateDbContextAsync();
-            var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-            UsuarioService = new UsuarioServiceAsync(uow);
-            users = await UsuarioService.FindAllAsync();
-            StateHasChanged();
-        };
-        var context = await Factory.CreateDbContextAsync();
-        var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+    private async void TenantChangedHandler(object? sender, EventArgs e)
+    {
+        await LoadUsersAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        await using var context = await Factory.CreateDbContextAsync();
+        using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
         UsuarioService = new UsuarioServiceAsync(uow);
         users = await UsuarioService.FindAllAsync();
- 
-    
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        Service.OnTenantChanged -= TenantChangedHandler;
+
+        if (UsuarioService is IAsyncDisposable asyncDisp)
+        {
+            await asyncDisp.DisposeAsync();
+        }
+        else if (UsuarioService is IDisposable disp)
+        {
+            disp.Dispose();
+        }
     }
 }
 
