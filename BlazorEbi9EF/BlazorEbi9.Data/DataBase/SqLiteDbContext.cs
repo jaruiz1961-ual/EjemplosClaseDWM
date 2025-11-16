@@ -7,11 +7,9 @@ namespace BlazorEbi9.Data.DataBase
 {
     public partial class SqLiteDbContext : DbContext
     {
-        // Campo que EF puede capturar como parámetro en el filtro
-        private int? _currentTenant;
-
+ 
         // Método para establecer el tenant en tiempo de ejecución
-        public void SetCurrentTenant(int? tenant) => _currentTenant = tenant;
+        public int? CurrentTenant { get; set; }
 
         public SqLiteDbContext(DbContextOptions<SqLiteDbContext> opts) : base(opts)
         {
@@ -26,7 +24,7 @@ namespace BlazorEbi9.Data.DataBase
             // Expresión simple y traducible:
             // permite filas públicas (TenantId == 0) o filas del tenant actual cuando _currentTenant tiene valor
             modelBuilder.Entity<UsuarioSet>()
-                .HasQueryFilter(u => u.TenantId == 0 || (_currentTenant != null && u.TenantId == _currentTenant.Value));
+                .HasQueryFilter(u => u.TenantId == 0 || (CurrentTenant != null && u.TenantId == CurrentTenant.Value));
 
             modelBuilder.Entity<UsuarioSet>(entity =>
             {

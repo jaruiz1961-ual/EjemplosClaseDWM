@@ -1,6 +1,7 @@
-
+using BlazorEbi9.Model.Entidades;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
@@ -11,11 +12,8 @@ namespace BlazorEbi9.Data.Services
 {
     public class TenantSaveChangesInterceptor : SaveChangesInterceptor
     {
-        private readonly IServiceProvider _rootProvider;
-
-        public TenantSaveChangesInterceptor(IServiceProvider rootProvider)
+        public TenantSaveChangesInterceptor()
         {
-            _rootProvider = rootProvider ?? throw new ArgumentNullException(nameof(rootProvider));
         }
 
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
@@ -37,17 +35,45 @@ namespace BlazorEbi9.Data.Services
         {
             if (context == null) return;
 
-            using var scope = _rootProvider.CreateScope();
-            var tenantProvider = scope.ServiceProvider.GetService<BlazorEbi9.Model.TenantService.ITenantProvider>();
-            if (tenantProvider == null) return;
+            // 1) Intentar obtener el tenant directamente desde el DbContext si la instancia lo expone
+            int? tenant = null;
+            if (context is BlazorEbi9.Data.DataBase.SqLiteDbContext sqCtx)
+            {
+                // si usas la propiedad pública CurrentTenant:
+                tenant = sqCtx.CurrentTenant;
+                // o si usas SetCurrentTenant/_currentTenant, añade aquí un getter público y úsalo
+            }
+
+            // 2) Si no hay tenant en la instancia, resolver ITenantProvider desde el IServiceProvider asociado al DbContext
+            //    (esto obtiene servicios del mismo scope que creó el DbContext)
+            if (tenant == null)
+            {
+                try
+                {
+                    var scopedProvider = ((IInfrastructure<IServiceProvider>)context).Instance;
+                    var tenantProvider = scopedProvider.GetService<BlazorEbi9.Model.TenantService.ITenantProvider>();
+                    if (tenantProvider != null)
+                    {
+                        tenant = tenantProvider.TenantId;
+                    }
+                }
+                catch
+                {
+                    // no forzar excepción aquí; simplemente no aplicamos tenant si no se puede resolver
+                    tenant = null;
+                }
+            }
+
+            if (tenant == null) return;
 
             var entries = context.ChangeTracker.Entries()
-                .Where(e => e.Entity is BlazorEbi9.Model.Entidades.ITenantEntity && e.State == EntityState.Added);
+                .Where(e => e.Entity is ITenantEntity /* marca tu interfaz */);
 
             foreach (var entry in entries)
             {
-                var tenantEntity = (BlazorEbi9.Model.Entidades.ITenantEntity)entry.Entity;
-                tenantEntity.TenantId = tenantProvider.TenantId;
+                var tenantEntity = (ITenantEntity)entry.Entity;
+                // Sólo asignar si es 0 o si quieres forzar siempre:
+                tenantEntity.TenantId = tenant.Value;
             }
         }
     }

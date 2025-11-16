@@ -27,7 +27,7 @@ namespace BlazorEbi9.Data.DataBase
         {
             var ctx = await _innerFactory.CreateDbContextAsync();
             // Establecer el tenant actual para que el filtro lo use como parámetro
-            ctx.SetCurrentTenant(_tenantService.Tenant);
+            ctx.CurrentTenant =_tenantService.Tenant;
             return ctx;
         }
     }

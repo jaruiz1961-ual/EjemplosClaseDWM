@@ -41,7 +41,7 @@ namespace BlazorEbi9.Data.Services
         public async Task<UsuarioSet> SaveUserAsyncTenant(UsuarioSet user, ITenantService service)
         {
             if (user == null) return null;
-            user.TenantId = service.Tenant;
+            //user.TenantId = service.Tenant;
             if (user.Id == default)
                 return await this.InsertAsync(user);
             else

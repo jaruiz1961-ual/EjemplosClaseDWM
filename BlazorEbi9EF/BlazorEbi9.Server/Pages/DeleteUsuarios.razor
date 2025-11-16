@@ -1,14 +1,10 @@
-﻿@page "/DeleteUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
+﻿@page "/DeleteUsuario"
+@page "/DeleteUsuario/{Id:int}"
 @using BlazorEbi9.Data.DataBase
 @using BlazorEbi9.Model.TenantService
-@using Microsoft.EntityFrameworkCore
-
-
-@inject IUsuarioServiceAsync UsuarioService
 @inject NavigationManager nav
 @inject ITenantService Service
-@inject IDbContextFactory<SqLiteDbContext> Factory
-
+@inject BlazorEbi9.Data.DataBase.ITenantDbContextFactory Factory
 <h3>Eliminar Usuario</h3>
 <p styp="color:red;text-align:center">¿Estas seguro ?</p>
 
@@ -49,24 +45,45 @@
 
 </table>
 @code {
-    [Parameter]
-    public int Id { get; set; }
+    [Parameter] public int Id { get; set; }
 
-    private UsuarioSet usuarioSet;
+    private UsuarioSet usuarioSet = new UsuarioSet();
+    UsuarioServiceAsync usuarioService;
 
     protected override async Task OnInitializedAsync()
     {
-        var context = await Factory.CreateDbContextAsync();
+        // Suscribir a cambios de tenant -> recargar
+        Service.OnTenantChanged += TenantChangedHandler;
 
+        await LoadUserAsync();
+    }
+
+    private async void TenantChangedHandler(object? sender, EventArgs e)
+    {
+        await LoadUserAsync();
+        StateHasChanged();
+    }
+
+    private async Task LoadUserAsync()
+    {
+        // Crear y disponer contexto/UoW/servicio por operación
+        var context = await Factory.CreateDbContextAsync();
         var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
-        UsuarioService = new UsuarioServiceAsync(uow);
+        usuarioService = new UsuarioServiceAsync(uow);
+
         if (Id != 0)
-            usuarioSet = await UsuarioService.FindIdAsync(Id);
+        {
+            var user = await usuarioService.FindIdAsync(Id);
+            if (user != null) usuarioSet = user;
+        }
+
+        // asegurar tenant correcto en el modelo para el formulario
+        usuarioSet.TenantId = Service.Tenant;
     }
 
     protected async Task Delete()
     {
-        await UsuarioService.DeleteIdAsync(Id);
+        await usuarioService.DeleteIdAsync(Id);
         nav.NavigateTo("/ListaUsuarios");
     }
 
@@ -74,5 +91,34 @@
     {
         nav.NavigateTo("/ListaUsuarios");
     }
+
+    protected async Task SaveUsuario()
+    {
+        // Crear contexto/UoW/servicio aquí también (no reutilizar uno creado antes)
+        // await using var context = await Factory.CreateDbContextAsync();
+        // using var uow = new UnitOfWorkAsync<SqLiteDbContext>(context);
+        // var usuarioService = new UsuarioServiceAsync(uow);
+
+        await usuarioService.SaveUserAsyncTenant(usuarioSet, Service);
+        nav.NavigateTo("/ListaUsuarios");
+    }
+
+   
+
+    public async ValueTask DisposeAsync()
+    {
+        Service.OnTenantChanged -= TenantChangedHandler;
+        if (usuarioService is IAsyncDisposable asyncDisp)
+        {
+            await asyncDisp.DisposeAsync();
+        }
+        else if (usuarioService is IDisposable disp)
+        {
+            disp.Dispose();
+        }
+    }
+
+    
+
 }
 
