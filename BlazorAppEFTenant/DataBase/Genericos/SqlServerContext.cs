@@ -67,8 +67,8 @@ namespace DataBase.Genericos
         { 
             base.OnModelCreating(modelBuilder);
             ModelCreatingTenant(modelBuilder);
-            modelBuilder.Entity<Usuario>()
-               .HasQueryFilter(u => u.TenantId == 0 || ( u.TenantId == CurrentTenantId));
+            //modelBuilder.Entity<Usuario>()
+            //   .HasQueryFilter(u => u.TenantId == 0 || ( u.TenantId == CurrentTenantId));
 
             modelBuilder.Entity<Usuario>(entity =>
             {
