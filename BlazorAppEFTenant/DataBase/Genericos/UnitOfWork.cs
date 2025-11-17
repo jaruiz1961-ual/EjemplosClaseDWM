@@ -11,6 +11,7 @@ namespace DataBase.Genericos
     where TContext : DbContext
     {
         public TContext Context { get; }
+        TContext IUnitOfWork<TContext>.Context { get => Context; set => throw new NotImplementedException(); }
 
         private readonly Dictionary<Type, object> _repositories = new();
 

@@ -9,13 +9,12 @@ using System.Threading.Tasks;
 
 namespace DataBase.Servicios
 {
-    public class ServicioUsuarios
-    where TContext : DbContext
+    public class ServicioUsuarios <TContext> where TContext : DbContext
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork<TContext> _unitOfWork;
         private readonly ITenantProvider _tenantProvider;
 
-        public ServicioUsuarios(IUnitOfWork unitOfWork, ITenantProvider tenantProvider)
+        public ServicioUsuarios(IUnitOfWork<TContext> unitOfWork, ITenantProvider tenantProvider)
         {
             _unitOfWork = unitOfWork;
             _tenantProvider = tenantProvider;

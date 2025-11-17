@@ -7,12 +7,10 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public interface IUnitOfWork: IDisposable 
+    public interface IUnitOfWork<TContext>: IDisposable where TContext : DbContext
     {
-     
-        IUnitOfWork Create(string contextoKey);
-        IGenericRepository<TEntity,DbContext>
-            GetRepository<TEntity>() where TEntity : class;
+        TContext Context { get; set; }
+        IGenericRepository<TEntity,TContext>  GetRepository<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync();
     }
 

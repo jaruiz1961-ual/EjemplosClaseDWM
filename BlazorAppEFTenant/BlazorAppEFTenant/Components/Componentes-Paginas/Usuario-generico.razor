@@ -1,0 +1,51 @@
+﻿@typeparam TContext
+@page "/usuario-generico"
+@using DataBase.Genericos
+@using DataBase.Modelo
+@inject IUnitOfWork<TContext> UnitOfWork 
+
+<h3>Listado de usuarios (Genérico)</h3>
+
+@if (usuarios is null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No hay usuarios registrados para este tenant.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in usuarios)
+            {
+                <tr>
+                    <td>@usuario.Id</td>
+                    <td>@usuario.Nombre</td>
+                    <td>@usuario.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code 
+{
+    private List<Usuario>? usuarios;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // El contexto concreto lo dictará el tipo de UnitOfWork inyectado:
+        var usuarioRepo = UnitOfWork.GetRepository<Usuario>();
+        usuarios = (await usuarioRepo.GetAllAsync()).ToList();
+    }
+}
+
