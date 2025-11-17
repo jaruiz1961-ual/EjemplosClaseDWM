@@ -8,6 +8,7 @@ var contextoElegido = builder.Configuration.GetValue<string>("Contexto");
 
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
+contextoElegido = "SqlServer";
 if (contextoElegido == "SqlServer")
 {
     // Configuración de cadena de conexión
