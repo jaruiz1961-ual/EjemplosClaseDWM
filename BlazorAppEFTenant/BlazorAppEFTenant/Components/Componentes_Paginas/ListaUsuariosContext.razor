@@ -1,8 +1,8 @@
 ﻿@typeparam TContext
-@page "/usuario-generico"
 @using DataBase.Genericos
 @using DataBase.Modelo
-@inject IUnitOfWork<TContext> UnitOfWork 
+@using Microsoft.EntityFrameworkCore
+@inject IUnitOfWorkFactory UnitOfWorkFactory
 
 <h3>Listado de usuarios (Genérico)</h3>
 
@@ -29,8 +29,8 @@ else
             {
                 <tr>
                     <td>@usuario.Id</td>
-                    <td>@usuario.Nombre</td>
-                    <td>@usuario.Email</td>
+                    <td>@usuario.UserName</td>
+                    <td>@usuario.email</td>
                 </tr>
             }
         </tbody>
@@ -40,11 +40,13 @@ else
 @code 
 {
     private List<Usuario>? usuarios;
+    private IUnitOfWork<DbContext> uow;
 
     protected override async Task OnInitializedAsync()
     {
-        // El contexto concreto lo dictará el tipo de UnitOfWork inyectado:
-        var usuarioRepo = UnitOfWork.GetRepository<Usuario>();
+        uow = UnitOfWorkFactory.Create("SqlServer");
+
+        var usuarioRepo = uow.GetRepository<Usuario>();
         usuarios = (await usuarioRepo.GetAllAsync()).ToList();
     }
 }
