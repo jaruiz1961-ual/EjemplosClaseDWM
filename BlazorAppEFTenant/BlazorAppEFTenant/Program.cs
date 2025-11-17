@@ -4,18 +4,24 @@ using Microsoft.EntityFrameworkCore; // Agrega esta directiva using al inicio de
 
 var builder = WebApplication.CreateBuilder(args);
 
-var contextoElegido = builder.Configuration.GetValue<string>("Contexto");
+IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+// Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
-contextoElegido = "SqlServer";
-if (contextoElegido == "SqlServer")
+// Registrar el interceptor como scoped (depende de ITenantProvider)
+builder.Services.AddScoped<TenantSaveChangesInterceptor>();
+
+string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
+
+if (provider == "SqlServer")
 {
     // Configuración de cadena de conexión
     builder.Services.AddDbContext<SqlServerContext>((sp, options) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("SqlDbContext");
 
         // Registrar el interceptor para la asignación automática de TenantId
         var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
@@ -30,11 +36,7 @@ if (contextoElegido == "SqlServer")
     
 
 
-    // Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
-    builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
-    // Registrar el interceptor como scoped (depende de ITenantProvider)
-    builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 
    
 }
