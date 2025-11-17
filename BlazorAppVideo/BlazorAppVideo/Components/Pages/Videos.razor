@@ -9,6 +9,17 @@
 <p> Video con HTML</p>
 <video id="video" width="640" height="360" controls autoplay></video>
 
+<Video Source=@url
+       StreamingLibrary="StreamingLibrary.Hls"
+       Controls="false"
+       AutoPlay="true" />
+<button @onclick="DetenerStream">Detener</button>
+
+
+
+
+
+
 @code {
     string url = "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8";
 
@@ -27,5 +38,9 @@
                 }
             ");
         }
+    }
+    void DetenerStream()
+    {
+        // Aquí puedes ocultar el video, destruir el componente, limpiar, o llamar a tu backend
     }
 }
