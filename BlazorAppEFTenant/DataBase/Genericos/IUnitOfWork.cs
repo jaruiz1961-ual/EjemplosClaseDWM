@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase
+namespace DataBase.Genericos
 {
-    public interface IUnitOfWork<TContext>: IDisposable where TContext: DbContext
+    public interface IUnitOfWork: IDisposable 
     {
-        TContext Context { get; }
-        IGenericRepository<TEntity,TContext>
+     
+        IUnitOfWork Create(string contextoKey);
+        IGenericRepository<TEntity,DbContext>
             GetRepository<TEntity>() where TEntity : class;
         Task<int> SaveChangesAsync();
     }
