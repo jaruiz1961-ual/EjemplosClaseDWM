@@ -3,6 +3,7 @@
 @using DataBase.Modelo
 @using Microsoft.EntityFrameworkCore
 @inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject string Contexto
 
 <h3>Listado de usuarios (Genérico)</h3>
 
@@ -44,7 +45,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        uow = UnitOfWorkFactory.Create("SqlServer");
+        uow = UnitOfWorkFactory.Create(Contexto);
 
         var usuarioRepo = uow.GetRepository<Usuario>();
         usuarios = (await usuarioRepo.GetAllAsync()).ToList();

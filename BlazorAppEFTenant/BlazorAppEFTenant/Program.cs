@@ -14,6 +14,7 @@ builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 
 string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
+builder.Services.AddSingleton(provider);
 
 if (provider == "SqlServer")
 {
@@ -29,17 +30,12 @@ if (provider == "SqlServer")
         options.AddInterceptors(interceptor);
     });
 
-    // Registrar repositorios y unidad de trabajo
-    builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
-    builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
-
-    
-
-
-
-
    
 }
+
+// Registrar repositorios y unidad de trabajo
+builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 
 // Registrar servicios y componentes de Blazor
 builder.Services.AddRazorPages();
