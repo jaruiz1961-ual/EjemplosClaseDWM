@@ -1,32 +1,42 @@
 using BlazorAppEFTenant.Components;
-using DataBase;
+using DataBase.Genericos;
 using Microsoft.EntityFrameworkCore; // Agrega esta directiva using al inicio del archivo
 
 var builder = WebApplication.CreateBuilder(args);
 
+var contextoElegido = builder.Configuration.GetValue<string>("Contexto");
 
+builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
-// Configuración de cadena de conexión
-builder.Services.AddDbContext<SqlServerContext>((sp, options) =>
+if (contextoElegido == "SqlServer")
 {
-    var configuration = sp.GetRequiredService<IConfiguration>();
-    var connectionString = configuration.GetConnectionString("DefaultConnection");
+    // Configuración de cadena de conexión
+    builder.Services.AddDbContext<SqlServerContext>((sp, options) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-    // Registrar el interceptor para la asignación automática de TenantId
-    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
-    options.UseSqlServer(connectionString);
-    options.AddInterceptors(interceptor);
-});
+        // Registrar el interceptor para la asignación automática de TenantId
+        var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+        options.UseSqlServer(connectionString);
+        options.AddInterceptors(interceptor);
+    });
 
-// Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+    // Registrar repositorios y unidad de trabajo
+    builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+    builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 
-// Registrar el interceptor como scoped (depende de ITenantProvider)
-builder.Services.AddScoped<TenantSaveChangesInterceptor>();
+    
 
-// Registrar repositorios y unidad de trabajo
-builder.Services.AddScoped<IUnitOfWork<SqlServerContext>, UnitOfWork<SqlServerContext>>();
-builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+
+    // Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
+    builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
+    // Registrar el interceptor como scoped (depende de ITenantProvider)
+    builder.Services.AddScoped<TenantSaveChangesInterceptor>();
+
+   
+}
 
 // Registrar servicios y componentes de Blazor
 builder.Services.AddRazorPages();

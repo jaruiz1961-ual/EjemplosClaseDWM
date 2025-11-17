@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase
+namespace DataBase.Genericos
 {
     public class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity, TContext>
     where TEntity : class
