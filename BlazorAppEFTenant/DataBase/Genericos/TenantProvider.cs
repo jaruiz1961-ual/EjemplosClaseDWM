@@ -6,25 +6,17 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
+
     public class TenantProvider : ITenantProvider
     {
-        private int? _currentTenantId;
+        private int _tenantId;
+        public int CurrentTenantId => _tenantId;
+        public event Action OnTenantChanged;
 
-        public int CurrentTenantId
+        public void SetTenant(int tenantId)
         {
-            get
-            {
-                if (_currentTenantId == null )
-                    throw new InvalidOperationException("El TenantId no ha sido asignado.");
-                return _currentTenantId.Value;
-            }
-        }
-
-        public void SetTenant(int? tenantId)
-        {
-            if (tenantId == null)
-                throw new ArgumentException("TenantId no puede ser vacío.");
-            _currentTenantId = tenantId;
+            _tenantId = tenantId;
+            OnTenantChanged?.Invoke();
         }
     }
 

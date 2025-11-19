@@ -9,7 +9,7 @@ IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettin
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 // Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
 
-builder.Services.AddScoped<ITenantProvider>(sp =>
+builder.Services.AddTransient<ITenantProvider>(sp =>
 {
     var provider = new TenantProvider();
     provider.SetTenant(1);
@@ -23,6 +23,9 @@ builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
 builder.Services.AddSingleton(provider);
 
+builder.Services.AddDbContext<SqlServerContext>(ServiceLifetime.Transient);
+
+
 if (provider == "SqlServer")
 {
     // Configuración de cadena de conexión
@@ -35,9 +38,10 @@ if (provider == "SqlServer")
         var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
         options.UseSqlServer(connectionString);
         options.AddInterceptors(interceptor);
-    });
 
-   
+    },
+    ServiceLifetime.Transient);
+
 }
 
 // Registrar repositorios y unidad de trabajo
