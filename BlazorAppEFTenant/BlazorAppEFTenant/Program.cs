@@ -8,7 +8,14 @@ IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettin
 
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 // Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
+builder.Services.AddScoped<ITenantProvider>(sp =>
+{
+    var provider = new TenantProvider();
+    provider.SetTenant(1);
+    return provider;
+});
+
 
 // Registrar el interceptor como scoped (depende de ITenantProvider)
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();

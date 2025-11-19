@@ -11,31 +11,33 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
 
-    public class SqlServerContextFactory : IDesignTimeDbContextFactory<SqlServerContext>
-    {
-        public SqlServerContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<SqlServerContext>();
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva2; AttachDbFilename=c:\temp\Nueva2.db ;Trusted_Connection=True;MultipleActiveResultSets=true");
-            return new SqlServerContext(optionsBuilder.Options);
-        }
-    }
+    //public class SqlServerContextFactory : IDesignTimeDbContextFactory<SqlServerContext>
+    //{
+    //    public SqlServerContext CreateDbContext(string[] args)
+    //    {
+    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerContext>();
+    //        optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva2; AttachDbFilename=c:\temp\Nueva2.db ;Trusted_Connection=True;MultipleActiveResultSets=true");
+    //        return new SqlServerContext(optionsBuilder.Options);
+    //    }
+    //}
 
     public class SqlServerContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
-        public int CurrentTenantId;
+        public int CurrentTenantId { get; set; }
 
-        public SqlServerContext(DbContextOptions<SqlServerContext> options)
-            : base(options)
-        {
+        //public SqlServerContext(DbContextOptions<SqlServerContext> options)
+        //    : base(options)
+        //{
 
-        }
+        //}
 
         public SqlServerContext(DbContextOptions<SqlServerContext> options, TenantSaveChangesInterceptor tenantInterceptor)
             : base(options)
         {
             _tenantInterceptor = tenantInterceptor;
+            CurrentTenantId = _tenantInterceptor.TenantProvider.CurrentTenantId;
+          
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -66,7 +68,7 @@ namespace DataBase.Genericos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         { 
             base.OnModelCreating(modelBuilder);
-            ModelCreatingTenant(modelBuilder);
+            
             //modelBuilder.Entity<Usuario>()
             //   .HasQueryFilter(u => u.TenantId == 0 || ( u.TenantId == CurrentTenantId));
 
@@ -82,7 +84,7 @@ namespace DataBase.Genericos
                 new Usuario { Id = 3, UserName = "Usuario3", NivelAcceso = 1, Codigo = "0003", Password = "abc 33", TenantId = 0 }
             );
 
-
+            ModelCreatingTenant(modelBuilder);
         }
     }
 
