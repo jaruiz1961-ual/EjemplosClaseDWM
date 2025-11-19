@@ -9,7 +9,10 @@ namespace DataBase.Genericos
     public interface ITenantProvider
     {
         int CurrentTenantId { get; }
-        void SetTenant(int? tenantId);
+        void SetTenant(int tenantId);
+        event Action OnTenantChanged;
     }
+
+
 
 }
