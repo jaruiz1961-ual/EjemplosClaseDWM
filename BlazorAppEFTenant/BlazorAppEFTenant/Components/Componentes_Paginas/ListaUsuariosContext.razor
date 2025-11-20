@@ -2,9 +2,9 @@
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using Microsoft.EntityFrameworkCore
-@inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject IMyDbContextFactory Factory
 @inject string Contexto
-@inject ITenantProvider tenant
+@inject ITenantServices Tenant
 
 <h3>Listado de usuarios (Genérico)</h3>
 
@@ -42,13 +42,13 @@ else
 @code 
 {
     private List<Usuario>? usuarios;
-    private IUnitOfWork<DbContext> uow;
+    private DbContext? context;
 
     protected override async Task OnInitializedAsync()
     {
-        tenant.SetTenant(2);
-        uow = UnitOfWorkFactory.Create(Contexto);
-
+        Tenant.SetTenant(2);
+        context = Factory.CreateDbContext(Contexto,Tenant);
+        var uow = new DataBase.Genericos.UnitOfWork<DbContext>(context);
         var usuarioRepo = uow.GetRepository<Usuario>();
         usuarios = (await usuarioRepo.GetAllAsync()).ToList();
     }

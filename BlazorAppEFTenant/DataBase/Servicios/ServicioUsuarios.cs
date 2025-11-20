@@ -12,12 +12,12 @@ namespace DataBase.Servicios
     public class ServicioUsuarios <TContext> where TContext : DbContext
     {
         private readonly IUnitOfWork<TContext> _unitOfWork;
-        private readonly ITenantProvider _tenantProvider;
+        private readonly ITenantServices _tenantService;
 
-        public ServicioUsuarios(IUnitOfWork<TContext> unitOfWork, ITenantProvider tenantProvider)
+        public ServicioUsuarios(IUnitOfWork<TContext> unitOfWork, ITenantServices tenantProvider)
         {
             _unitOfWork = unitOfWork;
-            _tenantProvider = tenantProvider;
+            _tenantService = tenantProvider;
         }
 
         public async Task<List<Usuario>> GetAllAsync()
@@ -26,12 +26,12 @@ namespace DataBase.Servicios
             var usuarios = await repo.GetAllAsync();
             // No es necesario filtrar manualmente por TenantId si tienes filtros globales en el DbContext,
             // pero puedes hacerlo aquí adicionalmente si lo deseas:
-            return usuarios.Where(u => u.TenantId == _tenantProvider.CurrentTenantId).ToList();
+            return usuarios.Where(u => u.TenantId == _tenantService.CurrentTenantId).ToList();
         }
         public async Task<Usuario?> GetFirstAsync()
         {
             var result = _unitOfWork.Context.Set<Usuario>()
-                .Where(u => u.TenantId == _tenantProvider.CurrentTenantId)
+                .Where(u => u.TenantId == _tenantService.CurrentTenantId)
                 .Take(1);
 
             return await result.FirstOrDefaultAsync();
@@ -42,7 +42,7 @@ namespace DataBase.Servicios
             var repo = _unitOfWork.GetRepository<Usuario>();
             var user = await repo.GetByIdAsync(id);
             // Validación adicional opcional de tenant
-            if (user != null && user.TenantId == _tenantProvider.CurrentTenantId)
+            if (user != null && user.TenantId == _tenantService.CurrentTenantId)
                 return user;
             return null;
         }
@@ -50,7 +50,7 @@ namespace DataBase.Servicios
         public async Task AddAsync(Usuario usuario)
         {
             // Asignar TenantId antes de guardar para seguridad extra
-            usuario.TenantId = _tenantProvider.CurrentTenantId;
+            usuario.TenantId = _tenantService.CurrentTenantId;
             var repo = _unitOfWork.GetRepository<Usuario>();
             await repo.AddAsync(usuario);
             await _unitOfWork.SaveChangesAsync();
@@ -59,7 +59,7 @@ namespace DataBase.Servicios
         public async Task UpdateAsync(Usuario usuario)
         {
             // Reforzar seguridad multi-tenant al actualizar
-            if (usuario.TenantId != _tenantProvider.CurrentTenantId)
+            if (usuario.TenantId != _tenantService.CurrentTenantId)
                 throw new UnauthorizedAccessException("No se puede editar un usuario de otro tenant.");
             var repo = _unitOfWork.GetRepository<Usuario>();
             repo.Update(usuario);
@@ -70,7 +70,7 @@ namespace DataBase.Servicios
         {
             var repo = _unitOfWork.GetRepository<Usuario>();
             var user = await repo.GetByIdAsync(id);
-            if (user != null && user.TenantId == _tenantProvider.CurrentTenantId)
+            if (user != null && user.TenantId == _tenantService.CurrentTenantId)
             {
                 repo.Remove(user);
                 await _unitOfWork.SaveChangesAsync();
