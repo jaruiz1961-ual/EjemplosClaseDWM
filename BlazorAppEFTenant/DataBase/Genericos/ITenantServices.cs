@@ -11,6 +11,7 @@ namespace DataBase.Genericos
         int CurrentTenantId { get; }
         void SetTenant(int tenantId);
         event Action OnTenantChanged;
+        int[] GetTenants();
     }
 
 

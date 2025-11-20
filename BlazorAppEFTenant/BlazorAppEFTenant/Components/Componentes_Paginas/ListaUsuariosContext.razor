@@ -6,7 +6,7 @@
 @inject string Contexto
 @inject ITenantServices Tenant
 
-<h3>Listado de usuarios (Genérico)</h3>
+<h3>Listado de usuarios (Genérico) @Tenant.CurrentTenantId</h3>
 
 @if (usuarios is null)
 {
@@ -45,8 +45,7 @@ else
     private DbContext? context;
 
     protected override async Task OnInitializedAsync()
-    {
-        Tenant.SetTenant(2);
+    {     
         context = Factory.CreateDbContext(Contexto,Tenant);
         var uow = new DataBase.Genericos.UnitOfWork<DbContext>(context);
         var usuarioRepo = uow.GetRepository<Usuario>();

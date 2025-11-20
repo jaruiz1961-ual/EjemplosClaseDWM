@@ -13,6 +13,11 @@ namespace DataBase.Genericos
         public int CurrentTenantId => _tenantId;
         public event Action OnTenantChanged;
 
+        public int[] GetTenants() => new[]
+               {
+            0,1,2
+        };
+
         public void SetTenant(int tenantId)
         {
             _tenantId = tenantId;

@@ -3,6 +3,10 @@ using DataBase.Genericos;
 using Microsoft.EntityFrameworkCore; // Agrega esta directiva using al inicio del archivo
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+    
+
 
 IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 
