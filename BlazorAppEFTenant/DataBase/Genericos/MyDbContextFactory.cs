@@ -22,7 +22,7 @@ namespace DataBase.Genericos
         {
             switch (key)
             {
-                case "SqlServer":
+                case "SqlServerContext":
                     var ctx = _provider.GetRequiredService<IDbContextFactory<SqlServerContext>>().CreateDbContext();
                     ctx.CurrentTenantId = Tenant.CurrentTenantId;
                     return ctx;
