@@ -1,87 +1,12 @@
 ﻿@page "/ListaUsuarios"
-@rendermode InteractiveServer
-
 @using DataBase.Genericos
 @using DataBase.Modelo
-@using Microsoft.EntityFrameworkCore
-@inject IMyDbContextFactory Factory
-@inject ITenantServices TenantService
-
+@inject IUnitOfWork<SqlServerContext> UnitOfWork
+@using BlazorAppEFTenant.Components.Componentes_Paginas
 
 <h3>Listado de usuarios</h3>
-<p>
-    Choose your tenant:
-    <select @onchange="OnTenantChanged">
-        @foreach (var tenant in TenantService.GetTenants())
-        {
-            <option value="@tenant" selected="@(tenant == _tenant)">@tenant</option>
-        }
-    </select>
-</p>
-<h3>Listado de usuarios (Genérico) @TenantService.CurrentTenantId</h3>
-
-@if (usuarios is null)
-{
-    <p><em>Cargando...</em></p>
-}
-else if (!usuarios.Any())
-{
-    <p>No hay usuarios registrados para este tenant.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>TenantId</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var usuario in usuarios)
-            {
-                <tr>
-                    <td>@usuario.Id</td>
-                    <td>@usuario.UserName</td>
-                    <td>@usuario.TenantId</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
-
+<ListaUsuariosContext TContext="SqlServerContext"/>
 @code {
-
-    private int? _tenant = null!;
-    List<Usuario> usuarios;
-    string Contexto = "SqlServerContext";
-    DbContext dbContext;
-
-    protected override async Task OnInitializedAsync()
-    {       
-        await base.OnInitializedAsync();
-        TenantService.OnTenantChanged += async () =>
-       {
-           await RefreshContactsAsync();
-           StateHasChanged();
-       };
-        await RefreshContactsAsync();
-    }
-
-    private async Task RefreshContactsAsync()
-    {
-        
-        dbContext = Factory.CreateDbContext(Contexto, TenantService);
-        var uow = new DataBase.Genericos.UnitOfWork<DbContext>(dbContext);
-        var usuarioRepo = uow.GetRepository<Usuario>();
-        usuarios = (await usuarioRepo.GetAllAsync()).ToList();
-    }
-    private void OnTenantChanged(ChangeEventArgs e)
-    {
-        var _t = int.Parse((e.Value as string) ?? "0");
-        TenantService.SetTenant(_t);
-    }
-
+    private List<Usuario>? usuarios;
 
 }

@@ -32,12 +32,11 @@ namespace DataBase.Genericos
 
         //}
 
-        public SqlServerContext(DbContextOptions<SqlServerContext> options,
-            ITenantServices tenantService,TenantSaveChangesInterceptor tenantInterceptor)
+        public SqlServerContext(DbContextOptions<SqlServerContext> options, TenantSaveChangesInterceptor tenantInterceptor)
             : base(options)
         {
             _tenantInterceptor = tenantInterceptor;
-            CurrentTenantId = tenantService.CurrentTenantId;
+            CurrentTenantId = _tenantInterceptor.TenantProvider.CurrentTenantId;
           
         }
 
