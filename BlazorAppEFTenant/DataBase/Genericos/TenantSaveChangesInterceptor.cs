@@ -10,11 +10,11 @@ namespace DataBase.Genericos
 {
     public class TenantSaveChangesInterceptor : SaveChangesInterceptor
     {
-        public ITenantProvider TenantProvider { get; set; }
+        public ITenantServices TenantService { get; set; }
 
-        public TenantSaveChangesInterceptor(ITenantProvider tenantProvider)
+        public TenantSaveChangesInterceptor(ITenantServices tenantService)
         {
-            TenantProvider = tenantProvider;
+            TenantService = tenantService;
         }
 
         public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
@@ -35,7 +35,7 @@ namespace DataBase.Genericos
         private void AssignTenantId(DbContext? context)
         {
             if (context == null) return;
-            var tenantId = TenantProvider.CurrentTenantId;
+            var tenantId = TenantService.CurrentTenantId;
 
             foreach (var entry in context.ChangeTracker.Entries<ITenantEntity>())
             {
