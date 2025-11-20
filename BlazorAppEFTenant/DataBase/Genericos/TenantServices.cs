@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
 
-    public class TenantService : ITenantServices
+    public class TenantProvider : ITenantProvider
     {
         private int _tenantId;
         public int CurrentTenantId => _tenantId;

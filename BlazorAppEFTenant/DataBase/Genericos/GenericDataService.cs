@@ -12,12 +12,12 @@ namespace DataBase.Genericos
     where TContext : DbContext
     {
         private readonly IUnitOfWork<TContext> _unitOfWork;
-        private readonly ITenantServices _tenantService;
+        private readonly ITenantProvider _tenantProvider;
 
-        public GenericDataService(IUnitOfWork<TContext> unitOfWork, ITenantServices tenantProvider)
+        public GenericDataService(IUnitOfWork<TContext> unitOfWork, ITenantProvider tenantProvider)
         {
             _unitOfWork = unitOfWork;
-            _tenantService = tenantProvider;
+            _tenantProvider = tenantProvider;
         }
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
@@ -36,7 +36,7 @@ namespace DataBase.Genericos
         {
             if (entity is ITenantEntity tenantEntity)
             {
-                tenantEntity.TenantId = _tenantService.CurrentTenantId;
+                tenantEntity.TenantId = _tenantProvider.CurrentTenantId;
             }
             var repo = _unitOfWork.GetRepository<TEntity>();
             await repo.AddAsync(entity);

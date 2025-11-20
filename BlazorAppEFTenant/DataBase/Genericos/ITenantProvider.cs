@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public interface ITenantServices
+    public interface ITenantProvider
     {
         int CurrentTenantId { get; }
         void SetTenant(int tenantId);

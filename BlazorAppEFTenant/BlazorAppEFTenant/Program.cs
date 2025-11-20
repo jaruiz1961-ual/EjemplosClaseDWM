@@ -13,13 +13,13 @@ IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettin
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 // Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
 
-builder.Services.AddTransient<ITenantServices>(sp =>
+builder.Services.AddTransient<ITenantProvider>(sp =>
 {
-    var provider = new TenantService();
+    var provider = new TenantProvider();
     provider.SetTenant(1);
     return provider;
 });
-builder.Services.AddScoped<IMyDbContextFactory, MyDbContextFactory>();
+
 
 // Registrar el interceptor como scoped (depende de ITenantProvider)
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();
@@ -30,12 +30,10 @@ builder.Services.AddSingleton(provider);
 builder.Services.AddDbContext<SqlServerContext>(ServiceLifetime.Transient);
 
 
-
-
 if (provider == "SqlServer")
 {
-
-    builder.Services.AddDbContextFactory<SqlServerContext>((sp, options) =>
+    // Configuración de cadena de conexión
+    builder.Services.AddDbContext<SqlServerContext>((sp, options) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
         var connectionString = configuration.GetConnectionString("SqlDbContext");
@@ -46,21 +44,7 @@ if (provider == "SqlServer")
         options.AddInterceptors(interceptor);
 
     },
-    ServiceLifetime.Scoped);
-
-    //// Configuración de cadena de conexión
-    //builder.Services.AddDbContext<SqlServerContext>((sp, options) =>
-    //{
-    //    var configuration = sp.GetRequiredService<IConfiguration>();
-    //    var connectionString = configuration.GetConnectionString("SqlDbContext");
-
-    //    // Registrar el interceptor para la asignación automática de TenantId
-    //    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
-    //    options.UseSqlServer(connectionString);
-    //    options.AddInterceptors(interceptor);
-
-    //},
-    //ServiceLifetime.Transient);
+    ServiceLifetime.Transient);
 
 }
 
