@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class Entidad : ITenantEntity, IEntity
+    public interface IEntity
     {
-        public int Id { get; set; }
-        public int? TenantId { get; set; }
+        int Id { get; set; }
     }
 
 }

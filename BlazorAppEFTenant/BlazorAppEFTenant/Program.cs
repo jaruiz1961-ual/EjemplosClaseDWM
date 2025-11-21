@@ -19,12 +19,14 @@ builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericReposito
 
 
 
-builder.Services.AddTransient<ITenantProvider>(sp =>
-{
-    var provider = new TenantProvider();
-    provider.SetTenant(2);
-    return provider;
-});
+//builder.Services.AddTransient<ITenantProvider>(sp =>
+//{
+//    var provider = new TenantProvider();
+//    provider.SetTenant(1);
+//    return provider;
+//});
+
+builder.Services.AddScoped<ITenantProvider, TenantProvider>();
 
 
 // Registrar el interceptor como scoped (depende de ITenantProvider)
