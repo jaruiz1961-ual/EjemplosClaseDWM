@@ -10,13 +10,19 @@ builder.Services.AddRazorComponents()
 
 IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 
+
+
+builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
-// Registrar el TenantProvider (puede ser Scoped, depende de cómo lo resuelvas en cada request o session)
+// Registrar repositorios y unidad de trabajo
+builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
+
+
 
 builder.Services.AddTransient<ITenantProvider>(sp =>
 {
     var provider = new TenantProvider();
-    provider.SetTenant(1);
+    provider.SetTenant(2);
     return provider;
 });
 
@@ -27,13 +33,13 @@ builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
 builder.Services.AddSingleton(provider);
 
-builder.Services.AddDbContext<SqlServerContext>(ServiceLifetime.Transient);
+builder.Services.AddDbContext<SqlDbContext>(ServiceLifetime.Scoped);
 
 
 if (provider == "SqlServer")
 {
     // Configuración de cadena de conexión
-    builder.Services.AddDbContext<SqlServerContext>((sp, options) =>
+    builder.Services.AddDbContextFactory<SqlDbContext>((sp, options) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
         var connectionString = configuration.GetConnectionString("SqlDbContext");
@@ -48,9 +54,7 @@ if (provider == "SqlServer")
 
 }
 
-// Registrar repositorios y unidad de trabajo
-builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
-builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+
 
 // Registrar servicios y componentes de Blazor
 builder.Services.AddRazorPages();
@@ -83,6 +87,10 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+using var scope = app.Services.CreateScope();
+var ctx = scope.ServiceProvider.GetRequiredService<SqlDbContext>(); // o SqlDbContext real
+bool ok = await ctx.Database.CanConnectAsync();
+Console.WriteLine("CanConnect = " + ok);
 
 
 app.Run();

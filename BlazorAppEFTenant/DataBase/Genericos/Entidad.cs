@@ -9,7 +9,7 @@ namespace DataBase.Genericos
     public class Entidad : ITenantEntity
     {
         public int Id { get; set; }
-        public int TenantId { get; set; }
+        public int? TenantId { get; set; }
     }
 
 }

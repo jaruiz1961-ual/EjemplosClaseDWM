@@ -8,36 +8,41 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
     public class UnitOfWork<TContext> : IUnitOfWork<TContext>
-    where TContext : DbContext
+    where TContext : DbContext,ITenantEntity
     {
-        public TContext Context { get; }
-        TContext IUnitOfWork<TContext>.Context { get => Context; set => throw new NotImplementedException(); }
-
         private readonly Dictionary<Type, object> _repositories = new();
 
-        public UnitOfWork(TContext context)
+        public TContext Context { get; }
+        DbContext IUnitOfWork.Context => Context;
+
+        public UnitOfWork(TContext context, ITenantProvider tenant)
         {
             Context = context;
+            context.TenantId = tenant.CurrentTenantId;
         }
 
-        public IGenericRepository<TEntity, TContext> GetRepository<TEntity>() where TEntity : class
+        public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
+            where TEntity : class
         {
             var type = typeof(TEntity);
-            if (!_repositories.ContainsKey(type))
+
+            if (!_repositories.TryGetValue(type, out var repo))
             {
-                var repo = new GenericRepository<TEntity, TContext>(Context);
+                repo = new GenericRepository<TEntity, TContext>(Context);
                 _repositories[type] = repo;
             }
-            return (IGenericRepository<TEntity, TContext>)_repositories[type];
+
+            return (IGenericRepository<TEntity, TContext>)repo;
         }
 
-        public int SaveChanges() => Context.SaveChanges();
+        IGenericRepository<TEntity> IUnitOfWork.GetRepository<TEntity>()
+            where TEntity : class
+            => GetRepository<TEntity>();   // aquí ya compila, porque el return es IGenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
 
-        public async Task<int> SaveChangesAsync() =>
-            await Context.SaveChangesAsync();
+        public Task<int> SaveChangesAsync() => Context.SaveChangesAsync();
 
         public void Dispose() => Context.Dispose();
-
-
     }
+
+
 }

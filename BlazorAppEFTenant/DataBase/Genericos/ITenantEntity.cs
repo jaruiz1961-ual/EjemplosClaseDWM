@@ -8,7 +8,7 @@ namespace DataBase.Genericos
 {
     public interface ITenantEntity
     {
-        int TenantId { get; set; }
+        int? TenantId { get; set; }
     }
 
 }

@@ -1,11 +1,12 @@
 ﻿@page "/ListaUsuarios"
 @using DataBase.Genericos
 @using DataBase.Modelo
-@inject IUnitOfWork<SqlServerContext> UnitOfWork
+
 @using BlazorAppEFTenant.Components.Componentes_Paginas
+@using Microsoft.EntityFrameworkCore
 
 <h3>Listado de usuarios</h3>
-<ListaUsuariosContext TContext="SqlServerContext"/>
+<ListaUsuariosContext TContext="SqlDbContext"/>
 @code {
     private List<Usuario>? usuarios;
 
