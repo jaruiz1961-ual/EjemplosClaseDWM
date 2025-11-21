@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\DataBase\DataBase.csproj" />
-    <ProjectReference Include="..\NewTenantApp.Client\NewTenantApp.Client.csproj" />
+    <ProjectReference Include="..\NewTenantApp.Client\BlazorAppEFTenant.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>
