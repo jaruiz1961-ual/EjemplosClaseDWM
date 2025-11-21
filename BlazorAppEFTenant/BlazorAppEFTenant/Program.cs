@@ -87,10 +87,6 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-using var scope = app.Services.CreateScope();
-var ctx = scope.ServiceProvider.GetRequiredService<SqlDbContext>(); // o SqlDbContext real
-bool ok = await ctx.Database.CanConnectAsync();
-Console.WriteLine("CanConnect = " + ok);
 
 
 app.Run();
