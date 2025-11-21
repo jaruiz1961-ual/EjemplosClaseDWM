@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using NewTenantApp.Client.Pages;
 using NewTenantApp.Components;
+using System.Runtime.CompilerServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,14 @@ IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettin
 string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
 
 builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
+builder.Services.AddScoped<ITenantProvider>(sp =>
+{
+    // aquí decides cómo construirlo: qué ctor, qué valores por defecto, etc.
+    var tenant = new TenantProvider();
+    tenant.SetTenant(1); // Establece el TenantId por defecto o según la lógica que necesites
+    return tenant;
+});
 
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 
