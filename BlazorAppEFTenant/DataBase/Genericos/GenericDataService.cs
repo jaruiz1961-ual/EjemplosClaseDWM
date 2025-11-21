@@ -29,7 +29,7 @@ namespace DataBase.Servicios
         }
         public async Task<T?> GetByIdAsync(int id)
         {
-            using var uow = _unitOfWorkFactory.Create(_contextKey);
+             var uow = _unitOfWorkFactory.Create(_contextKey);
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
             if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)
@@ -39,7 +39,7 @@ namespace DataBase.Servicios
         public async Task AddAsync(T data)
         {
             data.TenantId = _tenantProvider.CurrentTenantId;
-            using var uow = _unitOfWorkFactory.Create(_contextKey);
+             var uow = _unitOfWorkFactory.Create(_contextKey);
             var repo = uow.GetRepository<T>();
             await repo.AddAsync(data);
             await uow.SaveChangesAsync();
@@ -48,14 +48,14 @@ namespace DataBase.Servicios
         {
             if (data.TenantId != _tenantProvider.CurrentTenantId)
                 throw new UnauthorizedAccessException("No se puede editar una entidad de otro tenant.");
-            using var uow = _unitOfWorkFactory.Create(_contextKey);
+             var uow = _unitOfWorkFactory.Create(_contextKey);
             var repo = uow.GetRepository<T>();
             repo.Update(data);
             await uow.SaveChangesAsync();
         }
         public async Task DeleteAsync(int id)
         {
-            using var uow = _unitOfWorkFactory.Create(_contextKey);
+             var uow = _unitOfWorkFactory.Create(_contextKey);
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
             if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)
