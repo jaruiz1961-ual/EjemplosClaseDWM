@@ -1,0 +1,112 @@
+﻿@page "/ListaUsuarios"
+@rendermode InteractiveServer
+@using DataBase.Genericos
+@using DataBase.Modelo
+@using DataBase.Servicios
+@inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject ITenantProvider Tenant
+
+
+<h3>Listado de usuarios (Genérico)</h3>
+
+ <p>
+    Choose your tenant:
+    <select @onchange="OnTenantChanged">
+        @foreach (var tenant in Tenant.GetTenants())
+        {
+            <option value="@tenant" selected="@(tenant == TenantId)">@tenant</option>
+        }
+    </select>
+</p> 
+@if (Tenant.CurrentTenantId == null)
+{
+    <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
+}
+else
+{
+
+    <p>Usuarios del tenant <strong>@Tenant.CurrentTenantId</strong>:</p>
+
+@if (usuarios is null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No hay usuarios registrados .....</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>TenantId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in usuarios)
+            {
+                <tr>
+                    <td>@usuario.Id</td>
+                    <td>@usuario.UserName</td>
+                    <td>@usuario.TenantId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+}
+
+
+@code {
+    public List<Usuario>? usuarios { get; set; } = null;
+    int TenantId;
+    string Contexto = "SqlServer";
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        TenantId = Tenant.CurrentTenantId ?? 0;
+        Tenant.OnTenantChanged += async () =>
+       {
+           await CargarAsync();
+           StateHasChanged();
+       };
+        await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        try
+        {
+            var user = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
+            var list = await user.GetAllAsync();
+            usuarios = list.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
+    }
+    private async void OnTenantChanged(ChangeEventArgs e)
+    {
+        var _t = int.Parse((e.Value as string) ?? "0");
+        Tenant.SetTenant(_t);
+    
+    }
+    private void Dispose()
+    {
+        Tenant.OnTenantChanged -= async () =>
+       {
+            await CargarAsync();
+           StateHasChanged();
+       };
+    }
+}
+
