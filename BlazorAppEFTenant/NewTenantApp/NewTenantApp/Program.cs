@@ -1,8 +1,8 @@
 using DataBase.Genericos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
-using NewTenantApp.Client.Pages;
-using NewTenantApp.Components;
+using BlazorAppEFTenant.Client.Pages;
+using BlazorAppEFTenant.Components;
 using System.Runtime.CompilerServices;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -79,6 +79,6 @@ app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(typeof(NewTenantApp.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(BlazorAppEFTenant.Client._Imports).Assembly);
 
 app.Run();

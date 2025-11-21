@@ -5,9 +5,9 @@ VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBase", "DataBase\DataBase.csproj", "{D554B588-52A6-4300-83DC-475E03E15563}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewTenantApp", "NewTenantApp\NewTenantApp\NewTenantApp.csproj", "{D2725D00-F6D5-40C5-BCDC-53112D746005}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAppEFTenant", "NewTenantApp\NewTenantApp\BlazorAppEFTenant.csproj", "{D2725D00-F6D5-40C5-BCDC-53112D746005}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewTenantApp.Client", "NewTenantApp\NewTenantApp.Client\NewTenantApp.Client.csproj", "{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAppEFTenant.Client", "NewTenantApp\NewTenantApp.Client\BlazorAppEFTenant.Client.csproj", "{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
