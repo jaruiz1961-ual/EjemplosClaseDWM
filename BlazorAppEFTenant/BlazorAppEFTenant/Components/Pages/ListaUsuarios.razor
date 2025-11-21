@@ -1,13 +1,98 @@
 ﻿@page "/ListaUsuarios"
+@rendermode @(new Microsoft.AspNetCore.Components.Web.InteractiveServerRenderMode(prerender: true)) 
 @using DataBase.Genericos
 @using DataBase.Modelo
+@using DataBase.Servicios
+@* @inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject string Contexto
+@inject ITenantProvider Tenant *@
 
-@using BlazorAppEFTenant.Components.Componentes_Paginas
-@using Microsoft.EntityFrameworkCore
 
-<h3>Listado de usuarios</h3>
-<ListaUsuariosContext TContext="SqlDbContext"/>
-@code {
-    private List<Usuario>? usuarios;
+<h3>Listado de usuarios (Genérico)</h3>
 
+@* <p>
+    Choose your tenant:
+    <select @onchange="OnTenantChanged">
+        @foreach (var tenant in Tenant.GetTenants())
+        {
+            <option value="@tenant" selected="@(tenant == _tenant)">@tenant</option>
+        }
+    </select>
+</p> *@
+
+@if (usuarios is null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No hay usuarios registrados para este tenant.....</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>TenantId</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in usuarios)
+            {
+                <tr>
+                    <td>@usuario.Id</td>
+                    <td>@usuario.UserName</td>
+                    <td>@usuario.TenantId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code 
+{
+    public List<Usuario>? usuarios { get; set; }
+    private IUnitOfWork uow;
+    int _tenant = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        
+       //  Tenant.SetTenant(_tenant);
+       //  Tenant.OnTenantChanged += async () =>
+       // {
+       //      await CargarAsync();
+       //     StateHasChanged();
+       // };
+       //  await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        // try
+        // {
+            
+        //     uow = UnitOfWorkFactory.Create(Contexto); // devuelve IUnitOfWork
+        //     ServicioUsuarios user = new ServicioUsuarios(uow,Tenant);
+        //     var list = await user.GetAllAsync();
+        //     usuarios = list.ToList();
+        // }
+        // catch (Exception ex)
+        // {
+        //     Console.WriteLine("EX: " + ex.GetType().FullName);
+        //     Console.WriteLine(ex.ToString());
+        //     Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+        //     Console.WriteLine(ex.InnerException?.ToString());
+        //     throw;
+        // }
+    }
+    private async void OnTenantChanged(ChangeEventArgs e)
+    {
+        // var _t = int.Parse((e.Value as string) ?? "0");
+        // Tenant.SetTenant(_t);
+        // await CargarAsync();
+    }
 }

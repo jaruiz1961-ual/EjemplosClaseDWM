@@ -49,21 +49,25 @@ namespace DataBase.Genericos
         protected void ModelCreatingTenant(ModelBuilder modelBuilder)
         {
             var tenantEntityType = typeof(ITenantEntity);
+
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (tenantEntityType.IsAssignableFrom(entityType.ClrType))
                 {
-                    // Construir expresión para e => ((ITenantEntity)e).TenantId == CurrentTenantId
                     var parameter = Expression.Parameter(entityType.ClrType, "e");
                     var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
-                    var currentTenantId = Expression.Property(Expression.Constant(this), nameof(TenantId));
+
+                    // this.CurrentTenantId
+                    var currentTenantId = Expression.Property(
+                        Expression.Constant(this),
+                        nameof(TenantId));
+
                     var equals = Expression.Equal(property, currentTenantId);
                     var lambda = Expression.Lambda(equals, parameter);
 
                     modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
                 }
             }
-          
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
