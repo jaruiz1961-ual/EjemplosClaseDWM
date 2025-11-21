@@ -1,66 +1,62 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DataBase.Genericos;
+using DataBase.Modelo;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace DataBase.Servicios
 {
-    public class GenericDataService<TEntity, TContext>
-    where TEntity : class
-    where TContext : DbContext
+    public class GenericDataService<T> : IGenericDataService<T> where T : class, ITenantEntity, IEntity
     {
-        private readonly IUnitOfWork<TContext> _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ITenantProvider _tenantProvider;
-
-        public GenericDataService(IUnitOfWork<TContext> unitOfWork, ITenantProvider tenantProvider)
+        public GenericDataService(IUnitOfWork unitOfWork, ITenantProvider tenantProvider)
         {
             _unitOfWork = unitOfWork;
             _tenantProvider = tenantProvider;
         }
-
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public async Task<List<T>> GetAllAsync()
         {
-            var repo = _unitOfWork.GetRepository<TEntity>();
-            return await repo.GetAllAsync();
+            var repo = _unitOfWork.GetRepository<T>();
+            var allEntities = await repo.GetAllAsync();
+            return allEntities.Where(e => e.TenantId == _tenantProvider.CurrentTenantId).ToList();
         }
-
-        public async Task<TEntity?> GetByIdAsync(object id)
+        public async Task<T?> GetByIdAsync(int id)
         {
-            var repo = _unitOfWork.GetRepository<TEntity>();
-            return await repo.GetByIdAsync(id);
-        }
-
-        public async Task AddAsync(TEntity entity)
-        {
-            if (entity is ITenantEntity tenantEntity)
-            {
-                tenantEntity.TenantId = _tenantProvider.CurrentTenantId;
-            }
-            var repo = _unitOfWork.GetRepository<TEntity>();
-            await repo.AddAsync(entity);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task UpdateAsync(TEntity entity)
-        {
-            var repo = _unitOfWork.GetRepository<TEntity>();
-            repo.Update(entity);
-            await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task RemoveAsync(object id)
-        {
-            var repo = _unitOfWork.GetRepository<TEntity>();
+            var repo = _unitOfWork.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
-            if (entity != null)
+            if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)
+                return entity;
+            return null;
+        }
+        public async Task AddAsync(T data)
+        {
+            data.TenantId = _tenantProvider.CurrentTenantId;
+            var repo = _unitOfWork.GetRepository<T>();
+            await repo.AddAsync(data);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        public async Task UpdateAsync(T data)
+        {
+            if (data.TenantId != _tenantProvider.CurrentTenantId)
+                throw new UnauthorizedAccessException("No se puede editar una entidad de otro tenant.");
+            var repo = _unitOfWork.GetRepository<T>();
+            repo.Update(data);
+            await _unitOfWork.SaveChangesAsync();
+        }
+        public async Task DeleteAsync(int id)
+        {
+            var repo = _unitOfWork.GetRepository<T>();
+            var entity = await repo.GetByIdAsync(id);
+            if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)
             {
                 repo.Remove(entity);
                 await _unitOfWork.SaveChangesAsync();
             }
         }
     }
-
-
+    
 }

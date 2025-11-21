@@ -1,6 +1,7 @@
 ﻿@typeparam TContext
 @using DataBase.Genericos
 @using DataBase.Modelo
+@using DataBase.Servicios
 @using Microsoft.EntityFrameworkCore
 @inject IUnitOfWorkFactory UnitOfWorkFactory
 @inject string Contexto
@@ -47,12 +48,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        //   Tenant.SetTenant(2);
-        // //  uow = UnitOfWorkFactory.Create(Contexto);
-
-        //   var usuarioRepo = uow.GetRepository<Usuario>();
-        //  // usuarios = (await usuarioRepo.GetAllAsync()).ToList();
-        //   usuarios = await GetUsersAsync();
+        Tenant.SetTenant(2);
         await CargarAsync();
         StateHasChanged();
     }
@@ -61,10 +57,10 @@ else
     {
         try
         {
-            Tenant.SetTenant(2);
+            
             uow = UnitOfWorkFactory.Create(Contexto); // devuelve IUnitOfWork
-            var repo = uow.GetRepository<Usuario>();
-            var list = await repo.GetAllAsync();
+            ServicioUsuarios user = new ServicioUsuarios(uow,Tenant);
+            var list = await user.GetAllAsync();
             usuarios = list.ToList();
         }
         catch (Exception ex)
