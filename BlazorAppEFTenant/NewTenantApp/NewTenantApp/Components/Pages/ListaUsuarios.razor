@@ -7,9 +7,6 @@
 @inject ITenantProvider Tenant
 
 
-
-
-
 <h3>Listado de usuarios (Genérico)</h3>
 
  <p>
@@ -17,10 +14,18 @@
     <select @onchange="OnTenantChanged">
         @foreach (var tenant in Tenant.GetTenants())
         {
-            <option value="@tenant" selected="@(tenant == _tenant)">@tenant</option>
+            <option value="@tenant" selected="@(tenant == TenantId)">@tenant</option>
         }
     </select>
 </p> 
+@if (Tenant.CurrentTenantId == null)
+{
+    <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
+}
+else
+{
+
+    <p>Usuarios del tenant <strong>@Tenant.CurrentTenantId</strong>:</p>
 
 @if (usuarios is null)
 {
@@ -28,7 +33,7 @@
 }
 else if (!usuarios.Any())
 {
-    <p>No hay usuarios registrados para este tenant.....</p>
+    <p>No hay usuarios registrados .....</p>
 }
 else
 {
@@ -52,25 +57,24 @@ else
         </tbody>
     </table>
 }
+}
 
 
-@code 
-{
+@code {
     public List<Usuario>? usuarios { get; set; } = null;
- 
-    int _tenant = 0;
-    string Contexto="SqlServer";
+    int TenantId;
+    string Contexto = "SqlServer";
 
     protected override async Task OnInitializedAsync()
     {
-        
-        // Tenant.SetTenant(_tenant);
+
+        TenantId = Tenant.CurrentTenantId ?? 0;
         Tenant.OnTenantChanged += async () =>
        {
-            await CargarAsync();
+           await CargarAsync();
            StateHasChanged();
        };
-        // await CargarAsync();
+        await CargarAsync();
     }
 
     private async Task CargarAsync()
@@ -105,3 +109,4 @@ else
        };
     }
 }
+
