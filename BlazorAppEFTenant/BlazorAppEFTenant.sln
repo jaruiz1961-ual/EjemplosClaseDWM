@@ -7,6 +7,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataBase", "DataBase\DataBa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlazorAppEFTenant", "BlazorAppEFTenant\BlazorAppEFTenant.csproj", "{6DF0D992-0A72-CE35-F69D-D161183F4044}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewTenantApp", "NewTenantApp\NewTenantApp\NewTenantApp.csproj", "{D2725D00-F6D5-40C5-BCDC-53112D746005}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NewTenantApp.Client", "NewTenantApp\NewTenantApp.Client\NewTenantApp.Client.csproj", "{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{6DF0D992-0A72-CE35-F69D-D161183F4044}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6DF0D992-0A72-CE35-F69D-D161183F4044}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6DF0D992-0A72-CE35-F69D-D161183F4044}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2725D00-F6D5-40C5-BCDC-53112D746005}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2725D00-F6D5-40C5-BCDC-53112D746005}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2725D00-F6D5-40C5-BCDC-53112D746005}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2725D00-F6D5-40C5-BCDC-53112D746005}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9EA7BA70-F1DB-49D2-89C0-DCA240B9D07C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,14 +1,26 @@
-﻿@typeparam TContext
+﻿@page "/ListaUsuarios"
+@rendermode InteractiveServer
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
-@using Microsoft.EntityFrameworkCore
-@inject IUnitOfWorkFactory UnitOfWorkFactory
-@inject string Contexto
+@inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject ITenantProvider Tenant
 
 
+
+
+
 <h3>Listado de usuarios (Genérico)</h3>
+
+ <p>
+    Choose your tenant:
+    <select @onchange="OnTenantChanged">
+        @foreach (var tenant in Tenant.GetTenants())
+        {
+            <option value="@tenant" selected="@(tenant == _tenant)">@tenant</option>
+        }
+    </select>
+</p> 
 
 @if (usuarios is null)
 {
@@ -41,25 +53,31 @@ else
     </table>
 }
 
+
 @code 
 {
-    public List<Usuario>? usuarios { get; set; }
-    private IUnitOfWork uow;
+    public List<Usuario>? usuarios { get; set; } = null;
+ 
+    int _tenant = 0;
+    string Contexto="SqlServer";
 
     protected override async Task OnInitializedAsync()
     {
-        Tenant.SetTenant(2);
-        await CargarAsync();
-        StateHasChanged();
+        
+        // Tenant.SetTenant(_tenant);
+        Tenant.OnTenantChanged += async () =>
+       {
+            await CargarAsync();
+           StateHasChanged();
+       };
+        // await CargarAsync();
     }
 
     private async Task CargarAsync()
     {
         try
         {
-            
-           
-            ServicioUsuarios user = new ServicioUsuarios("SqlDbContext", UnitOfWorkFactory, Tenant);
+            var user = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();
         }
@@ -72,5 +90,18 @@ else
             throw;
         }
     }
+    private async void OnTenantChanged(ChangeEventArgs e)
+    {
+        var _t = int.Parse((e.Value as string) ?? "0");
+        Tenant.SetTenant(_t);
+    
+    }
+    private void Dispose()
+    {
+        Tenant.OnTenantChanged -= async () =>
+       {
+            await CargarAsync();
+           StateHasChanged();
+       };
+    }
 }
-

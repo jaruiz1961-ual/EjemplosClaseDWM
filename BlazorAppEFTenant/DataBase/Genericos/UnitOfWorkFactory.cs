@@ -21,14 +21,14 @@ namespace DataBase.Genericos
         {
             return contextoKey switch
             {
-                "SqlServer" => 
+                "SqlServer" =>
                     _provider.GetRequiredService<IUnitOfWork<SqlDbContext>>(),
                 _ => throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.")
 
             };
         }
 
-    
+
     }
 
 }

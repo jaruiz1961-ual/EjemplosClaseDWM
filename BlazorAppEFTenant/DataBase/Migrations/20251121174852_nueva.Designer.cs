@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataBase.Migrations
 {
     [DbContext(typeof(SqlDbContext))]
-    [Migration("20251121092905_nueva")]
+    [Migration("20251121174852_nueva")]
     partial class nueva
     {
         /// <inheritdoc />
