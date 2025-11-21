@@ -3,19 +3,16 @@ using DataBase.Genericos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace DataBase.Migrations
 {
-    [DbContext(typeof(SqlServerContext))]
-    [Migration("20251117202744_Inicial")]
-    partial class Inicial
+    [DbContext(typeof(SqlDbContext))]
+    partial class SqlDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,13 +40,13 @@ namespace DataBase.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TenantId")
+                    b.Property<int?>("TenantId")
                         .HasColumnType("int");
 
                     b.Property<string>("UserName")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("email")
                         .HasColumnType("nvarchar(max)");
@@ -65,7 +62,7 @@ namespace DataBase.Migrations
                             Codigo = "0001",
                             NivelAcceso = 1,
                             Password = "abc 11",
-                            TenantId = 1,
+                            TenantId = 0,
                             UserName = "Usuario1"
                         },
                         new
@@ -74,7 +71,7 @@ namespace DataBase.Migrations
                             Codigo = "0002",
                             NivelAcceso = 1,
                             Password = "abc 22",
-                            TenantId = 2,
+                            TenantId = 1,
                             UserName = "Usuario2"
                         },
                         new
@@ -83,7 +80,7 @@ namespace DataBase.Migrations
                             Codigo = "0003",
                             NivelAcceso = 1,
                             Password = "abc 33",
-                            TenantId = 0,
+                            TenantId = 2,
                             UserName = "Usuario3"
                         });
                 });

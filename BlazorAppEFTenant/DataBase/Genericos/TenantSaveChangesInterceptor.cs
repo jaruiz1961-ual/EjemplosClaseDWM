@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -39,7 +40,7 @@ namespace DataBase.Genericos
 
             foreach (var entry in context.ChangeTracker.Entries<ITenantEntity>())
             {
-                if (entry.State == EntityState.Added )
+                if (entry.State == EntityState.Added && tenantId != null)
                 {
                     entry.Entity.TenantId = tenantId;
                 }

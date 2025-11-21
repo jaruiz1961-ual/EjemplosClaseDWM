@@ -4,7 +4,8 @@
 @using Microsoft.EntityFrameworkCore
 @inject IUnitOfWorkFactory UnitOfWorkFactory
 @inject string Contexto
-@inject ITenantProvider tenant
+@inject ITenantProvider Tenant
+
 
 <h3>Listado de usuarios (Genérico)</h3>
 
@@ -14,7 +15,7 @@
 }
 else if (!usuarios.Any())
 {
-    <p>No hay usuarios registrados para este tenant.</p>
+    <p>No hay usuarios registrados para este tenant.....</p>
 }
 else
 {
@@ -41,16 +42,39 @@ else
 
 @code 
 {
-    private List<Usuario>? usuarios;
-    private IUnitOfWork<DbContext> uow;
+    public List<Usuario>? usuarios { get; set; }
+    private IUnitOfWork uow;
 
     protected override async Task OnInitializedAsync()
     {
-        tenant.SetTenant(2);
-        uow = UnitOfWorkFactory.Create(Contexto);
+        //   Tenant.SetTenant(2);
+        // //  uow = UnitOfWorkFactory.Create(Contexto);
 
-        var usuarioRepo = uow.GetRepository<Usuario>();
-        usuarios = (await usuarioRepo.GetAllAsync()).ToList();
+        //   var usuarioRepo = uow.GetRepository<Usuario>();
+        //  // usuarios = (await usuarioRepo.GetAllAsync()).ToList();
+        //   usuarios = await GetUsersAsync();
+        await CargarAsync();
+        StateHasChanged();
+    }
+
+    private async Task CargarAsync()
+    {
+        try
+        {
+            Tenant.SetTenant(2);
+            uow = UnitOfWorkFactory.Create(Contexto); // devuelve IUnitOfWork
+            var repo = uow.GetRepository<Usuario>();
+            var list = await repo.GetAllAsync();
+            usuarios = list.ToList();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
     }
 }
 

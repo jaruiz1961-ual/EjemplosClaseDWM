@@ -17,16 +17,18 @@ namespace DataBase.Genericos
             _provider = provider;
         }
 
-        public IUnitOfWork<DbContext> Create(string contextoKey)
+        public IUnitOfWork Create(string contextoKey)
         {
             return contextoKey switch
             {
-                "SqlServer" => new UnitOfWork<DbContext>(
-                    _provider.GetRequiredService<SqlServerContext>()),
+                "SqlServer" => 
+                    _provider.GetRequiredService<IUnitOfWork<SqlDbContext>>(),
                 _ => throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.")
 
             };
         }
+
+    
     }
 
 }

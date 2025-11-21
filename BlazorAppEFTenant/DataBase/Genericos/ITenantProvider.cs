@@ -8,8 +8,8 @@ namespace DataBase.Genericos
 {
     public interface ITenantProvider
     {
-        int CurrentTenantId { get; }
-        void SetTenant(int tenantId);
+        int? CurrentTenantId { get; }
+        void SetTenant(int? tenantId);
         event Action OnTenantChanged;
         int[] GetTenants();
     }
