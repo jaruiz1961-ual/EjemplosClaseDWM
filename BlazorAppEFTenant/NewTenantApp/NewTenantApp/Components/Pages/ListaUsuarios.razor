@@ -4,28 +4,22 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
-@inject ITenantProvider Tenant
+@inject ITenantProvider TenantProvider
+@inject NavigationManager nav
 
 
 <h3>Listado de usuarios (Genérico)</h3>
 
- <p>
-    Choose your tenant:
-    <select @onchange="OnTenantChanged">
-        @foreach (var tenant in Tenant.GetTenants())
-        {
-            <option value="@tenant" selected="@(tenant == TenantId)">@tenant</option>
-        }
-    </select>
-</p> 
-@if (Tenant.CurrentTenantId == null)
+
+
+@if (TenantProvider.CurrentTenantId == null)
 {
     <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
 }
 else
 {
 
-    <p>Usuarios del tenant <strong>@Tenant.CurrentTenantId</strong>:</p>
+    <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
 
 @if (usuarios is null)
 {
@@ -36,26 +30,36 @@ else if (!usuarios.Any())
     <p>No hay usuarios registrados .....</p>
 }
 else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>TenantId</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var usuario in usuarios)
-            {
+    {
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@usuario.Id</td>
-                    <td>@usuario.UserName</td>
-                    <td>@usuario.TenantId</td>
+                    <th>Id</th>
+                    <th>UserName</th>
+                    <th>Codigo</th>
+                    <th>Nivel</th>
+                    <th>Password</th>
+                    <th>Email</th>
+                    <th>Tenant</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var user in usuarios)
+                {
+                    <tr>
+                        <td>@user.Id</td>
+                        <td>@user.UserName</td>
+                        <td>@user.Codigo</td>
+                        <td>@user.NivelAcceso</td>
+                        <td>@user.Password</td>
+                        <td>@user.email</td>
+                        <td>@user.TenantId</td>
+                        <td><a href="DetalleUsuario/@user.Id"><i>Edit</i></a></td>
+                        <td><a href="DeteteUsuario/@user.Id"><i>Del</i></a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 }
 }
 
@@ -68,8 +72,8 @@ else
     protected override async Task OnInitializedAsync()
     {
 
-        TenantId = Tenant.CurrentTenantId ?? 0;
-        Tenant.OnTenantChanged += async () =>
+        TenantId = TenantProvider.CurrentTenantId ?? 0;
+        TenantProvider.OnTenantChanged += async () =>
        {
            await CargarAsync();
            StateHasChanged();
@@ -81,9 +85,12 @@ else
     {
         try
         {
-            var user = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
+            
+            var user = new ServicioUsuarios(Contexto, UnitOfWorkFactory, TenantProvider);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();
+            TenantId = TenantProvider.CurrentTenantId ?? 0;
+            
         }
         catch (Exception ex)
         {
@@ -94,15 +101,10 @@ else
             throw;
         }
     }
-    private async void OnTenantChanged(ChangeEventArgs e)
-    {
-        var _t = int.Parse((e.Value as string) ?? "0");
-        Tenant.SetTenant(_t);
-    
-    }
+
     private void Dispose()
     {
-        Tenant.OnTenantChanged -= async () =>
+        TenantProvider.OnTenantChanged -= async () =>
        {
             await CargarAsync();
            StateHasChanged();

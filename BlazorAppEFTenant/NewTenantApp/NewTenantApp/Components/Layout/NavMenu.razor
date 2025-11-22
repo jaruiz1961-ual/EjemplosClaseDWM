@@ -1,7 +1,20 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@rendermode InteractiveServer
+@using DataBase.Genericos
+@inject ITenantProvider Tenant
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">NewTenantApp</a>
     </div>
+    <p>
+        Choose your tenant:
+        <select @onchange="OnTenantChanged">
+            @foreach (var tenant in Tenant.GetTenants())
+            {
+                <option value="@tenant" selected="@(tenant == TenantId)">@tenant</option>
+            }
+        </select>
+    </p>
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
@@ -15,8 +28,8 @@
         </div>
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
+            <NavLink class="nav-link" href="DetalleUsuario">
+                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Añadir
             </NavLink>
         </div>
 
@@ -32,4 +45,20 @@
         </div>
     </nav>
 </div>
+@code{
+    int TenantId;
+    
+    private async Task OnTenantChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int newTenantId))
+        {
+            Tenant.SetTenant(newTenantId);
+        }
+    }
 
+
+    protected override async Task OnInitializedAsync()
+    {
+        TenantId = Tenant.CurrentTenantId ?? 0;
+    }
+    }
