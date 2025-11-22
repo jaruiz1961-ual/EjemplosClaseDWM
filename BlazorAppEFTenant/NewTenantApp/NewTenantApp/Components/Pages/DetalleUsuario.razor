@@ -5,6 +5,7 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject IContextKeyProvider Context
 @inject ITenantProvider Tenant
 @inject NavigationManager nav
 
@@ -89,6 +90,7 @@
     string Contexto = "SqlServer";
 
 
+
     bool displayValidationErrorMessages = false;
     bool displayUserAddedToDB = false;
 
@@ -96,7 +98,7 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        var servicioUsuario = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
+        var servicioUsuario = new ServicioUsuarios(Context, UnitOfWorkFactory, Tenant);
         if (Id != 0)
             servicioUsuario.UpdateAsync(NewUser);
         else
@@ -132,7 +134,7 @@
         {
             if (Id != 0)
             {
-                var servicioUsuario = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
+                var servicioUsuario = new ServicioUsuarios(Context, UnitOfWorkFactory, Tenant);
                 NewUser = await servicioUsuario.GetByIdAsync(Id);
             }
             else 

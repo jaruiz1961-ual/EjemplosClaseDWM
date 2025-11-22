@@ -5,6 +5,7 @@
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject ITenantProvider Tenant
+@inject IContextKeyProvider Context
 @inject NavigationManager nav
 
 
@@ -95,7 +96,7 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        var servicioUsuario = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
+        var servicioUsuario = new ServicioUsuarios(Context, UnitOfWorkFactory, Tenant);
         if (Id != 0)
             servicioUsuario.DeleteAsync(Id);
 
@@ -116,6 +117,7 @@
     {
 
         TenantId = Tenant.CurrentTenantId ?? 0;
+        Contexto = Context.CurrentContextKey ?? "SqlServer";
         Tenant.OnTenantChanged += async () =>
        {
            await CargarAsync();
@@ -130,7 +132,7 @@
         {
             if (Id != 0)
             {
-                var servicioUsuario = new ServicioUsuarios(Contexto, UnitOfWorkFactory, Tenant);
+                var servicioUsuario = new ServicioUsuarios(Context, UnitOfWorkFactory, Tenant);
                 NewUser = await servicioUsuario.GetByIdAsync(Id);
             }
             else 

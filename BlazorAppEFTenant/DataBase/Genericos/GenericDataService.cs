@@ -14,9 +14,9 @@ namespace DataBase.Servicios
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private readonly ITenantProvider _tenantProvider;
         private readonly string _contextKey;
-        public GenericDataService(string contextKey, IUnitOfWorkFactory uowFactory, ITenantProvider tenantProvider)
+        public GenericDataService(IContextKeyProvider contextKey, IUnitOfWorkFactory uowFactory, ITenantProvider tenantProvider)
         {
-            _contextKey = contextKey;
+            _contextKey = contextKey.CurrentContextKey;
             _tenantProvider = tenantProvider;
             _unitOfWorkFactory = uowFactory;
         }

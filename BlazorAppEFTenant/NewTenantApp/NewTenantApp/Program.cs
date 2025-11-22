@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using BlazorAppEFTenant.Client.Pages;
 using BlazorAppEFTenant.Components;
 using System.Runtime.CompilerServices;
+using DataBase.Contextos;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ builder.Services.AddRazorComponents()
 IConfiguration Configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").AddEnvironmentVariables().Build();
 string provider = Configuration.GetValue(typeof(string), "DataProvider").ToString();
 
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
+
 
 builder.Services.AddScoped<ITenantProvider>(sp =>
 {
@@ -25,15 +26,41 @@ builder.Services.AddScoped<ITenantProvider>(sp =>
     return tenant;
 });
 
+builder.Services.AddScoped<IContextKeyProvider>(sp =>
+{
+    // aquí decides cómo construirlo: qué ctor, qué valores por defecto, etc.
+    var context = new ContextKeyProvider();
+    context.SetContextKey("InMemory"); // Establece el contextokey por defecto o según la lógica que necesites
+    return context;
+});
+
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 
-if (provider == "SqlServer")
+//if (provider == "SqlServer")
+
+//if (provider == "SqLite")
 {
     // Configuración de cadena de conexión
-    builder.Services.AddDbContextFactory<SqlDbContext>((sp, options) =>
+    builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
     {
         var configuration = sp.GetRequiredService<IConfiguration>();
-        var connectionString = configuration.GetConnectionString("SqlDbContext");
+        var connectionString = configuration.GetConnectionString("SqLiteDbContext");
+
+        // Registrar el interceptor para la asignación automática de TenantId
+        var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+        options.UseSqlite(connectionString);
+        options.AddInterceptors(interceptor);
+
+    },
+    ServiceLifetime.Transient);
+}
+
+{
+    // Configuración de cadena de conexión
+    builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        var connectionString = configuration.GetConnectionString("SqlServerDbContext");
 
         // Registrar el interceptor para la asignación automática de TenantId
         var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
@@ -45,6 +72,21 @@ if (provider == "SqlServer")
 }
 
 
+{
+    // Configuración de cadena de conexión
+    builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
+    {
+        var configuration = sp.GetRequiredService<IConfiguration>();
+        var connectionString = configuration.GetConnectionString("InMemoryDbContext");
+
+        // Registrar el interceptor para la asignación automática de TenantId
+        var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+        options.UseInMemoryDatabase(connectionString);
+        options.AddInterceptors(interceptor);
+
+    },
+    ServiceLifetime.Transient);
+}
 
 builder.Services.AddTransient(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();

@@ -5,6 +5,7 @@
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject ITenantProvider TenantProvider
+@inject IContextKeyProvider ContextKeyProvider
 @inject NavigationManager nav
 
 
@@ -67,7 +68,7 @@ else
 @code {
     public List<Usuario>? usuarios { get; set; } = null;
     int TenantId;
-    string Contexto = "SqlServer";
+    string ContextoKey ="";
 
     protected override async Task OnInitializedAsync()
     {
@@ -78,7 +79,12 @@ else
            await CargarAsync();
            StateHasChanged();
        };
-        await CargarAsync();
+        ContextKeyProvider.OnContextKeyChanged += async () =>
+        {
+            await CargarAsync();
+            StateHasChanged();
+        };
+       await CargarAsync();
     }
 
     private async Task CargarAsync()
@@ -86,10 +92,11 @@ else
         try
         {
             
-            var user = new ServicioUsuarios(Contexto, UnitOfWorkFactory, TenantProvider);
+            var user = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();
             TenantId = TenantProvider.CurrentTenantId ?? 0;
+            ContextoKey = ContextKeyProvider.CurrentContextKey ?? "SqlServer";
             
         }
         catch (Exception ex)
@@ -109,6 +116,11 @@ else
             await CargarAsync();
            StateHasChanged();
        };
+        ContextKeyProvider.OnContextKeyChanged -= async () =>
+        {
+            await CargarAsync();
+            StateHasChanged();
+        };
     }
 }
 

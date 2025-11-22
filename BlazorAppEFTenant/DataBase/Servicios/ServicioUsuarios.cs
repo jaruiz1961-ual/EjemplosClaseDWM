@@ -11,7 +11,7 @@ namespace DataBase.Servicios
 {
     public class ServicioUsuarios : GenericDataService<Usuario>, IGenericDataService<Usuario>
     {
-        public ServicioUsuarios(string contexto,IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider):base(contexto,unitOfWorkFactory,tenantProvider)
+        public ServicioUsuarios(IContextKeyProvider contexto,IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider):base(contexto,unitOfWorkFactory,tenantProvider)
         {
 
         }

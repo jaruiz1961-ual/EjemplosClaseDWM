@@ -11,28 +11,15 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
 
-    //public class SqlServerContextFactory : IDesignTimeDbContextFactory<SqlServerContext>
-    //{
-    //    public SqlServerContext CreateDbContext(string[] args)
-    //    {
-    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerContext>();
-    //        optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva2; AttachDbFilename=c:\temp\Nueva2.db ;Trusted_Connection=True;MultipleActiveResultSets=true");
-    //        return new SqlServerContext(optionsBuilder.Options);
-    //    }
-    //}
 
-    public class SqlDbContext : DbContext, ITenantEntity
+
+    public class InMemoryDbContext : DbContext, ITenantEntity
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
 
-        //public SqlServerContext(DbContextOptions<SqlServerContext> options)
-        //    : base(options)
-        //{
 
-        //}
-
-        public SqlDbContext(DbContextOptions<SqlDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
+        public InMemoryDbContext(DbContextOptions<InMemoryDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
@@ -81,9 +68,9 @@ namespace DataBase.Genericos
             });
 
             modelBuilder.Entity<Usuario>().HasData
-       (new Usuario { Id = 1, UserName = "Usuario1", NivelAcceso = 1, Codigo = "0001", Password = "abc 11", TenantId = 0 },
-       new Usuario { Id = 2, UserName = "Usuario2", NivelAcceso = 1, Codigo = "0002", Password = "abc 22", TenantId = 1 },
-       new Usuario { Id = 3, UserName = "Usuario3", NivelAcceso = 1, Codigo = "0003", Password = "abc 33", TenantId = 2 });
+       (new Usuario { Id = 1, UserName = "Usuario1M", NivelAcceso = 1, Codigo = "0001", Password = "abc 11", TenantId = 0 },
+       new Usuario { Id = 2, UserName = "Usuario2M", NivelAcceso = 1, Codigo = "0002", Password = "abc 22", TenantId = 1 },
+       new Usuario { Id = 3, UserName = "Usuario3M", NivelAcceso = 1, Codigo = "0003", Password = "abc 33", TenantId = 2 });
 
             ModelCreatingTenant(modelBuilder);
             

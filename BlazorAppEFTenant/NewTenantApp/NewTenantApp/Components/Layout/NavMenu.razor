@@ -1,6 +1,7 @@
 ﻿@rendermode InteractiveServer
 @using DataBase.Genericos
 @inject ITenantProvider Tenant
+@inject IContextKeyProvider Context
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -12,6 +13,21 @@
             @foreach (var tenant in Tenant.GetTenants())
             {
                 <option value="@tenant" selected="@(tenant == TenantId)">@tenant</option>
+            }
+        </select>
+    </p>
+</div>
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">NewContext</a>
+    </div>
+    <p>
+        Choose your context:
+        <select @onchange="OnContextKeyChanged">
+            @foreach (var context in Context.GetContexts())
+            {
+                <option value="@context" selected="@(context == ContextKey)">@context</option>
             }
         </select>
     </p>
@@ -47,6 +63,7 @@
 </div>
 @code{
     int TenantId;
+    string ContextKey;
     
     private async Task OnTenantChanged(ChangeEventArgs e)
     {
@@ -56,9 +73,17 @@
         }
     }
 
+    private async Task OnContextKeyChanged(ChangeEventArgs e)
+    {
+        Context.SetContextKey(e.Value.ToString());
+
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
         TenantId = Tenant.CurrentTenantId ?? 0;
+        ContextKey = Context.CurrentContextKey ?? "SqlServer";
     }
     }
+    

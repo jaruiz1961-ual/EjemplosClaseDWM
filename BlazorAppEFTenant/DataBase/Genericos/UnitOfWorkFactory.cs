@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DataBase.Contextos;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,11 @@ namespace DataBase.Genericos
             return contextoKey switch
             {
                 "SqlServer" =>
-                    _provider.GetRequiredService<IUnitOfWork<SqlDbContext>>(),
+                    _provider.GetRequiredService<IUnitOfWork<SqlServerDbContext>>(),
+                "SqLite" =>
+                _provider.GetRequiredService<IUnitOfWork<SqLiteDbContext>>(),
+                "InMemory" =>
+                _provider.GetRequiredService<IUnitOfWork<InMemoryDbContext>>(),
                 _ => throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.")
 
             };
