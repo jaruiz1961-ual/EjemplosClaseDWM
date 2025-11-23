@@ -1,6 +1,6 @@
 ﻿@page "/DetalleUsuario"
 @page "/DetalleUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
@@ -8,11 +8,12 @@
 @inject IContextKeyProvider ContextKeyProvider
 @inject ITenantProvider TenantProvider
 @inject NavigationManager nav
+@implements IDisposable
 
 
 <h3>DetalleUsuario</h3>
 <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-<p>Usuarios del tenant <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+<p>Usuarios del contexto <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
 
 <div class="container">
     @if (NewUser != null)
@@ -40,8 +41,8 @@
                     <div class="row" style="margin-top:10px">
                         <div class="col-md-12">
                             <label for="NivelAcceso">NivelAcceso #</label>
-                            <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.NivelAcceso" placeholder="enter NivelAcceso ..." />
-                            <ValidationMessage For="@(() => NewUser.NivelAcceso)" />
+                            <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.Contexto" placeholder="enter NivelAcceso ..." />
+                            <ValidationMessage For="@(() => NewUser.Contexto)" />
                         </div>
                     </div>
 
@@ -91,7 +92,7 @@
     public int Id { get; set; }
 
     private Usuario NewUser = new Usuario();
-    int TenantId;
+
 
     private Func<Task>? _onTenantChangedHandler;
     private Func<Task>? _onContextKeyChangedHandler;
@@ -103,21 +104,23 @@
     protected override async Task OnInitializedAsync()
     {
 
-        TenantId = TenantProvider.CurrentTenantId ?? 0;
+    
         _onTenantChangedHandler += async () =>
        {
-           await CargarAsync();
+           await CargarAsync();           
            StateHasChanged();
        };
 
         _onContextKeyChangedHandler += async () =>
         {
-            await CargarAsync();
+            await CargarAsync();     
             StateHasChanged();
         };
 
         TenantProvider.OnTenantChanged += _onTenantChangedHandler;
         ContextKeyProvider.OnContextKeyChanged += _onTenantChangedHandler;
+
+        NewUser.TenantId = TenantProvider.CurrentTenantId ?? 0;
         await CargarAsync();
     }
 
@@ -148,6 +151,7 @@
 
     private async Task CargarAsync()
     {
+ 
         try
         {
             if (Id != 0)
@@ -157,8 +161,7 @@
             }
             else 
             {
-                NewUser = new Usuario();
-                NewUser.TenantId = TenantId;
+
             }
 
         }
@@ -177,7 +180,10 @@
         nav.NavigateTo("/ListaUsuarios");
     }
 
-
+    void IDisposable.Dispose()
+    {
+        Dispose();
+    }
     private void Dispose()
     {
         TenantProvider.OnTenantChanged -= _onTenantChangedHandler;

@@ -33,8 +33,9 @@ namespace DataBase.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("NivelAcceso")
-                        .HasColumnType("int");
+                    b.Property<string>("Contexto")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -60,7 +61,7 @@ namespace DataBase.Migrations
                         {
                             Id = 1,
                             Codigo = "0001",
-                            NivelAcceso = 1,
+                            Contexto = "SqlServer",
                             Password = "abc 11",
                             TenantId = 0,
                             UserName = "Usuario1"
@@ -69,7 +70,7 @@ namespace DataBase.Migrations
                         {
                             Id = 2,
                             Codigo = "0002",
-                            NivelAcceso = 1,
+                            Contexto = "SqlServer",
                             Password = "abc 22",
                             TenantId = 1,
                             UserName = "Usuario2"
@@ -78,7 +79,7 @@ namespace DataBase.Migrations
                         {
                             Id = 3,
                             Codigo = "0003",
-                            NivelAcceso = 1,
+                            Contexto = "SqlServer",
                             Password = "abc 33",
                             TenantId = 2,
                             UserName = "Usuario3"

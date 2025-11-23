@@ -5,10 +5,10 @@
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">NewTenantApp</a>
+        <a class="navbar-brand" href="">New Tenant</a>
     </div>
     <p>
-        Choose your tenant:
+       
         <select @onchange="OnTenantChanged">
             @foreach (var tenant in Tenant.GetTenants())
             {
@@ -23,7 +23,7 @@
         <a class="navbar-brand" href="">NewContext</a>
     </div>
     <p>
-        Choose your context:
+   
         <select @onchange="OnContextKeyChanged">
             @foreach (var context in Context.GetContexts())
             {

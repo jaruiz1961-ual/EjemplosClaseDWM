@@ -1,5 +1,5 @@
 ﻿@page "/ListaUsuariosMultipleContext"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
@@ -7,6 +7,7 @@
 @inject ITenantProvider TenantProvider
 @inject IContextKeyProvider ContextKeyProvider
 @inject NavigationManager nav
+@implements IDisposable
 
 
 <h3>Listado de usuarios (Genérico)</h3>
@@ -20,7 +21,7 @@
 else
 {
     <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-    <p>Usuarios del tenant <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+    <p>Usuarios del contexto <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
 
 @if (usuarios is null)
 {
@@ -51,7 +52,7 @@ else
                         <td>@user.Id</td>
                         <td>@user.UserName</td>
                         <td>@user.Codigo</td>
-                        <td>@user.NivelAcceso</td>
+                        <td>@user.Contexto</td>
                         <td>@user.Password</td>
                         <td>@user.email</td>
                         <td>@user.TenantId</td>
@@ -112,6 +113,10 @@ else
             Console.WriteLine(ex.InnerException?.ToString());
             throw;
         }
+    }
+    void IDisposable.Dispose()
+    {
+        Dispose();
     }
 
     private void Dispose()
