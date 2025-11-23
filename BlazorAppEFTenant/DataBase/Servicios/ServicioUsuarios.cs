@@ -15,8 +15,12 @@ namespace DataBase.Servicios
         {
 
         }
+        public ServicioUsuarios(string contexto, IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider) : base(contexto, unitOfWorkFactory, tenantProvider)
+        {
 
-      
+        }
+
+
     }
 
 }

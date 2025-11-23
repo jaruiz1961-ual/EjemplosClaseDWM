@@ -10,6 +10,8 @@
 
 
 <h3>DetalleUsuario</h3>
+<p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
+<p>Usuarios del tenant <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
 
 <div class="container">
     <EditForm Model="@NewUser" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" FormName="DetalleUsuarioForm">

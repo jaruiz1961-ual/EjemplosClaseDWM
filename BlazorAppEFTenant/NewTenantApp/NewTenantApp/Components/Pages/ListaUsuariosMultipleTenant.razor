@@ -1,4 +1,4 @@
-﻿@page "/ListaUsuarios"
+﻿@page "/ListaUsuariosMultipleTenant"
 @rendermode InteractiveServer
 @using DataBase.Genericos
 @using DataBase.Modelo
@@ -19,7 +19,6 @@
 }
 else
 {
-
     <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
     <p>Usuarios del tenant <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
 
@@ -67,7 +66,7 @@ else
 
 
 @code {
-    public List<Usuario>? usuarios { get; set; } = null;
+    public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="";
 
@@ -76,22 +75,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-
-
-        _onTenantChangedHandler += async () =>
+        _onContextKeyChangedHandler += async () =>
        {
+           usuarios.Clear();
            await CargarAsync();
            StateHasChanged();
        };
-
-        _onContextKeyChangedHandler += async () =>
-        {
-            await CargarAsync();
-            StateHasChanged();
-        };
-
-        TenantProvider.OnTenantChanged +=  _onTenantChangedHandler;
-        ContextKeyProvider.OnContextKeyChanged += _onTenantChangedHandler;
+        ContextKeyProvider.OnContextKeyChanged +=  _onContextKeyChangedHandler;
         await CargarAsync();
     }
 
@@ -99,13 +89,16 @@ else
     {
         try
         {
+            var _tenant = TenantProvider.CurrentTenantId;
+            foreach (var tenant in TenantProvider.GetTenants())
+            {
+                TenantProvider.SetTenant(tenant);
+                var user = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
+                var list = await user.GetAllAsync();
+                usuarios.AddRange(list);
 
-            var user = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
-            var list = await user.GetAllAsync();
-            usuarios = list.ToList();
-            TenantId = TenantProvider.CurrentTenantId ?? 0;
-            ContextoKey = ContextKeyProvider.CurrentContextKey ?? "SqlServer";
-
+            }
+            TenantProvider.SetTenant(_tenant);
         }
         catch (Exception ex)
         {
@@ -119,8 +112,8 @@ else
 
     private void Dispose()
     {
-        TenantProvider.OnTenantChanged -= _onTenantChangedHandler;
         ContextKeyProvider.OnContextKeyChanged -= _onContextKeyChangedHandler;
+
 
     }
 }

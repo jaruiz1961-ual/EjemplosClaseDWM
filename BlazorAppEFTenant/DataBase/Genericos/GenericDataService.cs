@@ -20,6 +20,13 @@ namespace DataBase.Servicios
             _tenantProvider = tenantProvider;
             _unitOfWorkFactory = uowFactory;
         }
+
+        public GenericDataService(string contextKey, IUnitOfWorkFactory uowFactory, ITenantProvider tenantProvider)
+        {
+            _contextKey = contextKey;
+            _tenantProvider = tenantProvider;
+            _unitOfWorkFactory = uowFactory;
+        }
         public async Task<List<T>> GetAllAsync()
         {
             var uow = _unitOfWorkFactory.Create(_contextKey);
