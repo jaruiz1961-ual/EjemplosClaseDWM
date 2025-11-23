@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
     public class UnitOfWork<TContext> : IUnitOfWork<TContext>
-    where TContext : DbContext,ITenantEntity
+    where TContext : DbContext
     {
         private readonly Dictionary<Type, object> _repositories = new();
 
@@ -18,7 +18,7 @@ namespace DataBase.Genericos
         public UnitOfWork(TContext context, ITenantProvider tenant)
         {
             Context = context;
-            context.TenantId = tenant.CurrentTenantId;
+            
         }
 
         public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()

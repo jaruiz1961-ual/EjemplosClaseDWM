@@ -4,8 +4,8 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
-@inject ITenantProvider Tenant
-@inject IContextKeyProvider Context
+@inject ITenantProvider TenantProvider
+@inject IContextKeyProvider ContextKeyProvider
 @inject NavigationManager nav
 
 
@@ -92,11 +92,36 @@
     bool displayValidationErrorMessages = false;
     bool displayUserAddedToDB = false;
 
+    private Func<Task>? _onTenantChangedHandler;
+    private Func<Task>? _onContextKeyChangedHandler;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        TenantId = TenantProvider.CurrentTenantId ?? 0;
+        _onTenantChangedHandler += async () =>
+       {
+           await CargarAsync();
+           StateHasChanged();
+       };
+
+        _onContextKeyChangedHandler += async () =>
+        {
+            await CargarAsync();
+            StateHasChanged();
+        };
+
+        TenantProvider.OnTenantChanged += _onTenantChangedHandler;
+        ContextKeyProvider.OnContextKeyChanged += _onTenantChangedHandler;
+        await CargarAsync();
+    }
+
     private async Task HandleValidSubmit(EditContext context)
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        var servicioUsuario = new ServicioUsuarios(Context, UnitOfWorkFactory, Tenant);
+        var servicioUsuario = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
         if (Id != 0)
             servicioUsuario.DeleteAsync(Id);
 
@@ -113,26 +138,14 @@
     }
 
 
-    protected override async Task OnInitializedAsync()
-    {
-
-        TenantId = Tenant.CurrentTenantId ?? 0;
-        Contexto = Context.CurrentContextKey ?? "SqlServer";
-        Tenant.OnTenantChanged += async () =>
-       {
-           await CargarAsync();
-           StateHasChanged();
-       };
-        await CargarAsync();
-    }
-
+   
     private async Task CargarAsync()
     {
         try
         {
             if (Id != 0)
             {
-                var servicioUsuario = new ServicioUsuarios(Context, UnitOfWorkFactory, Tenant);
+                var servicioUsuario = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
                 NewUser = await servicioUsuario.GetByIdAsync(Id);
             }
             else 
@@ -160,16 +173,14 @@
     private async void OnTenantChanged(ChangeEventArgs e)
     {
         var _t = int.Parse((e.Value as string) ?? "0");
-        Tenant.SetTenant(_t);
+        TenantProvider.SetTenant(_t);
     
     }
     private void Dispose()
     {
-        Tenant.OnTenantChanged -= async () =>
-       {
-            await CargarAsync();
-           StateHasChanged();
-       };
+        TenantProvider.OnTenantChanged -= _onTenantChangedHandler;
+        ContextKeyProvider.OnContextKeyChanged -= _onContextKeyChangedHandler;
+
     }
 }
 

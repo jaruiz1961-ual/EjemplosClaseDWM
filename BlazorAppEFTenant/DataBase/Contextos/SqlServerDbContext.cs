@@ -23,7 +23,7 @@ namespace DataBase.Contextos
         }
     }
 
-    public class SqlServerDbContext : DbContext, ITenantEntity
+    public class SqlServerDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }

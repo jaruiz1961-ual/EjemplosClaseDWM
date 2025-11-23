@@ -22,7 +22,7 @@ namespace DataBase.Genericos
         }
     }
 
-    public class SqLiteDbContext : DbContext, ITenantEntity
+    public class SqLiteDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }

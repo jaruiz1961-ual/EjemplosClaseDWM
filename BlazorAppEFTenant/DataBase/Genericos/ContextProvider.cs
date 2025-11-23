@@ -11,7 +11,7 @@ namespace DataBase.Genericos
     {
         private string _contextKey;
         public string CurrentContextKey => _contextKey;
-        public event Action OnContextKeyChanged;
+        public event Func<Task>? OnContextKeyChanged;
 
         public string[] GetContexts() => new[]
                {

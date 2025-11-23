@@ -70,34 +70,41 @@ else
     int TenantId;
     string ContextoKey ="";
 
+    private Func<Task>? _onTenantChangedHandler;
+    private Func<Task>? _onContextKeyChangedHandler;
+
     protected override async Task OnInitializedAsync()
     {
 
         TenantId = TenantProvider.CurrentTenantId ?? 0;
-        TenantProvider.OnTenantChanged += async () =>
+        _onTenantChangedHandler += async () =>
        {
            await CargarAsync();
            StateHasChanged();
        };
-        ContextKeyProvider.OnContextKeyChanged += async () =>
+
+        _onContextKeyChangedHandler += async () =>
         {
             await CargarAsync();
             StateHasChanged();
         };
-       await CargarAsync();
+
+        TenantProvider.OnTenantChanged +=  _onTenantChangedHandler;
+        ContextKeyProvider.OnContextKeyChanged += _onTenantChangedHandler;
+        await CargarAsync();
     }
 
     private async Task CargarAsync()
     {
         try
         {
-            
+
             var user = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();
             TenantId = TenantProvider.CurrentTenantId ?? 0;
             ContextoKey = ContextKeyProvider.CurrentContextKey ?? "SqlServer";
-            
+
         }
         catch (Exception ex)
         {
@@ -111,16 +118,9 @@ else
 
     private void Dispose()
     {
-        TenantProvider.OnTenantChanged -= async () =>
-       {
-            await CargarAsync();
-           StateHasChanged();
-       };
-        ContextKeyProvider.OnContextKeyChanged -= async () =>
-        {
-            await CargarAsync();
-            StateHasChanged();
-        };
+        TenantProvider.OnTenantChanged -= _onTenantChangedHandler;
+        ContextKeyProvider.OnContextKeyChanged -= _onContextKeyChangedHandler;
+
     }
 }
 

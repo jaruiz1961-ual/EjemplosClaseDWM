@@ -10,7 +10,7 @@ namespace DataBase.Genericos
     {
         string CurrentContextKey { get; }
         void SetContextKey(string contextKey);
-        event Action OnContextKeyChanged;
+        event Func<Task>? OnContextKeyChanged;
         string[] GetContexts();
     }
 

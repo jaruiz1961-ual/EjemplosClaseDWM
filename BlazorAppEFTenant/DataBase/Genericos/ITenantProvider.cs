@@ -10,7 +10,7 @@ namespace DataBase.Genericos
     {
         int? CurrentTenantId { get; }
         void SetTenant(int? tenantId);
-        event Action OnTenantChanged;
+        event  Func<Task>? OnTenantChanged;
         int[] GetTenants();
     }
 

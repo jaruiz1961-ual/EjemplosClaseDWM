@@ -11,7 +11,7 @@ namespace DataBase.Genericos
     {
         private int? _tenantId;
         public int? CurrentTenantId => _tenantId;
-        public event Action OnTenantChanged;
+        public event Func<Task>? OnTenantChanged;
 
         public int[] GetTenants() => new[]
                {

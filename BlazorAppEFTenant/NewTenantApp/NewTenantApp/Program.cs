@@ -123,4 +123,24 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorAppEFTenant.Client._Imports).Assembly);
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SqlServerDbContext>();
+    db.Database.Migrate();          // Aplica todas las migraciones pendientes, crea la BD si no existe
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SqLiteDbContext>();
+    db.Database.Migrate();          // Aplica todas las migraciones pendientes, crea la BD si no existe
+}
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<InMemoryDbContext>();
+    db.Database.EnsureCreated();    // Para que funcione HasData
+}
+
+
 app.Run();

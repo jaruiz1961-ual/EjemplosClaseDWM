@@ -13,7 +13,7 @@ namespace DataBase.Genericos
 
 
 
-    public class InMemoryDbContext : DbContext, ITenantEntity
+    public class InMemoryDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
