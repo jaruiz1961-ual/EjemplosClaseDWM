@@ -37,11 +37,12 @@ namespace DataBase.Genericos
                     var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
                     return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey);
                 case "Api":
-                    var tenantApi = _provider.GetRequiredService<ITenantProvider>();
-                    return new UnitOfWork<DbContext>(null, tenantApi, _repoFactory, contextoKey); // Usa object si no hay contexto real
+                    var httpClient = _provider.GetRequiredService<HttpClient>();
+                    return new UnitOfWorkApi(httpClient,contextoKey); // Usa object si no hay contexto real
                                                                                                // Otras variantes...
                 default:
-                    throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.");
+                    var inM = _provider.GetRequiredService<InMemoryDbContext>();
+                    return new UnitOfWork<InMemoryDbContext>(inM, tenant, _repoFactory, contextoKey);
             }
         }
     }

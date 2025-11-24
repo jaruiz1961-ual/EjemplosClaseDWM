@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class ApiUnitOfWork : IUnitOfWork
+    public class UnitOfWorkApi : IUnitOfWork
     {
         private readonly HttpClient _httpClient;
         private readonly string _contextKey;
         private readonly Dictionary<Type, object> _repositories = new();
 
-        public ApiUnitOfWork(HttpClient httpClient, string contextKey)
+        public UnitOfWorkApi(HttpClient httpClient, string contextKey)
         {
             _httpClient = httpClient;
             _contextKey = contextKey;
@@ -30,20 +30,21 @@ namespace DataBase.Genericos
         {
             if (!_repositories.TryGetValue(typeof(TEntity), out var repo))
             {
-                repo = new ApiGenericRepository<TEntity, DbContext>(_httpClient, _contextKey);
+                var resourceName = typeof(TEntity).Name.ToLower() + "s";
+                repo = new GenericRepositoryApi<TEntity, DbContext>(_httpClient, resourceName);
                 _repositories[typeof(TEntity)] = repo;
             }
             return (IGenericRepository<TEntity>)repo;
         }
-        public IGenericRepository<TEntity, TContext> GetRepository<TEntity, TContext>()
-        where TEntity : class
-        where TContext : DbContext
-        {
-            // Aquí debes calcular el resourceName por convención, no pedirlo como parámetro externo.
-            var resourceName = typeof(TEntity).Name.ToLower() + "s";
-            // Construir el repo API sin parámetros extra
-            return new ApiGenericRepository<TEntity, TContext>(_httpClient, resourceName);
-        }
+        //public IGenericRepository<TEntity, TContext> GetRepository<TEntity, TContext>()
+        //where TEntity : class
+        //where TContext : DbContext
+        //{
+        //    // Aquí debes calcular el resourceName por convención, no pedirlo como parámetro externo.
+        //    var resourceName = typeof(TEntity).Name.ToLower() + "s";
+        //    // Construir el repo API sin parámetros extra
+        //    return new GenericRepositoryApi<TEntity, TContext>(_httpClient, resourceName);
+        //}
 
         public Task SaveChangesAsync() => Task.CompletedTask;
 

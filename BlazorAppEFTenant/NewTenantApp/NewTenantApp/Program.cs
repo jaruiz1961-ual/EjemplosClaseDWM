@@ -18,8 +18,8 @@ IConfiguration configuration = builder.Configuration;
 builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
-    var apiUrl = config.GetConnectionString("UrlApi");
-    client.BaseAddress = new Uri(apiUrl);
+    var UrlApi = config.GetConnectionString("UrlApi");
+    client.BaseAddress = new Uri(UrlApi);
 });
 
 // Tenant Provider y Context Provider
@@ -57,7 +57,7 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
 
 // NO REGISTRES IGenericRepository<,> como open-generic
 // SÓLO REGISTRA LAS FACTORÍAS NECESARIAS:
-builder.Services.AddScoped<IGenericRepositoryFactory, RepositoryFactory>();
+builder.Services.AddScoped<IGenericRepositoryFactory, GenericRepositoryFactory>();
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 // OJO: Si tu UnitOfWork generic depende solo de DI-resolvable (DbContext y factory)
@@ -78,7 +78,10 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     InitDb<SqLiteDbContext>("SqLite", db => db?.Database.Migrate());
     InitDb<InMemoryDbContext>("InMemory", db => db?.Database.EnsureCreated());
 }
-
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
+{
+    options.DetailedErrors = true;
+});
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

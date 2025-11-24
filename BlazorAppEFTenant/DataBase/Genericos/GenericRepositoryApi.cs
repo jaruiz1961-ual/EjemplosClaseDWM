@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class ApiGenericRepository<TEntity, TContext> : IGenericRepository<TEntity, TContext>
+    public class GenericRepositoryApi<TEntity, TContext> : IGenericRepository<TEntity, TContext>
      where TEntity : class
      where TContext : DbContext
     {
         private readonly HttpClient _httpClient;
         private readonly string _resourceName;
 
-        public ApiGenericRepository(HttpClient httpClient, string resourceName)
+        public GenericRepositoryApi(HttpClient httpClient, string resourceName)
         {
             _httpClient = httpClient;
             _resourceName = resourceName.ToLower();

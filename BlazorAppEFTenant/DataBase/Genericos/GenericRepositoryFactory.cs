@@ -10,11 +10,11 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
 
-    public class RepositoryFactory : IGenericRepositoryFactory
+    public class GenericRepositoryFactory : IGenericRepositoryFactory
     {
         private readonly IServiceProvider _provider;
 
-        public RepositoryFactory(IServiceProvider provider)
+        public GenericRepositoryFactory(IServiceProvider provider)
         {
             _provider = provider;
         }
@@ -37,7 +37,7 @@ namespace DataBase.Genericos
                 case "Api":
                     var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient("ApiRest");
                     var resource = resourceName ?? typeof(TEntity).Name.ToLower() + "s";
-                    return new ApiGenericRepository<TEntity, TContext>(httpClient, resource);
+                    return new GenericRepositoryApi<TEntity, TContext>(httpClient, resource);
                 default:
                     throw new NotSupportedException($"Contexto '{tipoContexto}' no soportado.");
             }
