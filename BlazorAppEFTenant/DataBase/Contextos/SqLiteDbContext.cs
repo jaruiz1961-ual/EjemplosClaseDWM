@@ -12,26 +12,26 @@ namespace DataBase.Genericos
 {
     //PM> dotnet-ef migrations add Final --context SqLiteDbContext
     //PM> dotnet-ef database update --context SqLiteDbContext
-    public class SqlLiteContextFactory : IDesignTimeDbContextFactory<SqLiteDbContext>
-    {
-        public SqLiteDbContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
-            optionsBuilder.UseSqlite(@"data source = c:\\temp\\NuevaSqlite3.db");
-            return new SqLiteDbContext(optionsBuilder.Options);
-        }
-    }
+    //public class SqlLiteContextFactory : IDesignTimeDbContextFactory<SqLiteDbContext>
+    //{
+    //    public SqLiteDbContext CreateDbContext(string[] args)
+    //    {
+    //        var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
+    //        optionsBuilder.UseSqlite(@"data source = c:\\temp\\NuevaSqlite3.db");
+    //        return new SqLiteDbContext(optionsBuilder.Options);
+    //    }
+    //}
 
     public class SqLiteDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
 
-        public SqLiteDbContext(DbContextOptions<SqLiteDbContext> options)
-            : base(options)
-        {
+        //public SqLiteDbContext(DbContextOptions<SqLiteDbContext> options)
+        //    : base(options)
+        //{
 
-        }
+        //}
 
         public SqLiteDbContext(DbContextOptions<SqLiteDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
             : base(options) 

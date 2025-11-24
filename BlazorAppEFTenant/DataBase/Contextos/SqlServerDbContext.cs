@@ -13,26 +13,26 @@ namespace DataBase.Contextos
 {
     //PM> dotnet-ef migrations add Final --context SqlServerDbContext
     //PM> dotnet-ef database update --context SqlServerDbContext
-    public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>
-    {
-        public SqlServerDbContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva3; AttachDbFilename=c:\temp\Nueva3.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
-            return new SqlServerDbContext(optionsBuilder.Options);
-        }
-    }
+    //public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>
+    //{
+    //    public SqlServerDbContext CreateDbContext(string[] args)
+    //    {
+    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
+    //        optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva3; AttachDbFilename=c:\temp\Nueva3.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
+    //        return new SqlServerDbContext(optionsBuilder.Options);
+    //    }
+    //}
 
     public class SqlServerDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
 
-        public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
-            : base(options)
-        {
+        //public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
+        //    : base(options)
+        //{
 
-        }
+        //}
 
         public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
             : base(options) 

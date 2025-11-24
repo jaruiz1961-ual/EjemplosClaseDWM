@@ -15,7 +15,7 @@ namespace DataBase.Genericos
 
         public string[] GetContexts() => new[]
                {
-            "SqlServer","SqLite","InMemory"
+            "SqlServer","SqLite","InMemory","Api"
         };
 
         public void SetContextKey(string contextKey)

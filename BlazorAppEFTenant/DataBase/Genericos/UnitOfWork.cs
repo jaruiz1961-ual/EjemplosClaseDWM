@@ -15,10 +15,21 @@ namespace DataBase.Genericos
         public TContext Context { get; }
         DbContext IUnitOfWork.Context => Context;
 
+        string _tipoContexto;
+        IGenericRepository<Entidad, TContext> repo = null;
+        private  IGenericRepositoryFactory _repositoryFactory;
+
+
         public UnitOfWork(TContext context, ITenantProvider tenant)
         {
             Context = context;
             
+        }
+        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto = null)
+        {
+            Context = context;
+            _repositoryFactory = factory;
+            _tipoContexto = tipoContexto;
         }
 
         public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
@@ -28,13 +39,25 @@ namespace DataBase.Genericos
 
             if (!_repositories.TryGetValue(type, out var repo))
             {
-                repo = new GenericRepository<TEntity, TContext>(Context);
-                _repositories[type] = repo;
+                if (_tipoContexto == "Api")
+                {
+                    // Devuelve ApiGenericRepository
+                    repo = _repositoryFactory.Create<TEntity, TContext>(_tipoContexto);
+                }
+                else
+                {
+                    if (!_repositories.TryGetValue(type, out repo))
+                    {
+                        repo = new GenericRepository<TEntity, TContext>(Context);
+                        _repositories[type] = repo;
+                    }
+                }
             }
 
             return (IGenericRepository<TEntity, TContext>)repo;
         }
 
+       
         IGenericRepository<TEntity> IUnitOfWork.GetRepository<TEntity>()
             where TEntity : class
             => GetRepository<TEntity>();   // aquí ya compila, porque el return es IGenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
