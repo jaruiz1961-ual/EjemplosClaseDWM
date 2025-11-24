@@ -16,32 +16,31 @@ namespace DataBase.Genericos
         private readonly IGenericRepositoryFactory _repoFactory;
         private readonly bool _isApi;
 
-        public UnitOfWorkFactory(IServiceProvider provider, IGenericRepositoryFactory repoFactory, bool isApi = false)
+        public UnitOfWorkFactory(IServiceProvider provider, IGenericRepositoryFactory repoFactory)
         {
             _provider = provider;
             _repoFactory = repoFactory;
         }
 
-        public IUnitOfWork Create(string contextoKey,bool isApi = false)
+        public IUnitOfWork Create(string contextoKey,bool isApi )
         {
             var tenant = _provider.GetRequiredService<ITenantProvider>();
             if (isApi)
             {
-                var httpClient = _provider.GetRequiredService<HttpClient>();
-                return new UnitOfWorkApi(httpClient, contextoKey); // Usa object si no hay contexto real
+                return new UnitOfWork<DbContext>(null, tenant, _repoFactory, contextoKey, true);
             }
-            switch (contextoKey)
+            switch (contextoKey.ToLower())
             {
-                case "SqlServer":
+                case "sqlserver":
                     var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
 
-                    return new UnitOfWork<SqlServerDbContext>(sqlDb, tenant, _repoFactory, contextoKey);
-                case "SqLite":
+                    return new UnitOfWork<SqlServerDbContext>(sqlDb, tenant, _repoFactory, contextoKey,false);
+                case "sqlite":
                     var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
-                    return new UnitOfWork<SqLiteDbContext>(sqLite, tenant, _repoFactory, contextoKey);
-                case "InMemory":
+                    return new UnitOfWork<SqLiteDbContext>(sqLite, tenant, _repoFactory, contextoKey,false);
+                case "inmemory":
                     var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
-                    return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey);
+                    return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey,false);
                     default: throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.");
             }
         }

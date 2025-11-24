@@ -1,6 +1,7 @@
 ﻿using DataBase.Contextos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Net.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,26 +20,27 @@ namespace DataBase.Genericos
             _provider = provider;
         }
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string dbContextKey, bool isApi,string apiResourceName = null)
+        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string dbContextKey, TContext context, bool isApi,string apiResourceName = null)
             where TEntity : class
             where TContext : DbContext
         {
             if (isApi) 
             {
-                var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient("ApiRest");
+                var httpClient= _provider.GetRequiredService<IHttpClientFactory>().CreateClient("ApiRest");
+                 Console.WriteLine("BaseAddress: " + httpClient.BaseAddress);
                 var resource = apiResourceName ?? typeof(TEntity).Name.ToLower() + "s";
                 return new GenericRepositoryApi<TEntity, TContext>(httpClient, dbContextKey, resource);
             }
-            switch (dbContextKey)
+            switch (dbContextKey.ToLower())
             {
-                case "SqlServer":
-                    var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
+                case "sqlserver":
+                    var sqlDb = context as SqlServerDbContext;
                     return new GenericRepository<TEntity, SqlServerDbContext>(sqlDb) as IGenericRepository<TEntity, TContext>;
-                case "SqLite":
-                    var sqliteDb = _provider.GetRequiredService<SqLiteDbContext>();
+                case "sqlite":
+                    var sqliteDb = context as SqLiteDbContext;
                     return new GenericRepository<TEntity, SqLiteDbContext>(sqliteDb) as IGenericRepository<TEntity, TContext>;
-                case "InMemory":
-                    var memDb = _provider.GetRequiredService<InMemoryDbContext>();
+                case "inmemory":
+                    var memDb = context as InMemoryDbContext;
                     return new GenericRepository<TEntity, InMemoryDbContext>(memDb) as IGenericRepository<TEntity, TContext>;
                     default:
                     throw new NotSupportedException($"Contexto '{dbContextKey}' no soportado.");

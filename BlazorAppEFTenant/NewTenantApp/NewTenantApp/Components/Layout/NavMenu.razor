@@ -35,7 +35,7 @@
 </div>
 
 <h3>Selecciona el origen de datos:</h3>
-<InputRadioGroup  @bind-Value="DataSource">
+<InputRadioGroup @bind-Value="DataSource">
     @foreach (var option in Options)
     {
         <div>
@@ -44,6 +44,7 @@
         </div>
     }
 </InputRadioGroup>
+
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
@@ -101,8 +102,21 @@
     int TenantId;
     string ContextKey;
     string ApiContextKey;
-    private string DataSource = "Ef";
+
     private string[] Options = new[] { "Api", "Ef" };
+    private string dataSource;
+    public string DataSource
+    {
+        get => dataSource;
+        set
+        {
+            if (dataSource != value)
+            {
+                dataSource = value;
+                OnContextApiKeyChanged(value);
+            }
+        }
+    }
 
     private async Task OnTenantChanged(ChangeEventArgs e)
     {
@@ -110,6 +124,7 @@
         {
             Tenant.SetTenant(newTenantId);
         }
+      
     }
 
     private async Task OnContextKeyChanged(ChangeEventArgs e)
@@ -119,10 +134,11 @@
 
     }
 
-    private async Task OnContextApiKeyChanged(ChangeEventArgs e)
+    private async Task OnContextApiKeyChanged(string value)
     {
-         Context.SetContextDbKey(ContextKey,e.Value.ToString()=="Api");
-         ContextKey = e.Value.ToString();
+        
+        Context.SetContextDbKey(ContextKey,value=="Api");
+        DataSource = value;
 
     }
 
@@ -131,6 +147,7 @@
     {
         TenantId = Tenant.CurrentTenantId ?? 0;
         ContextKey = Context.CurrentContextKey ?? "SqlServer";
+        DataSource = "Ef";
     }
     }
     

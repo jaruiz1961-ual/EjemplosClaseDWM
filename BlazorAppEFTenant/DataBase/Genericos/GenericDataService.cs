@@ -15,12 +15,12 @@ namespace DataBase.Servicios
         private readonly ITenantProvider _tenantProvider;
         private readonly string _contextKey;
         private readonly bool _isApi;
-        public GenericDataService(IContextKeyDbProvider contextKey, IUnitOfWorkFactory uowFactory, ITenantProvider tenantProvider, bool isApi = false)
+        public GenericDataService(IContextKeyDbProvider contextKey, IUnitOfWorkFactory uowFactory, ITenantProvider tenantProvider)
         {
             _contextKey = contextKey.CurrentContextKey;
             _tenantProvider = tenantProvider;
             _unitOfWorkFactory = uowFactory;
-            _isApi = isApi;
+            _isApi = contextKey.IsApi;
 
         }
 
@@ -66,7 +66,7 @@ namespace DataBase.Servicios
         }
         public async Task DeleteAsync(int id)
         {
-             var uow = _unitOfWorkFactory.Create(_contextKey);
+             var uow = _unitOfWorkFactory.Create(_contextKey, _isApi);
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
             if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)

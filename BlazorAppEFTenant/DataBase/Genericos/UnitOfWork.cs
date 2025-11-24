@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,18 +19,19 @@ namespace DataBase.Genericos
         string _tipoContexto;
         IGenericRepository<Entidad, TContext> repo = null;
         private  IGenericRepositoryFactory _repositoryFactory;
-
+        bool _isApi;
 
         public UnitOfWork(TContext context, ITenantProvider tenant)
         {
             Context = context;
             
         }
-        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto )
+        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto, bool isApi )
         {
             Context = context;
             _repositoryFactory = factory;
             _tipoContexto = tipoContexto;
+            _isApi = isApi;
         }
 
         public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
@@ -39,8 +41,9 @@ namespace DataBase.Genericos
 
             if (!_repositories.TryGetValue(type, out var repo))
             {
-                 repo = _repositoryFactory.Create<TEntity, TContext>(_tipoContexto,false);
-                    _repositories[type] = repo;     
+                 repo = _repositoryFactory.Create<TEntity, TContext>(_tipoContexto,Context,_isApi);
+                    _repositories[type] = repo;
+
             }
 
             return (IGenericRepository<TEntity, TContext>)repo;

@@ -19,8 +19,11 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     var UrlApi = config.GetConnectionString("UrlApi");
+    Console.WriteLine("UrlApi: " + config.GetConnectionString("UrlApi"));
     client.BaseAddress = new Uri(UrlApi);
 });
+
+
 
 // Tenant Provider y Context Provider
 builder.Services.AddScoped<ITenantProvider> (sp=>

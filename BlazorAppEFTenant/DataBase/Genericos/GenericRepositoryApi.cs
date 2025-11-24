@@ -17,7 +17,7 @@ namespace DataBase.Genericos
         private readonly string _resourceName;
         private readonly string _contexto;
 
-        public GenericRepositoryApi(HttpClient httpClient, string resourceName, string contexto)
+        public GenericRepositoryApi(HttpClient httpClient, string contexto, string resourceName)
         {
             _httpClient = httpClient;
             _resourceName = resourceName.ToLower();
@@ -31,8 +31,10 @@ namespace DataBase.Genericos
         public async Task<TEntity?> GetByIdAsync(object id) =>
             await _httpClient.GetFromJsonAsync<TEntity>($"/api/{_resourceName}/{id}");
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync() =>
-            await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>($"/api/{_contexto}/{_resourceName}") ?? Enumerable.Empty<TEntity>();
+        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        {
+            return await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>($"/api/{_contexto}/{_resourceName}") ?? Enumerable.Empty<TEntity>();
+        }
 
         public async Task AddAsync(TEntity entity)
         {

@@ -105,7 +105,7 @@ else
         try
         {
 
-            usuarioService= new ServicioUsuarios(ContextKeyProvider, UowFactory, TenantProvider,true);
+            usuarioService= new ServicioUsuarios(ContextKeyProvider, UowFactory, TenantProvider);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
             TenantId = TenantProvider.CurrentTenantId ?? 0;

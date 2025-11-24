@@ -4,6 +4,7 @@ namespace DataBase.Genericos
     public interface IContextKeyDbProvider
     {
         string CurrentContextKey { get; }
+        bool IsApi { get; }
 
         event Func<Task>? OnContextKeyChanged;
 

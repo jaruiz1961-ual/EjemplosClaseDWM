@@ -9,8 +9,8 @@ namespace DataBase.Genericos
 
     public class ContextKeyDbProvider : IContextKeyDbProvider
     {
-        private string _contextKeyDb;
-        private bool IsApi { get; set; } = false;
+        private string _contextKeyDb = "InMemory";
+        public bool IsApi { get; set; } = false;
         public string CurrentContextKey => _contextKeyDb;
         public event Func<Task>? OnContextKeyChanged;
 

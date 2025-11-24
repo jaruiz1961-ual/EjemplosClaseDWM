@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class UnitOfWorkApi : IUnitOfWork
+    public class UnitOfWorkApi2 : IUnitOfWork
     {
         private readonly HttpClient _httpClient;
         private readonly string _contextKey;
         private readonly Dictionary<Type, object> _repositories = new();
 
-        public UnitOfWorkApi(HttpClient httpClient, string contextKey)
+        public UnitOfWorkApi2(HttpClient httpClient, string contextKey)
         {
             _httpClient = httpClient;
             _contextKey = contextKey;
@@ -28,10 +28,11 @@ namespace DataBase.Genericos
 
         public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class
         {
+
             if (!_repositories.TryGetValue(typeof(TEntity), out var repo))
             {
                 var resourceName = typeof(TEntity).Name.ToLower() + "s";
-                repo = new GenericRepositoryApi<TEntity, DbContext>(_httpClient, resourceName,_contextKey);
+                repo = new GenericRepositoryApi<TEntity, DbContext>(_httpClient, _contextKey, resourceName);
                 _repositories[typeof(TEntity)] = repo;
             }
             return (IGenericRepository<TEntity>)repo;

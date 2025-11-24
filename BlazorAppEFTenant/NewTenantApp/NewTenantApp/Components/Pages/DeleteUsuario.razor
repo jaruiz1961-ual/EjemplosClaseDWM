@@ -14,73 +14,75 @@
 <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
 <p>Usuarios del contexto <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
 
-<div class="container">
-    <EditForm Model="@NewUser" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" FormName="DetalleUsuarioForm">
-        <DataAnnotationsValidator />
-        <div class="row">
-            <div class="col-md-8">
-                <div class="row" style="margin-top:10px">
-                    <div class="col-md-12">
-                        <label for="Codigo">Codigo #</label>
-                        <input type="text" class="form-control" id="Codigo" @bind-value="NewUser.Codigo" placeholder="enter codigo ..." />
-                        <ValidationMessage For="@(() => NewUser.Codigo)" />
+@if (NewUser != null)
+{
+    <div class="container">
+        <EditForm Model="@NewUser" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" FormName="DetalleUsuarioForm">
+            <DataAnnotationsValidator />
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="Codigo">Codigo #</label>
+                            <input type="text" class="form-control" id="Codigo" @bind-value="NewUser.Codigo" placeholder="enter codigo ..." />
+                            <ValidationMessage For="@(() => NewUser.Codigo)" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="row" style="margin-top:10px">
-                    <div class="col-md-12">
-                        <label for="UserName">UsertName #</label>
-                        <input type="text" class="form-control" id="UserName" @bind-value="NewUser.UserName" placeholder="enter UserName ..." />
-                        <ValidationMessage For="@(() => NewUser.UserName)" />
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="UserName">UsertName #</label>
+                            <input type="text" class="form-control" id="UserName" @bind-value="NewUser.UserName" placeholder="enter UserName ..." />
+                            <ValidationMessage For="@(() => NewUser.UserName)" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="row" style="margin-top:10px">
-                    <div class="col-md-12">
-                        <label for="NivelAcceso">NivelAcceso #</label>
-                        <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.Contexto" placeholder="enter NivelAcceso ..." />
-                        <ValidationMessage For="@(() => NewUser.Contexto)" />
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="NivelAcceso">NivelAcceso #</label>
+                            <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.Contexto" placeholder="enter NivelAcceso ..." />
+                            <ValidationMessage For="@(() => NewUser.Contexto)" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="row" style="margin-top:10px">
-                    <div class="col-md-12">
-                        <label for="Password">Password #</label>
-                        <input type="text" class="form-control" id="Password" @bind-value="NewUser.Password" placeholder="enter Password ..." />
-                        <ValidationMessage For="@(() => NewUser.Password)" />
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="Password">Password #</label>
+                            <input type="text" class="form-control" id="Password" @bind-value="NewUser.Password" placeholder="enter Password ..." />
+                            <ValidationMessage For="@(() => NewUser.Password)" />
+                        </div>
                     </div>
-                </div>
 
-                <div class="row" style="margin-top:10px">
-                    <div class="col-md-12">
-                        <label for="email">email #</label>
-                        <input type="text" class="form-control" id="email" @bind-value="NewUser.email" placeholder="enter email ..." />
-                        <ValidationMessage For="@(() => NewUser.email)" />
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="email">email #</label>
+                            <input type="text" class="form-control" id="email" @bind-value="NewUser.email" placeholder="enter email ..." />
+                            <ValidationMessage For="@(() => NewUser.email)" />
+                        </div>
                     </div>
-                </div>
-                <div class="row" style="margin-top:10px">
-                    <div class="col-md-12">
-                        <label for="email">email #</label>
-                        <input type="text" class="form-control" id="tenant" @bind-value="NewUser.TenantId" placeholder="enter tenant ..." />
-                        <ValidationMessage For="@(() => NewUser.TenantId)" />
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="email">email #</label>
+                            <input type="text" class="form-control" id="tenant" @bind-value="NewUser.TenantId" placeholder="enter tenant ..." />
+                            <ValidationMessage For="@(() => NewUser.TenantId)" />
+                        </div>
                     </div>
-                </div>
 
-                <button type="submit" class="btn btn-info" style="margin-top:10px">Save</button>
-                <button type="button" class="btn btn-secondary" @onclick="Cancel" style="margin-top:10px">Cancel</button>
+                    <button type="submit" class="btn btn-info" style="margin-top:10px">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel" style="margin-top:10px">Cancel</button>
+                </div>
+                @if (displayValidationErrorMessages)
+                {
+                    <div class="col-md-4" style="margin-top:10px">
+                        <label>Validation Messages: </label>
+                        <ValidationSummary />
+                    </div>
+                }
             </div>
-            @if (displayValidationErrorMessages)
-            {
-                <div class="col-md-4" style="margin-top:10px">
-                    <label>Validation Messages: </label>
-                    <ValidationSummary />
-                </div>
-            }
-        </div>
-    </EditForm>
+        </EditForm>
 
-</div>
-
+    </div>
+}
 
 @code {
 
@@ -128,8 +130,9 @@
         if (Id != 0)
             servicioUsuario.DeleteAsync(Id);
 
-     
-        nav.NavigateTo("/ListaUsuarios");
+        nav.NavigateTo("javascript:history.back()");
+
+      //  nav.NavigateTo("/ListaUsuarios");
     }
 
 
@@ -170,7 +173,8 @@
 
     protected void Cancel()
     {
-        nav.NavigateTo("/ListaUsuarios");
+        //nav.NavigateTo("/ListaUsuarios");
+        nav.NavigateTo("javascript:history.back()");
     }
 
     private async void OnTenantChanged(ChangeEventArgs e)

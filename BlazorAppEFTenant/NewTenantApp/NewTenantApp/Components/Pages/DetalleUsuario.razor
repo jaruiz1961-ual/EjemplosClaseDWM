@@ -134,8 +134,10 @@
             servicioUsuario.UpdateAsync(NewUser);
         else
             servicioUsuario.AddAsync(NewUser);
+
+        nav.NavigateTo("javascript:history.back()");
      
-        nav.NavigateTo("/ListaUsuarios");
+        //nav.NavigateTo("/ListaUsuarios");
     }
 
 
@@ -177,7 +179,8 @@
 
     protected void Cancel()
     {
-        nav.NavigateTo("/ListaUsuarios");
+        nav.NavigateTo("javascript:history.back()");
+        //nav.NavigateTo("/ListaUsuarios");
     }
 
     void IDisposable.Dispose()
