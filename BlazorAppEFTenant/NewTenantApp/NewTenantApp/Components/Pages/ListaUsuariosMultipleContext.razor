@@ -5,7 +5,7 @@
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject ITenantProvider TenantProvider
-@inject IContextKeyProvider ContextKeyProvider
+@inject IContextKeyDbProvider ContextKeyProvider
 @inject NavigationManager nav
 @implements IDisposable
 
@@ -95,9 +95,13 @@ else
     {
         try
         {
-            foreach (var contextKey in ContextKeyProvider.GetContexts())
+            foreach (var contextKey in ContextKeyProvider.GetContextKeDb())
             {
-
+                if (contextKey.StartsWith("Api"))
+                {
+                    // Saltar contextos API
+                    continue;
+                };
                 var user = new ServicioUsuarios(contextKey, UnitOfWorkFactory, TenantProvider);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);

@@ -14,16 +14,22 @@ namespace DataBase.Genericos
     {
         private readonly IServiceProvider _provider;
         private readonly IGenericRepositoryFactory _repoFactory;
+        private readonly bool _isApi;
 
-        public UnitOfWorkFactory(IServiceProvider provider, IGenericRepositoryFactory repoFactory)
+        public UnitOfWorkFactory(IServiceProvider provider, IGenericRepositoryFactory repoFactory, bool isApi = false)
         {
             _provider = provider;
             _repoFactory = repoFactory;
         }
 
-        public IUnitOfWork Create(string contextoKey)
+        public IUnitOfWork Create(string contextoKey,bool isApi = false)
         {
             var tenant = _provider.GetRequiredService<ITenantProvider>();
+            if (isApi)
+            {
+                var httpClient = _provider.GetRequiredService<HttpClient>();
+                return new UnitOfWorkApi(httpClient, contextoKey); // Usa object si no hay contexto real
+            }
             switch (contextoKey)
             {
                 case "SqlServer":
@@ -36,13 +42,7 @@ namespace DataBase.Genericos
                 case "InMemory":
                     var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
                     return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey);
-                case "Api":
-                    var httpClient = _provider.GetRequiredService<HttpClient>();
-                    return new UnitOfWorkApi(httpClient,contextoKey); // Usa object si no hay contexto real
-                                                                                               // Otras variantes...
-                default:
-                    var inM = _provider.GetRequiredService<InMemoryDbContext>();
-                    return new UnitOfWork<InMemoryDbContext>(inM, tenant, _repoFactory, contextoKey);
+                    default: throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.");
             }
         }
     }

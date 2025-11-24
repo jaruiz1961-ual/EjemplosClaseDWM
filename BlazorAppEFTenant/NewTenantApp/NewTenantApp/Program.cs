@@ -23,8 +23,19 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 });
 
 // Tenant Provider y Context Provider
-builder.Services.AddScoped<ITenantProvider, TenantProvider>();
-builder.Services.AddScoped<IContextKeyProvider, ContextKeyProvider>();
+builder.Services.AddScoped<ITenantProvider> (sp=>
+{
+    var provider = new TenantProvider();
+    provider.SetTenant(1); // Asigna aquí el valor inicial por defecto
+    return provider;
+});
+
+builder.Services.AddScoped<IContextKeyDbProvider>(sp =>
+{
+    var provider = new ContextKeyDbProvider();
+    provider.SetContextDbKey("InMemory",false); // Asigna aquí el valor inicial por defecto
+    return provider;
+});
 
 // Interceptor para multitenant (opcional)
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();
@@ -37,7 +48,7 @@ builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
     var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
     options.UseSqlServer(conn);
     options.AddInterceptors(interceptor);
-});
+},ServiceLifetime.Transient);
 builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -45,7 +56,7 @@ builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
     var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
     options.UseSqlite(conn);
     options.AddInterceptors(interceptor);
-});
+}, ServiceLifetime.Transient);
 builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -53,7 +64,7 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
     var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
     options.UseInMemoryDatabase(conn);
     options.AddInterceptors(interceptor);
-});
+}, ServiceLifetime.Transient);
 
 // NO REGISTRES IGenericRepository<,> como open-generic
 // SÓLO REGISTRA LAS FACTORÍAS NECESARIAS:

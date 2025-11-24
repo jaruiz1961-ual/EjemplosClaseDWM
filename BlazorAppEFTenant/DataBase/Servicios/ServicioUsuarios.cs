@@ -11,11 +11,11 @@ namespace DataBase.Servicios
 {
     public class ServicioUsuarios : GenericDataService<Usuario>, IGenericDataService<Usuario>
     {
-        public ServicioUsuarios(IContextKeyProvider contexto,IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider):base(contexto,unitOfWorkFactory,tenantProvider)
+        public ServicioUsuarios(IContextKeyDbProvider contexto,IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider,bool isApi =false):base(contexto,unitOfWorkFactory,tenantProvider,isApi)
         {
 
         }
-        public ServicioUsuarios(string contexto, IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider) : base(contexto, unitOfWorkFactory, tenantProvider)
+        public ServicioUsuarios(string contexto, IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider, bool isApi =false) : base(contexto, unitOfWorkFactory, tenantProvider,isApi)
         {
 
         }

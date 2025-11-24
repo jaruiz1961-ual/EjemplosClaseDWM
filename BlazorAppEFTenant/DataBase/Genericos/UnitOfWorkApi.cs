@@ -31,7 +31,7 @@ namespace DataBase.Genericos
             if (!_repositories.TryGetValue(typeof(TEntity), out var repo))
             {
                 var resourceName = typeof(TEntity).Name.ToLower() + "s";
-                repo = new GenericRepositoryApi<TEntity, DbContext>(_httpClient, resourceName);
+                repo = new GenericRepositoryApi<TEntity, DbContext>(_httpClient, resourceName,_contextKey);
                 _repositories[typeof(TEntity)] = repo;
             }
             return (IGenericRepository<TEntity>)repo;

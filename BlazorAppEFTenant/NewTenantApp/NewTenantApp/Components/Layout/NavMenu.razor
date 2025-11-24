@@ -1,7 +1,8 @@
 ﻿@rendermode InteractiveServer
 @using DataBase.Genericos
+@using Microsoft.AspNetCore.Components.Forms
 @inject ITenantProvider Tenant
-@inject IContextKeyProvider Context
+@inject IContextKeyDbProvider Context
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -25,13 +26,24 @@
     <p>
    
         <select @onchange="OnContextKeyChanged">
-            @foreach (var context in Context.GetContexts())
+            @foreach (var context in Context.GetContextKeDb())
             {
-                <option value="@context" selected="@(context == ContextKey)">@context</option>
+                <option  value="@context"  selected="@(context == ContextKey)">@context</option>
             }
         </select>
     </p>
 </div>
+
+<h3>Selecciona el origen de datos:</h3>
+<InputRadioGroup  @bind-Value="DataSource">
+    @foreach (var option in Options)
+    {
+        <div>
+            <InputRadio Value="@option" />
+            <label style="color:white">@option</label>
+        </div>
+    }
+</InputRadioGroup>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
@@ -54,16 +66,15 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
             </NavLink>
         </div>
+
+         @if (!DataSource.StartsWith("Api"))
+        {
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="ListaUsuarios">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ListaUsuariosApi">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista Api
-            </NavLink>
-        </div>
+
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="ListaUsuariosMultipleContext">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista MultipleContext
@@ -74,12 +85,25 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista MultipleTenant
             </NavLink>
         </div>
+        }
+
+        @if (DataSource.StartsWith("Api"))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="ListaUsuariosApi">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista Api
+            </NavLink>
+        </div>
+        }
     </nav>
 </div>
 @code{
     int TenantId;
     string ContextKey;
-    
+    string ApiContextKey;
+    private string DataSource = "Ef";
+    private string[] Options = new[] { "Api", "Ef" };
+
     private async Task OnTenantChanged(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value.ToString(), out int newTenantId))
@@ -90,7 +114,15 @@
 
     private async Task OnContextKeyChanged(ChangeEventArgs e)
     {
-        Context.SetContextKey(e.Value.ToString());
+        Context.SetContextDbKey(e.Value.ToString(),DataSource=="Api");
+        ContextKey = e.Value.ToString();
+
+    }
+
+    private async Task OnContextApiKeyChanged(ChangeEventArgs e)
+    {
+         Context.SetContextDbKey(ContextKey,e.Value.ToString()=="Api");
+         ContextKey = e.Value.ToString();
 
     }
 

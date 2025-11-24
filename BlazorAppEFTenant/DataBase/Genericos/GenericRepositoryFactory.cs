@@ -19,11 +19,17 @@ namespace DataBase.Genericos
             _provider = provider;
         }
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string tipoContexto, string resourceName = null)
+        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string dbContextKey, bool isApi,string apiResourceName = null)
             where TEntity : class
             where TContext : DbContext
         {
-            switch (tipoContexto)
+            if (isApi) 
+            {
+                var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient("ApiRest");
+                var resource = apiResourceName ?? typeof(TEntity).Name.ToLower() + "s";
+                return new GenericRepositoryApi<TEntity, TContext>(httpClient, dbContextKey, resource);
+            }
+            switch (dbContextKey)
             {
                 case "SqlServer":
                     var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
@@ -34,14 +40,12 @@ namespace DataBase.Genericos
                 case "InMemory":
                     var memDb = _provider.GetRequiredService<InMemoryDbContext>();
                     return new GenericRepository<TEntity, InMemoryDbContext>(memDb) as IGenericRepository<TEntity, TContext>;
-                case "Api":
-                    var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient("ApiRest");
-                    var resource = resourceName ?? typeof(TEntity).Name.ToLower() + "s";
-                    return new GenericRepositoryApi<TEntity, TContext>(httpClient, resource);
-                default:
-                    throw new NotSupportedException($"Contexto '{tipoContexto}' no soportado.");
+                    default:
+                    throw new NotSupportedException($"Contexto '{dbContextKey}' no soportado.");
             }
         }
+
+       
     }
 
 }

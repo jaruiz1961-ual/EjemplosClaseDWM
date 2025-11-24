@@ -9,7 +9,7 @@ namespace DataBase.Genericos
 {
     public interface IUnitOfWorkFactory
     {
-        IUnitOfWork Create(string contextoKey);
+        IUnitOfWork Create(string contextoKey, bool isApi = false);
     }
 
 }
