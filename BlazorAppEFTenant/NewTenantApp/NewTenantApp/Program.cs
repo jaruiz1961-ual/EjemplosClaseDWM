@@ -114,6 +114,6 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorAppEFTenant.Client._Imports).Assembly);
-app.MapUsuariosApis();
+app.MapUsuariosApis<Usuario>();
 
 app.Run();

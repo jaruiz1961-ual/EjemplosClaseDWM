@@ -29,7 +29,7 @@ namespace DataBase.Genericos
 
         // Métodos de la interfaz base
         public async Task<TEntity?> GetByIdAsync(object id) =>
-            await _httpClient.GetFromJsonAsync<TEntity>($"/api/{_resourceName}/{id}");
+            await _httpClient.GetFromJsonAsync<TEntity>($"/api/{_contexto}/{_resourceName}/{id}");
 
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
@@ -38,7 +38,7 @@ namespace DataBase.Genericos
 
         public async Task AddAsync(TEntity entity)
         {
-            var resp = await _httpClient.PostAsJsonAsync($"/api/{_resourceName}", entity);
+            var resp = await _httpClient.PostAsJsonAsync($"/api/{_contexto}/{_resourceName}", entity);
             resp.EnsureSuccessStatusCode();
         }
 
@@ -48,7 +48,7 @@ namespace DataBase.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var resp = _httpClient.PutAsJsonAsync($"/api/{_resourceName}/{id}", entity).Result;
+            var resp = _httpClient.PutAsJsonAsync($"/api/{_contexto}/{_resourceName}/{id}", entity).Result;
             resp.EnsureSuccessStatusCode();
         }
 
@@ -57,7 +57,7 @@ namespace DataBase.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var resp = _httpClient.DeleteAsync($"/api/{_resourceName}/{id}").Result;
+            var resp = _httpClient.DeleteAsync($"/api/{_contexto}/{_resourceName}/{id}").Result;
             resp.EnsureSuccessStatusCode();
         }
     }

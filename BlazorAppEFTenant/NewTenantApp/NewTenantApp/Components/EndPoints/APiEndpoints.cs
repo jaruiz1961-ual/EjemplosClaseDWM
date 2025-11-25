@@ -8,7 +8,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
     public static class ApiEndpoints
     {
-        public static void MapUsuariosApis(this WebApplication app)
+        public static void MapUsuariosApis<T> (this WebApplication app) where T: class,ITenantEntity,IEntity
         {
             // GET: listar todos
             app.MapGet("/api/{contexto}/usuarios", async (
@@ -16,7 +16,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 IUnitOfWorkFactory uowFactory,
                 ITenantProvider tenantProvider) =>
             {
-                var service = new GenericDataService<Usuario>(contexto, uowFactory, tenantProvider);
+                var service = new GenericDataService<T>(contexto, uowFactory, tenantProvider);
                 var usuarios = await service.GetAllAsync();
                 return Results.Ok(usuarios);
             });
@@ -28,7 +28,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 IUnitOfWorkFactory uowFactory,
                 ITenantProvider tenantProvider) =>
             {
-                var service = new GenericDataService<Usuario>(contexto, uowFactory, tenantProvider);
+                var service = new GenericDataService<T>(contexto, uowFactory, tenantProvider);
                 var usuario = await service.GetByIdAsync(id);
                 return usuario is not null ? Results.Ok(usuario) : Results.NotFound();
             });
@@ -36,11 +36,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
             // POST: crear usuario
             app.MapPost("/api/{contexto}/usuarios", async (
                 string contexto,
-                Usuario usuario,
+                T usuario,
                 IUnitOfWorkFactory uowFactory,
                 ITenantProvider tenantProvider) =>
             {
-                var service = new GenericDataService<Usuario>(contexto, uowFactory, tenantProvider);
+                var service = new GenericDataService<T>(contexto, uowFactory, tenantProvider);
                 await service.AddAsync(usuario);
                 return Results.Created($"/api/{contexto}/usuarios/{usuario.Id}", usuario);
             });
@@ -49,20 +49,21 @@ namespace BlazorAppEFTenant.Components.EndPoints
             app.MapPut("/api/{contexto}/usuarios/{id:int}", async (
                 string contexto,
                 int id,
-                Usuario usuario,
+                T usuario,
                 IUnitOfWorkFactory uowFactory,
                 ITenantProvider tenantProvider) =>
             {
-                var service = new GenericDataService<Usuario>(contexto, uowFactory, tenantProvider);
+                var service = new GenericDataService<T>(contexto, uowFactory, tenantProvider);
                 var actual = await service.GetByIdAsync(id);
                 if (actual is null)
                     return Results.NotFound();
                 // Copia campos actualizables
-                actual.UserName = usuario.UserName;
-                actual.Codigo = usuario.Codigo;
-                actual.Contexto = usuario.Contexto;
-                actual.Password = usuario.Password;
-                actual.TenantId = usuario.TenantId;
+                actual = usuario;
+                //actual.UserName = usuario.UserName;
+                //actual.Codigo = usuario.Codigo;
+                //actual.Contexto = usuario.Contexto;
+                //actual.Password = usuario.Password;
+                //actual.TenantId = usuario.TenantId;
                 await service.UpdateAsync(actual);
                 return Results.Ok(actual);
             });
@@ -74,7 +75,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 IUnitOfWorkFactory uowFactory,
                 ITenantProvider tenantProvider) =>
             {
-                var service = new GenericDataService<Usuario>(contexto, uowFactory, tenantProvider);
+                var service = new GenericDataService<T>(contexto, uowFactory, tenantProvider);
                 var usuario = await service.GetByIdAsync(id);
                 if (usuario is null)
                     return Results.NotFound();
