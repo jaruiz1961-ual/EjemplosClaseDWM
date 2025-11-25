@@ -24,10 +24,19 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 
 
 // Tenant Provider y Context Provider
-builder.Services.AddScoped<ITenantProvider,TenantProvider>();
+builder.Services.AddScoped<ITenantProvider>(sp =>
+{
+    var provider = new TenantProvider();
+    provider.SetTenant(1); // Asigna aquí el valor inicial por defecto
+    return provider;
+});
 
-builder.Services.AddScoped<IContextKeyProvider,ContextKeyProvider>();
-
+builder.Services.AddScoped<IContextKeyProvider>(sp =>
+{
+    var provider = new ContextKeyProvider();
+    provider.SetContext("InMemory", "Ef", DirBase); // Asigna aquí el valor inicial por defecto
+    return provider;
+});
 // Interceptor para multitenant (opcional)
 builder.Services.AddScoped<TenantSaveChangesInterceptor>();
 

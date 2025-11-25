@@ -9,8 +9,8 @@ namespace DataBase.Genericos
 
     public class TenantProvider : ITenantProvider
     {
-        private int? _tenantId;
-        public int? CurrentTenantId => _tenantId;
+        
+        public int? CurrentTenantId { get; set; } = 0;
         public event Func<Task>? OnTenantChanged;
 
         public int[] GetTenants() => new[]
@@ -20,7 +20,7 @@ namespace DataBase.Genericos
 
         public void SetTenant(int? tenantId)
         {
-            _tenantId = tenantId;
+            CurrentTenantId = tenantId;
             OnTenantChanged?.Invoke();
         }
     }

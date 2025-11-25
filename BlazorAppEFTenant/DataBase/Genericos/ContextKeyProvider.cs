@@ -9,12 +9,11 @@ namespace DataBase.Genericos
 
     public class ContextKeyProvider : IContextKeyProvider
     {
-        private string _contextKeyDb = "InMemory";
-        public string _apiName = null;
-        public Uri _dirBase = null;
-        public string CurrentContextKey => _contextKeyDb;
-        public string ApiName => _apiName;
-        public Uri DirBase => _dirBase;
+ 
+        public string CurrentContextKey { get; set; } 
+        public string ApiName { get; set; }
+        public Uri DirBase { get; set; }
+   
 
         public event Func<Task>? OnContextKeyChanged;
 
@@ -30,9 +29,9 @@ namespace DataBase.Genericos
 
         public void SetContext(string contextKey, string apiName, Uri dirBase)
         {
-            _contextKeyDb = contextKey;
-            _apiName = apiName;
-            _dirBase = dirBase;
+            CurrentContextKey = contextKey;
+            ApiName = apiName;
+            DirBase = dirBase;
             OnContextKeyChanged?.Invoke();
         }
     }
