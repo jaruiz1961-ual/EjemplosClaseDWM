@@ -15,10 +15,7 @@ namespace DataBase.Servicios
         {
 
         }
-        public ServicioUsuarios(string contexto, IUnitOfWorkFactory unitOfWorkFactory, ITenantProvider tenantProvider, string apiName = null) : base(contexto, unitOfWorkFactory, tenantProvider,apiName)
-        {
-
-        }
+  
 
 
     }

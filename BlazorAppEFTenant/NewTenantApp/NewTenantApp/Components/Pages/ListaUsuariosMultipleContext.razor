@@ -94,16 +94,13 @@ else
 
     private async Task CargarAsync()
     {
+        var cp = new ContextKeyProvider();
         try
         {
             foreach (var contextKey in ContextKeyProvider.GetContextKeyDb())
             {
-                if (contextKey.StartsWith("Api"))
-                {
-                    // Saltar contextos API
-                    continue;
-                };
-                var user = new ServicioUsuarios(contextKey, UnitOfWorkFactory, TenantProvider);
+                cp.SetContext(contextKey, ContextKeyProvider.ApiName);
+                var user = new ServicioUsuarios(cp, UnitOfWorkFactory, TenantProvider);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);
                 TenantId = TenantProvider.CurrentTenantId ?? 0;

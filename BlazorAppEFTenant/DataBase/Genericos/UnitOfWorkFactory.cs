@@ -40,13 +40,13 @@ namespace DataBase.Genericos
                     case "sqlserver":
                         var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
 
-                        return new UnitOfWork<SqlServerDbContext>(sqlDb, tenant, _repoFactory, contextoKey, null);
+                        return new UnitOfWork<SqlServerDbContext>(sqlDb, tenant, _repoFactory, contextoKey, "Ef");
                     case "sqlite":
                         var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
-                        return new UnitOfWork<SqLiteDbContext>(sqLite, tenant, _repoFactory, contextoKey, null);
+                        return new UnitOfWork<SqLiteDbContext>(sqLite, tenant, _repoFactory, contextoKey, "Ef");
                     case "inmemory":
                         var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
-                        return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey, null);
+                        return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey, "Ef");
                     default: throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.");
                 }
             throw new NotSupportedException($"Tipo de acceso '{apiName}' no soportado.");
