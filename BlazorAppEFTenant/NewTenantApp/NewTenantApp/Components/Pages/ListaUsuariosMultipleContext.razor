@@ -5,7 +5,7 @@
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject ITenantProvider TenantProvider
-@inject IContextKeyDbProvider ContextKeyProvider
+@inject IContextKeyProvider ContextKeyProvider
 @inject NavigationManager nav
 @implements IDisposable
 
@@ -95,7 +95,7 @@ else
     {
         try
         {
-            foreach (var contextKey in ContextKeyProvider.GetContextKeDb())
+            foreach (var contextKey in ContextKeyProvider.GetContextKeyDb())
             {
                 if (contextKey.StartsWith("Api"))
                 {

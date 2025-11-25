@@ -19,19 +19,19 @@ namespace DataBase.Genericos
         string _tipoContexto;
         IGenericRepository<Entidad, TContext> repo = null;
         private  IGenericRepositoryFactory _repositoryFactory;
-        bool _isApi;
+        string _apiName;
 
         public UnitOfWork(TContext context, ITenantProvider tenant)
         {
             Context = context;
             
         }
-        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto, bool isApi )
+        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto, string apiName=null)
         {
             Context = context;
             _repositoryFactory = factory;
             _tipoContexto = tipoContexto;
-            _isApi = isApi;
+            _apiName = apiName;
         }
 
         public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
@@ -41,7 +41,7 @@ namespace DataBase.Genericos
 
             if (!_repositories.TryGetValue(type, out var repo))
             {
-                 repo = _repositoryFactory.Create<TEntity, TContext>(_tipoContexto,Context,_isApi);
+                 repo = _repositoryFactory.Create<TEntity, TContext>(_tipoContexto,Context,_apiName);
                     _repositories[type] = repo;
 
             }

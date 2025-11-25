@@ -1,12 +1,6 @@
 ﻿using DataBase.Contextos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
@@ -20,13 +14,13 @@ namespace DataBase.Genericos
             _provider = provider;
         }
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string dbContextKey, TContext context, bool isApi,string apiResourceName = null)
+        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string dbContextKey, TContext context, string apiName = null,string apiResourceName = null)
             where TEntity : class
             where TContext : DbContext
         {
-            if (isApi) 
+            if (apiName!=null && apiName.ToLower()!="ef") 
             {
-                var httpClient= _provider.GetRequiredService<IHttpClientFactory>().CreateClient("ApiRest");
+                var httpClient= _provider.GetRequiredService<IHttpClientFactory>().CreateClient(apiName);
                  Console.WriteLine("BaseAddress: " + httpClient.BaseAddress);
                 var resource = apiResourceName ?? typeof(TEntity).Name.ToLower() + "s";
                 return new GenericRepositoryApi<TEntity, TContext>(httpClient, dbContextKey, resource);

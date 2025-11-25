@@ -1,8 +1,7 @@
 ﻿@rendermode InteractiveServer
 @using DataBase.Genericos
-@using Microsoft.AspNetCore.Components.Forms
 @inject ITenantProvider Tenant
-@inject IContextKeyDbProvider Context
+@inject IContextKeyProvider Context
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -26,25 +25,28 @@
     <p>
    
         <select @onchange="OnContextKeyChanged">
-            @foreach (var context in Context.GetContextKeDb())
+            @foreach (var context in Context.GetContextKeyDb())
             {
-                <option  value="@context"  selected="@(context == ContextKey)">@context</option>
+                <option yvalue="@context" selected="@(context == ContextKey)">@context</option>
             }
         </select>
     </p>
 </div>
 
-<h3>Selecciona el origen de datos:</h3>
-<InputRadioGroup @bind-Value="DataSource">
-    @foreach (var option in Options)
-    {
-        <div>
-            <InputRadio Value="@option" />
-            <label style="color:white">@option</label>
-        </div>
-    }
-</InputRadioGroup>
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Modo Conexion API</a>
+    </div>
+    <p>
 
+        <select @onchange="OnContextApiKeyChanged">
+            @foreach (var apiName in Context.GetApiNames())
+            {
+                <option value="@apiName" selected="@(apiName == ApiName)">@apiName</option>                            
+            }
+        </select>
+    </p>
+</div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
@@ -68,7 +70,7 @@
             </NavLink>
         </div>
 
-         @if (!DataSource.StartsWith("Api"))
+         @if (!ContextKey.StartsWith("Api"))
         {
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="ListaUsuarios">
@@ -88,7 +90,7 @@
         </div>
         }
 
-        @if (DataSource.StartsWith("Api"))
+        @if (ContextKey.StartsWith("Api"))
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="ListaUsuariosApi">
@@ -101,44 +103,27 @@
 @code{
     int TenantId;
     string ContextKey;
-    string ApiContextKey;
-
-    private string[] Options = new[] { "Api", "Ef" };
-    private string dataSource;
-    public string DataSource
-    {
-        get => dataSource;
-        set
-        {
-            if (dataSource != value)
-            {
-                dataSource = value;
-                OnContextApiKeyChanged(value);
-            }
-        }
-    }
+    string ApiName;
 
     private async Task OnTenantChanged(ChangeEventArgs e)
     {
         if (int.TryParse(e.Value.ToString(), out int newTenantId))
         {
+            TenantId = newTenantId;
             Tenant.SetTenant(newTenantId);
         }
-      
     }
 
     private async Task OnContextKeyChanged(ChangeEventArgs e)
     {
-        Context.SetContextDbKey(e.Value.ToString(),DataSource=="Api");
-        ContextKey = e.Value.ToString();
-
+        Context.SetContext(e.Value.ToString(),Context.ApiName);
+        ContextKey = e.Value.ToString();   
     }
 
-    private async Task OnContextApiKeyChanged(string value)
+    private async Task OnContextApiKeyChanged(ChangeEventArgs e)
     {
-        
-        Context.SetContextDbKey(ContextKey,value=="Api");
-        DataSource = value;
+        Context.SetContext(Context.CurrentContextKey,e.Value.ToString());
+        ApiName = e.Value.ToString();
 
     }
 
@@ -146,8 +131,8 @@
     protected override async Task OnInitializedAsync()
     {
         TenantId = Tenant.CurrentTenantId ?? 0;
-        ContextKey = Context.CurrentContextKey ?? "SqlServer";
-        DataSource = "Ef";
+        ContextKey = Context.CurrentContextKey ?? "InMemory";
+        ApiName = Context.ApiName ?? "Ef";
     }
     }
     

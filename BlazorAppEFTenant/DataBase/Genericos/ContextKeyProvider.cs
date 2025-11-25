@@ -7,22 +7,28 @@ using System.Threading.Tasks;
 namespace DataBase.Genericos
 {
 
-    public class ContextKeyDbProvider : IContextKeyDbProvider
+    public class ContextKeyProvider : IContextKeyProvider
     {
         private string _contextKeyDb = "InMemory";
-        public bool IsApi { get; set; } = false;
+        public string _apiName = null;
         public string CurrentContextKey => _contextKeyDb;
+        public string ApiName => _apiName;
         public event Func<Task>? OnContextKeyChanged;
 
-        public string[] GetContextKeDb() => new[]
+        public string[] GetContextKeyDb() => new[]
         {
             "SqlServer","SqLite","InMemory"
         };
 
-        public void SetContextDbKey(string contextKey, bool isApi)
+        public string[] GetApiNames() => new[]
+        {
+            "Ef","ApiRest"
+        };
+
+        public void SetContext(string contextKey, string apiName)
         {
             _contextKeyDb = contextKey;
-            IsApi = isApi;
+            _apiName = apiName;
             OnContextKeyChanged?.Invoke();
         }
     }

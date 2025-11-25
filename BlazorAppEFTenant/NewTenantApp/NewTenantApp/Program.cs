@@ -33,10 +33,10 @@ builder.Services.AddScoped<ITenantProvider> (sp=>
     return provider;
 });
 
-builder.Services.AddScoped<IContextKeyDbProvider>(sp =>
+builder.Services.AddScoped<IContextKeyProvider>(sp =>
 {
-    var provider = new ContextKeyDbProvider();
-    provider.SetContextDbKey("InMemory",false); // Asigna aquí el valor inicial por defecto
+    var provider = new ContextKeyProvider();
+    provider.SetContext("InMemory","Ef"); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 
