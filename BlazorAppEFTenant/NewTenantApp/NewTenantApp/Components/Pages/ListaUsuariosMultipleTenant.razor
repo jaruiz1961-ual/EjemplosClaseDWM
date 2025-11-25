@@ -20,8 +20,9 @@
 }
 else
 {
-    <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-    <p>Usuarios del contexto <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+    <p>TenantId <strong>@TenantProvider.CurrentTenantId</strong>:</p>
+    <p>ContextKeDb <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+    <p>ApiName <strong>@ContextKeyProvider.ApiName</strong>:</p>
 
 @if (usuarios is null)
 {

@@ -26,7 +26,7 @@ namespace DataBase.Genericos
             Context = context;
             
         }
-        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto, string apiName=null)
+        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto, string apiName)
         {
             Context = context;
             _repositoryFactory = factory;

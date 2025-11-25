@@ -25,24 +25,31 @@ namespace DataBase.Genericos
         public IUnitOfWork Create(string contextoKey,string apiName )
         {
             var tenant = _provider.GetRequiredService<ITenantProvider>();
+            if (apiName == null)
+            {
+                return new UnitOfWork<DbContext>(null, tenant, _repoFactory, contextoKey, apiName);
+            }
+            else
             if (apiName != null && apiName.ToLower() != "ef")
             {
                 return new UnitOfWork<DbContext>(null, tenant, _repoFactory, contextoKey, apiName);
             }
-            switch (contextoKey.ToLower())
-            {
-                case "sqlserver":
-                    var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
+            else if (apiName.ToLower() == "ef")
+                switch (contextoKey.ToLower())
+                {
+                    case "sqlserver":
+                        var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
 
-                    return new UnitOfWork<SqlServerDbContext>(sqlDb, tenant, _repoFactory, contextoKey,null);
-                case "sqlite":
-                    var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
-                    return new UnitOfWork<SqLiteDbContext>(sqLite, tenant, _repoFactory, contextoKey,null);
-                case "inmemory":
-                    var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
-                    return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey,null);
+                        return new UnitOfWork<SqlServerDbContext>(sqlDb, tenant, _repoFactory, contextoKey, null);
+                    case "sqlite":
+                        var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
+                        return new UnitOfWork<SqLiteDbContext>(sqLite, tenant, _repoFactory, contextoKey, null);
+                    case "inmemory":
+                        var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
+                        return new UnitOfWork<InMemoryDbContext>(inMemory, tenant, _repoFactory, contextoKey, null);
                     default: throw new NotSupportedException($"Contexto '{contextoKey}' no soportado.");
-            }
+                }
+            throw new NotSupportedException($"Tipo de acceso '{apiName}' no soportado.");
         }
     }
 

@@ -1,5 +1,5 @@
-﻿@page "/ListaUsuariosApi"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+﻿@page "/ListaUsuariosCliente"
+@rendermode InteractiveWebAssembly
 
 @using DataBase.Genericos
 @using DataBase.Modelo
@@ -7,11 +7,12 @@
 @inject IUnitOfWorkFactory UowFactory
 @inject ITenantProvider TenantProvider
 @inject IContextKeyProvider ContextKeyProvider
+@inject HttpClient Http
 @inject NavigationManager nav
 @implements IDisposable
 
 
-<h3>Listado de usuarios (Genérico)</h3>
+<h3>Listado de usuarios (Genérico) en Cliente</h3>
 
 
 
@@ -21,9 +22,9 @@
 }
 else
 {
-
-    <p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-    <p>Usuarios del contexto <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+    <p>TenantId <strong>@TenantProvider.CurrentTenantId</strong>:</p>
+    <p>ContextKeDb <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+    <p>ApiName <strong>@ContextKeyProvider.ApiName</strong>:</p>
 
 @if (usuarios is null)
 {
