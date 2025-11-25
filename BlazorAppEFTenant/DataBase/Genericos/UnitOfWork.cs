@@ -54,9 +54,9 @@ namespace DataBase.Genericos
             where TEntity : class
             => GetRepository<TEntity>();   // aquí ya compila, porque el return es IGenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
 
-        public Task<int> SaveChangesAsync() => Context.SaveChangesAsync();
+        public Task<int> SaveChangesAsync() => Context?.SaveChangesAsync();
 
-        public void Dispose() => Context.Dispose();
+        public void Dispose() => Context?.Dispose();
     }
 
 
