@@ -2,56 +2,63 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class UnitOfWorkApi2 : IUnitOfWork
+    public class UnitOfWorkApi<TContext> : IUnitOfWork<TContext>
+    where TContext : DbContext
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _contextKey;
         private readonly Dictionary<Type, object> _repositories = new();
 
-        public UnitOfWorkApi2(HttpClient httpClient, string contextKey)
+        public TContext Context { get; }
+        DbContext IUnitOfWork.Context => Context;
+
+        
+        IGenericRepository<Entidad, TContext> repo = null;
+        private  IGenericRepositoryFactory _repositoryFactory;
+        IContextKeyProvider _cp;
+
+        public UnitOfWorkApi(TContext context, ITenantProvider tenant)
         {
-            _httpClient = httpClient;
-            _contextKey = contextKey;
+            Context = context;
+            
+        }
+        public UnitOfWorkApi(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, 
+            IContextKeyProvider cp)
+        {
+            Context = context;
+            _repositoryFactory = factory;
+            _cp = cp;
         }
 
-        public DbContext Context => throw new NotImplementedException();
-
-        public void Dispose()
+        public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
+            where TEntity : class
         {
-            throw new NotImplementedException();
-        }
+            var type = typeof(TEntity);
 
-        public IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class
-        {
-
-            if (!_repositories.TryGetValue(typeof(TEntity), out var repo))
+            if (!_repositories.TryGetValue(type, out var repo))
             {
-                var resourceName = typeof(TEntity).Name.ToLower() + "s";
-                repo = new GenericRepositoryApi<TEntity, DbContext>(_httpClient, _contextKey, resourceName);
-                _repositories[typeof(TEntity)] = repo;
+                 repo = _repositoryFactory.Create<TEntity, TContext>(Context,_cp);
+                    _repositories[type] = repo;
+
             }
-            return (IGenericRepository<TEntity>)repo;
-        }
-        //public IGenericRepository<TEntity, TContext> GetRepository<TEntity, TContext>()
-        //where TEntity : class
-        //where TContext : DbContext
-        //{
-        //    // Aquí debes calcular el resourceName por convención, no pedirlo como parámetro externo.
-        //    var resourceName = typeof(TEntity).Name.ToLower() + "s";
-        //    // Construir el repo API sin parámetros extra
-        //    return new GenericRepositoryApi<TEntity, TContext>(_httpClient, resourceName);
-        //}
 
-        public Task SaveChangesAsync() => Task.CompletedTask;
-
-        Task<int> IUnitOfWork.SaveChangesAsync()
-        {
-            throw new NotImplementedException();
+            return (IGenericRepository<TEntity, TContext>)repo;
         }
+
+       
+        IGenericRepository<TEntity> IUnitOfWork.GetRepository<TEntity>()
+            where TEntity : class
+            => GetRepository<TEntity>();   // aquí ya compila, porque el return es IGenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
+
+        public Task<int> SaveChangesAsync() => Task.FromResult(0);
+
+        public void Dispose() => Task.FromResult(0);
     }
+
+
 }

@@ -15,25 +15,25 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 //    client.BaseAddress = new Uri(UrlApi);
 //});
 var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
+Uri DirBase = new Uri(apiUrl!);
 builder.Services.AddScoped(sp =>
-    new HttpClient { BaseAddress = new Uri(apiUrl!) }
+    new HttpClient { BaseAddress = DirBase }
 );
 
 
 
 
-// Tenant Provider y Context Provider
-builder.Services.AddScoped<ITenantProvider>(sp =>
+builder.Services.AddTransient<ITenantProvider>(sp =>
 {
     var provider = new TenantProvider();
     provider.SetTenant(1); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 
-builder.Services.AddScoped<IContextKeyProvider>(sp =>
+builder.Services.AddTransient<IContextKeyProvider>(sp =>
 {
     var provider = new ContextKeyProvider();
-    provider.SetContext("InMemory", "ApiRest"); // Asigna aquí el valor inicial por defecto
+    provider.SetContext("InMemory", "Ef", DirBase); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 

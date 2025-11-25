@@ -11,8 +11,11 @@ namespace DataBase.Genericos
     {
         private string _contextKeyDb = "InMemory";
         public string _apiName = null;
+        public Uri _dirBase = null;
         public string CurrentContextKey => _contextKeyDb;
         public string ApiName => _apiName;
+        public Uri DirBase => _dirBase;
+
         public event Func<Task>? OnContextKeyChanged;
 
         public string[] GetContextKeyDb() => new[]
@@ -25,10 +28,11 @@ namespace DataBase.Genericos
             "Ef","ApiRest"
         };
 
-        public void SetContext(string contextKey, string apiName)
+        public void SetContext(string contextKey, string apiName, Uri dirBase)
         {
             _contextKeyDb = contextKey;
             _apiName = apiName;
+            _dirBase = dirBase;
             OnContextKeyChanged?.Invoke();
         }
     }

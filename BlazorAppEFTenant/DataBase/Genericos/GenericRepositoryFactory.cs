@@ -14,28 +14,28 @@ namespace DataBase.Genericos
             _provider = provider;
         }
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(string dbContextKey, TContext context, string apiName,string apiResourceName )
+        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(TContext context, IContextKeyProvider cp )
             where TEntity : class
             where TContext : DbContext
         {
-            if (apiName == null )
+            if (cp.ApiName == null )
             {
-                var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient(apiName);
+                var httpClient = _provider.GetRequiredService<HttpClient>();
                 Console.WriteLine("BaseAddress: " + httpClient.BaseAddress);
-                var resource = apiResourceName ?? typeof(TEntity).Name.ToLower() + "s";
-                return new GenericRepositoryApi<TEntity, TContext>(httpClient, dbContextKey, resource);
+                var resource =  typeof(TEntity).Name.ToLower() + "s";
+                return new GenericRepositoryApi<TEntity, TContext>(httpClient, cp, resource);
             }
             else
-            if (apiName != null && apiName.ToLower() != "ef")
+            if (cp.ApiName != null && cp.ApiName.ToLower() != "ef")
             {
-                var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient(apiName);
+                var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient(cp.ApiName);
                 Console.WriteLine("BaseAddress: " + httpClient.BaseAddress);
-                var resource = apiResourceName ?? typeof(TEntity).Name.ToLower() + "s";
-                return new GenericRepositoryApi<TEntity, TContext>(httpClient, dbContextKey, resource);
+                var resource =  typeof(TEntity).Name.ToLower() + "s";
+                return new GenericRepositoryApi<TEntity, TContext>(httpClient, cp, resource);
             }
             else
-            if (apiName.ToLower() == "ef")
-                switch (dbContextKey.ToLower())
+            if (cp.ApiName.ToLower() == "ef")
+                switch (cp.CurrentContextKey.ToLower())
                 {
                     case "sqlserver":
                         var sqlDb = context as SqlServerDbContext;
@@ -47,9 +47,9 @@ namespace DataBase.Genericos
                         var memDb = context as InMemoryDbContext;
                         return new GenericRepository<TEntity, InMemoryDbContext>(memDb) as IGenericRepository<TEntity, TContext>;
                     default:
-                        throw new NotSupportedException($"Contexto '{dbContextKey}' no soportado.");
+                        throw new NotSupportedException($"Contexto '{cp.CurrentContextKey}' no soportado.");
                 }
-            throw new NotSupportedException($"Tipo de acceso '{apiName}' no soportado.");
+            throw new NotSupportedException($"Tipo de acceso '{cp.ApiName}' no soportado.");
         }
 
        

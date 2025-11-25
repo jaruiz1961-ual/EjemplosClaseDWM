@@ -105,8 +105,9 @@ else
     {
         try
         {
-
-            usuarioService= new ServicioUsuarios(ContextKeyProvider, UowFactory, TenantProvider);
+            var cp = new ContextKeyProvider();
+            cp.SetContext(ContextKeyProvider.CurrentContextKey,ContextKeyProvider.ApiName, ContextKeyProvider.DirBase);
+            usuarioService= new ServicioUsuarios(cp, UowFactory, TenantProvider);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
             TenantId = TenantProvider.CurrentTenantId ?? 0;

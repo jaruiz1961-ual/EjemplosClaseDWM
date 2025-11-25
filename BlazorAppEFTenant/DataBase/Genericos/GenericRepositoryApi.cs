@@ -17,11 +17,13 @@ namespace DataBase.Genericos
         private readonly string _resourceName;
         private readonly string _contexto;
 
-        public GenericRepositoryApi(HttpClient httpClient, string contexto, string resourceName)
+        public GenericRepositoryApi(HttpClient httpClient, IContextKeyProvider cp, string resourceName)
         {
             _httpClient = httpClient;
             _resourceName = resourceName.ToLower();
-            _contexto = contexto;
+            _contexto = cp.CurrentContextKey;
+            if (httpClient.BaseAddress == null)
+                _httpClient.BaseAddress = cp.DirBase;
         }
 
         // Propiedad Context: solo para cumplimiento de la interfaz

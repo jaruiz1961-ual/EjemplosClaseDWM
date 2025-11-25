@@ -115,13 +115,13 @@
 
     private async Task OnContextKeyChanged(ChangeEventArgs e)
     {
-        Context.SetContext(e.Value.ToString(),Context.ApiName);
+        Context.SetContext(e.Value.ToString(),Context.ApiName,Context.DirBase);
         ContextKey = e.Value.ToString();   
     }
 
     private async Task OnContextApiKeyChanged(ChangeEventArgs e)
     {
-        Context.SetContext(Context.CurrentContextKey,e.Value.ToString());
+        Context.SetContext(Context.CurrentContextKey,e.Value.ToString(),Context.DirBase);
         ApiName = e.Value.ToString();
 
     }

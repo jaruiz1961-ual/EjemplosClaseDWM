@@ -14,24 +14,24 @@ namespace DataBase.Genericos
         private readonly Dictionary<Type, object> _repositories = new();
 
         public TContext Context { get; }
+
         DbContext IUnitOfWork.Context => Context;
 
-        string _tipoContexto;
         IGenericRepository<Entidad, TContext> repo = null;
         private  IGenericRepositoryFactory _repositoryFactory;
-        string _apiName;
+        IContextKeyProvider _cp;
 
-        public UnitOfWork(TContext context, ITenantProvider tenant)
-        {
-            Context = context;
+        //public UnitOfWork(TContext context, ITenantProvider tenant)
+        //{
+        //    Context = context;
             
-        }
-        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, string tipoContexto, string apiName)
+        //}
+        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, IContextKeyProvider cp)
         {
             Context = context;
             _repositoryFactory = factory;
-            _tipoContexto = tipoContexto;
-            _apiName = apiName;
+            _cp = cp;
+
         }
 
         public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
@@ -41,7 +41,7 @@ namespace DataBase.Genericos
 
             if (!_repositories.TryGetValue(type, out var repo))
             {
-                 repo = _repositoryFactory.Create<TEntity, TContext>(_tipoContexto,Context,_apiName);
+                 repo = _repositoryFactory.Create<TEntity, TContext>(Context,_cp);
                     _repositories[type] = repo;
 
             }

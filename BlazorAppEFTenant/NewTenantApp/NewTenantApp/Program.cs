@@ -15,28 +15,26 @@ builder.Services.AddRazorComponents()
 IConfiguration configuration = builder.Configuration;
 
 // HttpClient para APIs externas (AJUSTA la clave según tu appsettings)
+Uri DirBase = new Uri(configuration.GetConnectionString("UrlApi") ?? "https://localhost:7013/");
 builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 {
-    var config = sp.GetRequiredService<IConfiguration>();
-    var UrlApi = config.GetConnectionString("UrlApi");
-    Console.WriteLine("UrlApi: " + config.GetConnectionString("UrlApi"));
-    client.BaseAddress = new Uri(UrlApi);
+    client.BaseAddress = DirBase;
 });
 
 
 
 // Tenant Provider y Context Provider
-builder.Services.AddScoped<ITenantProvider> (sp=>
+builder.Services.AddTransient<ITenantProvider> (sp=>
 {
     var provider = new TenantProvider();
     provider.SetTenant(1); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 
-builder.Services.AddScoped<IContextKeyProvider>(sp =>
+builder.Services.AddTransient<IContextKeyProvider>(sp =>
 {
     var provider = new ContextKeyProvider();
-    provider.SetContext("InMemory","Ef"); // Asigna aquí el valor inicial por defecto
+    provider.SetContext("InMemory","Ef",DirBase); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 

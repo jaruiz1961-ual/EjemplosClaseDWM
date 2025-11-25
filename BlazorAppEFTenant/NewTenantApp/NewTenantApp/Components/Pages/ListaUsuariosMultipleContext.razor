@@ -99,7 +99,7 @@ else
         {
             foreach (var contextKey in ContextKeyProvider.GetContextKeyDb())
             {
-                cp.SetContext(contextKey, ContextKeyProvider.ApiName);
+                cp.SetContext(contextKey, ContextKeyProvider.ApiName,ContextKeyProvider.DirBase);
                 var user = new ServicioUsuarios(cp, UnitOfWorkFactory, TenantProvider);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);
