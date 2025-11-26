@@ -1,10 +1,10 @@
-﻿@page "/ListaUsuarios"
+﻿@page "/ListaUsuariosApi"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
-@inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject IUnitOfWorkFactory UowFactory 
 
 @inject IContextProvider ContextProvider
 @inject NavigationManager nav
@@ -64,10 +64,8 @@ else
 
 @code {
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
-    int TenantId;
-    string ContextoKey ="";
+    private GenericDataService<Usuario> usuarioService;
 
-   
     private Func<Task>? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
@@ -78,7 +76,7 @@ else
             StateHasChanged();
         };
 
-    
+
         ContextProvider.OnContextChanged += _onContextChangedHandler;
         await CargarAsync();
     }
@@ -88,10 +86,12 @@ else
         try
         {
 
-            var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
-            var list = await user.GetAllAsync();
+            var cp = new ContextProvider();
+            cp.SetContext(ContextProvider.TenantId, ContextProvider.DbKey, 
+                ContextProvider.ApiName, ContextProvider.DirBase, "ApiServer");
+            usuarioService = new ServicioUsuarios(cp, UowFactory);
+            var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
-
 
         }
         catch (Exception ex)
@@ -111,7 +111,7 @@ else
 
     private void Dispose()
     {
-  
+
         ContextProvider.OnContextChanged -= _onContextChangedHandler;
 
     }

@@ -1,51 +1,45 @@
 ﻿@rendermode InteractiveServer
 @using DataBase.Genericos
-@inject ITenantProvider Tenant
-@inject IContextKeyProvider Context
+@inject IContextProvider ContextProvider
 
 <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">New Tenant</a>
-    </div>
-    <p>
-       
-        <select @onchange="OnTenantChanged">
-            @foreach (var tenant in Tenant.GetTenants())
-            {
-                <option value="@tenant" selected="@(tenant == TenantId)">@tenant</option>
-            }
-        </select>
-    </p>
+    <div class="container-fluid" />
+    <select class="form-select" @bind="TenantId">
 
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">NewContext</a>
-    </div>
-    <p>
-   
-        <select @onchange="OnContextKeyChanged">
-            @foreach (var context in Context.GetContextKeyDb())
-            {
-                <option yvalue="@context" selected="@(context == ContextKey)">@context</option>
-            }
-        </select>
-    </p>
+        @foreach (var opcion in ContextProvider.GetTenantIds())
+        {
+            <option value="@opcion">@opcion</option>
+        }
+    </select>
+    <select class="form-select" @bind="ContextKey">
 
+        @foreach (var opcion in ContextProvider.GetContextKeyDbs())
+        {
+            <option value="@opcion">@opcion</option>
+        }
+    </select>
+    <select class="form-select" @bind="ApiName">
 
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">Modo Conexion API</a>
-    </div>
-    <p>
+        @foreach (var opcion in ContextProvider.GetApiNames())
+        {
+            <option value="@opcion">@opcion</option>
+        }
+    </select>
+    <select class="form-select" @bind="Mode">
 
-        <select @onchange="OnContextApiKeyChanged">
-            @foreach (var apiName in Context.GetApiNames())
-            {
-                <option value="@apiName" selected="@(apiName == ApiName)">@apiName</option>                            
-            }
-        </select>
-    </p>
+        @foreach (var opcion in ContextProvider.GetConnectionModes())
+        {
+            <option value="@opcion">@opcion</option>
+        }
+    </select>
+ 
 </div>
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<button class="btn btn-primary" @onclick="Actualizar">
+    Actualizar
+</button>
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
@@ -73,6 +67,11 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista
             </NavLink>
         </div>
+        <div class="nav-item ">
+            <NavLink class="nav-link" href="ListaUsuariosApi">
+                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> ListaApi
+            </NavLink>
+        </div>
 
         <div class="nav-item ">
             <NavLink class="nav-link" href="ListaUsuariosMultipleContext">
@@ -98,40 +97,20 @@
         </div>
         
     </nav>
+    
 </div>
 @code{
-    int TenantId;
-    string ContextKey;
-    string ApiName;
+    int TenantId = 0;
+    string ContextKey = "SqLite";
+    string ApiName = "ApiRest";
+    string Mode = "Ef";
 
-    private async Task OnTenantChanged(ChangeEventArgs e)
+
+    private async Task Actualizar()
     {
-        if (int.TryParse(e.Value.ToString(), out int newTenantId))
-        {
-            TenantId = newTenantId;
-            Tenant.SetTenant(newTenantId);
-        }
+        ContextProvider.SetContext(TenantId,ContextKey,ApiName,ContextProvider.DirBase,Mode);
+         
     }
 
-    private async Task OnContextKeyChanged(ChangeEventArgs e)
-    {
-        Context.SetContext(e.Value.ToString(),Context.ApiName,Context.DirBase);
-        ContextKey = e.Value.ToString();   
-    }
-
-    private async Task OnContextApiKeyChanged(ChangeEventArgs e)
-    {
-        Context.SetContext(Context.CurrentContextKey,e.Value.ToString(),Context.DirBase);
-        ApiName = e.Value.ToString();
-
-    }
-
-
-    protected override async Task OnInitializedAsync()
-    {
-        TenantId = Tenant.CurrentTenantId ?? 0;
-        ContextKey = Context.CurrentContextKey ?? "InMemory";
-        ApiName = Context.ApiName ?? "Ef";
-    }
     }
     

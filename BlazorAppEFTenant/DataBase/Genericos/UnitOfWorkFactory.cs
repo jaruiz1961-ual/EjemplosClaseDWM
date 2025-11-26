@@ -22,35 +22,35 @@ namespace DataBase.Genericos
             _repoFactory = repoFactory;
         }
 
-        public IUnitOfWork Create(IContextKeyProvider cp)
+        public IUnitOfWork Create(IContextProvider cp)
         {
-            var tenantProvider = _provider.GetRequiredService<ITenantProvider>();
-            string apiResource = null;
-            if (cp.ApiName == null)
+      
+     
+            if (cp.ConnectionMode.ToLower() == "apiclient")
             {
-                return new UnitOfWorkApi<DbContext>(null, tenantProvider, _repoFactory, cp);
+                return new UnitOfWorkApi<DbContext>(cp, _repoFactory);
             }
             else
-            if (cp.ApiName != null && cp.ApiName.ToLower() != "ef")
+            if (cp.ConnectionMode.ToLower() == "apiserver")
             {
-                return new UnitOfWorkApi<DbContext>(null, tenantProvider, _repoFactory, cp);
+                return new UnitOfWorkApi<DbContext>(cp, _repoFactory);
             }
-            else if (cp.ApiName.ToLower() == "ef")
-                switch (cp.CurrentContextKey.ToLower())
+            else if (cp.ConnectionMode.ToLower() == "ef")
+                switch (cp.DbKey.ToLower())
                 {
                     case "sqlserver":
                         var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
 
-                        return new UnitOfWork<SqlServerDbContext>(sqlDb, tenantProvider, _repoFactory, cp);
+                        return new UnitOfWork<SqlServerDbContext>(sqlDb, cp, _repoFactory);
                     case "sqlite":
                         var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
-                        return new UnitOfWork<SqLiteDbContext>(sqLite, tenantProvider, _repoFactory, cp);
+                        return new UnitOfWork<SqLiteDbContext>(sqLite, cp, _repoFactory);
                     case "inmemory":
                         var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
-                        return new UnitOfWork<InMemoryDbContext>(inMemory, tenantProvider, _repoFactory, cp);
-                    default: throw new NotSupportedException($"Contexto '{cp.CurrentContextKey}' no soportado.");
+                        return new UnitOfWork<InMemoryDbContext>(inMemory, cp, _repoFactory);
+                    default: throw new NotSupportedException($"Contexto '{cp.DbKey}' no soportado.");
                 }
-            throw new NotSupportedException($"Tipo de acceso '{cp.ApiName}' no soportado.");
+            throw new NotSupportedException($"Tipo de acceso '{cp.ConnectionMode}' no soportado.");
         }
     }
 

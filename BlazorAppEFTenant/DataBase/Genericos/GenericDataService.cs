@@ -12,13 +12,12 @@ namespace DataBase.Servicios
     public class GenericDataService<T> : IGenericDataService<T> where T : class, ITenantEntity, IEntity
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
-        private readonly ITenantProvider _tenantProvider;
-        private readonly IContextKeyProvider _contextProvider;
+
+        private readonly IContextProvider _contextProvider;
         private readonly string _apiName;
-        public GenericDataService(IContextKeyProvider contextKeyProvider, IUnitOfWorkFactory uowFactory, ITenantProvider tenantProvider)
+        public GenericDataService(IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = contextKeyProvider;
-            _tenantProvider = tenantProvider;
+            _contextProvider = contextKeyProvider;         
             _unitOfWorkFactory = uowFactory;
        
 
@@ -30,20 +29,23 @@ namespace DataBase.Servicios
             var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
             var allEntities = await repo.GetAllAsync();
-            return allEntities.Where(e => e.TenantId == _tenantProvider.CurrentTenantId).ToList();
+            return allEntities.ToList();
+            //return allEntities.Where(e => e.TenantId == _tenantProvider.TenantId).ToList();
         }
         public async Task<T?> GetByIdAsync(int id)
         {
              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
-            if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)
-                return entity;
-            return null;
+            return entity;
+
+            //if (entity != null && entity.TenantId == _tenantProvider.TenantId)
+            //    return entity;
+            //return null;
         }
         public async Task AddAsync(T data)
         {
-            data.TenantId = _tenantProvider.CurrentTenantId;
+            //data.TenantId = _tenantProvider.TenantId;
              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
             await repo.AddAsync(data);
@@ -51,8 +53,8 @@ namespace DataBase.Servicios
         }
         public async Task UpdateAsync(T data)
         {
-            if (data.TenantId != _tenantProvider.CurrentTenantId)
-                throw new UnauthorizedAccessException("No se puede editar una entidad de otro tenant.");
+            //if (data.TenantId != _tenantProvider.TenantId)
+            //    throw new UnauthorizedAccessException("No se puede editar una entidad de otro tenant.");
              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
             repo.Update(data);
@@ -63,7 +65,7 @@ namespace DataBase.Servicios
              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
-            if (entity != null && entity.TenantId == _tenantProvider.CurrentTenantId)
+            if (entity != null)// && entity.TenantId == _tenantProvider.TenantId)
             {
                 repo.Remove(entity);
                 await uow.SaveChangesAsync();

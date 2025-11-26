@@ -4,25 +4,18 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
-@inject ITenantProvider TenantProvider
-@inject IContextKeyProvider ContextKeyProvider
+
+@inject IContextProvider ContextProvider
 @inject NavigationManager nav
 @implements IDisposable
 
 
 <h3>Listado de usuarios (Genérico)</h3>
 
+<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
 
-
-@if (TenantProvider.CurrentTenantId == null)
-{
-    <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
-}
-else
-{
-    <p>TenantId <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-    <p>ContextKeDb <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
-    <p>ApiName <strong>@ContextKeyProvider.ApiName</strong>:</p>
 
 @if (usuarios is null)
 {
@@ -63,23 +56,22 @@ else
                 }
             </tbody>
         </table>
-}
+
 }
 
 
 @code {
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
-    int TenantId;
-    string ContextoKey ="";
 
-    private Func<Task>? _onTenantChangedHandler;
-    private Func<Task>? _onContextKeyChangedHandler;
+
+ 
+    private Func<Task>? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
     {
 
-        TenantId = TenantProvider.CurrentTenantId ?? 0;
-        _onTenantChangedHandler += async () =>
+
+        _onContextChangedHandler += async () =>
        {
            usuarios.Clear();
            await CargarAsync();
@@ -87,23 +79,23 @@ else
        };
 
 
-        TenantProvider.OnTenantChanged +=  _onTenantChangedHandler;
+        ContextProvider.OnContextChanged +=  _onContextChangedHandler;
 
         await CargarAsync();
     }
 
     private async Task CargarAsync()
     {
-        var cp = new ContextKeyProvider();
+        var cp = new ContextProvider();
         try
         {
-            foreach (var contextKey in ContextKeyProvider.GetContextKeyDb())
+            foreach (var contextKey in ContextProvider.GetContextKeyDbs())
             {
-                cp.SetContext(contextKey, ContextKeyProvider.ApiName,ContextKeyProvider.DirBase);
-                var user = new ServicioUsuarios(cp, UnitOfWorkFactory, TenantProvider);
+                cp.SetContext(ContextProvider.TenantId,contextKey, ContextProvider.ApiName,ContextProvider.DirBase,ContextProvider.ConnectionMode);
+                var user = new ServicioUsuarios(cp, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);
-                TenantId = TenantProvider.CurrentTenantId ?? 0;
+ 
             }
 
         }
@@ -123,7 +115,7 @@ else
 
     private void Dispose()
     {
-        TenantProvider.OnTenantChanged -= _onTenantChangedHandler;
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
 
 
     }

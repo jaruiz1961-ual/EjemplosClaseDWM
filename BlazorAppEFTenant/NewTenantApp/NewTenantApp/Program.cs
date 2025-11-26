@@ -24,21 +24,17 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 
 
 // Tenant Provider y Context Provider
-builder.Services.AddScoped<ITenantProvider>(sp =>
+
+
+builder.Services.AddScoped<IContextProvider>(sp =>
 {
-    var provider = new TenantProvider();
-    provider.SetTenant(1); // Asigna aquí el valor inicial por defecto
+    var provider = new ContextProvider();
+    provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7031/"), "Ef"); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 
-builder.Services.AddScoped<IContextKeyProvider>(sp =>
-{
-    var provider = new ContextKeyProvider();
-    provider.SetContext("InMemory", "Ef", DirBase); // Asigna aquí el valor inicial por defecto
-    return provider;
-});
 // Interceptor para multitenant (opcional)
-builder.Services.AddScoped<TenantSaveChangesInterceptor>();
+builder.Services.AddTransient<TenantSaveChangesInterceptor>();
 
 // Factorías de DbContexts para todos los backends locales:
 builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>

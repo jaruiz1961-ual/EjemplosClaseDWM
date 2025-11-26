@@ -5,15 +5,15 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
-@inject IContextKeyProvider ContextKeyProvider
-@inject ITenantProvider TenantProvider
+@inject IContextProvider ContextProvider
+
 @inject NavigationManager nav
 @implements IDisposable
 
 
-<h3>DetalleUsuario</h3>
-<p>Usuarios del tenant <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-<p>Usuarios del contexto <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
+<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
 
 <div class="container">
     @if (NewUser != null)
@@ -94,34 +94,14 @@
     private Usuario NewUser = new Usuario();
 
 
-    private Func<Task>? _onTenantChangedHandler;
-    private Func<Task>? _onContextKeyChangedHandler;
-
     bool displayValidationErrorMessages = false;
     bool displayUserAddedToDB = false;
 
 
     protected override async Task OnInitializedAsync()
     {
-
-    
-        _onTenantChangedHandler += async () =>
-       {
-           await CargarAsync();           
+            await CargarAsync();           
            StateHasChanged();
-       };
-
-        _onContextKeyChangedHandler += async () =>
-        {
-            await CargarAsync();     
-            StateHasChanged();
-        };
-
-        TenantProvider.OnTenantChanged += _onTenantChangedHandler;
-        ContextKeyProvider.OnContextKeyChanged += _onTenantChangedHandler;
-
-        NewUser.TenantId = TenantProvider.CurrentTenantId ?? 0;
-        await CargarAsync();
     }
 
 
@@ -129,7 +109,7 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        var servicioUsuario = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
+        var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
         if (Id != 0)
             servicioUsuario.UpdateAsync(NewUser);
         else
@@ -158,7 +138,7 @@
         {
             if (Id != 0)
             {
-                var servicioUsuario = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
+                var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 NewUser = await servicioUsuario.GetByIdAsync(Id);
             }
             else 
@@ -189,8 +169,7 @@
     }
     private void Dispose()
     {
-        TenantProvider.OnTenantChanged -= _onTenantChangedHandler;
-        ContextKeyProvider.OnContextKeyChanged -= _onContextKeyChangedHandler;
+
 
     }
 }

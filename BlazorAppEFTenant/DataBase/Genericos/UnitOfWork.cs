@@ -19,14 +19,14 @@ namespace DataBase.Genericos
 
         IGenericRepository<Entidad, TContext> repo = null;
         private  IGenericRepositoryFactory _repositoryFactory;
-        IContextKeyProvider _cp;
+        IContextProvider _cp;
 
         //public UnitOfWork(TContext context, ITenantProvider tenant)
         //{
         //    Context = context;
             
         //}
-        public UnitOfWork(TContext context, ITenantProvider tenant, IGenericRepositoryFactory factory, IContextKeyProvider cp)
+        public UnitOfWork(TContext context, IContextProvider cp, IGenericRepositoryFactory factory)
         {
             Context = context;
             _repositoryFactory = factory;
@@ -35,21 +35,18 @@ namespace DataBase.Genericos
         }
 
         public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
-            where TEntity : class
+    where TEntity : class
         {
             var type = typeof(TEntity);
 
-            if (!_repositories.TryGetValue(type, out var repo))
-            {
-                 repo = _repositoryFactory.Create<TEntity, TContext>(Context,_cp);
-                    _repositories[type] = repo;
+            var repo = _repositoryFactory.Create<TEntity, TContext>(Context, _cp);
+            _repositories[type] = repo; // Siempre actualiza (o reemplaza)
 
-            }
-
-            return (IGenericRepository<TEntity, TContext>)repo;
+            return (IGenericRepository<TEntity, TContext>)repo!;
         }
 
-       
+
+
         IGenericRepository<TEntity> IUnitOfWork.GetRepository<TEntity>()
             where TEntity : class
             => GetRepository<TEntity>();   // aquí ya compila, porque el return es IGenericRepository<TEntity, TContext> : IGenericRepository<TEntity>

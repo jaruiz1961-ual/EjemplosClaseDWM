@@ -10,7 +10,7 @@ namespace DataBase.Genericos
     public interface IGenericRepositoryFactory
     {
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(TContext  context,IContextKeyProvider ic)
+        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(TContext  context,IContextProvider ic)
            where TEntity : class
            where TContext : DbContext;
     }

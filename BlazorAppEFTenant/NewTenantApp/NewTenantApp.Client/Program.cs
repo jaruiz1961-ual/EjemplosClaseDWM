@@ -23,17 +23,12 @@ builder.Services.AddScoped(sp =>
 
 
 
-builder.Services.AddTransient<ITenantProvider>(sp =>
-{
-    var provider = new TenantProvider();
-    provider.SetTenant(1); // Asigna aquí el valor inicial por defecto
-    return provider;
-});
 
-builder.Services.AddTransient<IContextKeyProvider>(sp =>
+
+builder.Services.AddScoped<IContextProvider>(sp =>
 {
-    var provider = new ContextKeyProvider();
-    provider.SetContext("InMemory", "Ef", DirBase); // Asigna aquí el valor inicial por defecto
+    var provider = new ContextProvider();
+    provider.SetContext(1,"InMemory","ApiRest",new Uri(@"https://localhost:7031/"),"ApiServer"); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 

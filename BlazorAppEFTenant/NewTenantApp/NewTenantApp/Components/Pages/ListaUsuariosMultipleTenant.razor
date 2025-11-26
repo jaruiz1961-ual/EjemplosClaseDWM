@@ -4,8 +4,8 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
-@inject ITenantProvider TenantProvider
-@inject IContextKeyProvider ContextKeyProvider
+
+@inject IContextProvider ContextProvider
 @inject NavigationManager nav
 @implements IDisposable
 
@@ -13,16 +13,9 @@
 <h3>Listado de usuarios (Genérico)</h3>
 
 
-
-@if (TenantProvider.CurrentTenantId == null)
-{
-    <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
-}
-else
-{
-    <p>TenantId <strong>@TenantProvider.CurrentTenantId</strong>:</p>
-    <p>ContextKeDb <strong>@ContextKeyProvider.CurrentContextKey</strong>:</p>
-    <p>ApiName <strong>@ContextKeyProvider.ApiName</strong>:</p>
+<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
 
 @if (usuarios is null)
 {
@@ -69,21 +62,18 @@ else
 
 @code {
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
-    int TenantId;
-    string ContextoKey ="";
-
-    private Func<Task>? _onTenantChangedHandler;
-    private Func<Task>? _onContextKeyChangedHandler;
+ 
+    private Func<Task>? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
     {
-        _onContextKeyChangedHandler += async () =>
+        _onContextChangedHandler += async () =>
        {
            usuarios.Clear();
            await CargarAsync();
            StateHasChanged();
        };
-        ContextKeyProvider.OnContextKeyChanged +=  _onContextKeyChangedHandler;
+        ContextProvider.OnContextChanged +=  _onContextChangedHandler;
         await CargarAsync();
     }
 
@@ -91,16 +81,16 @@ else
     {
         try
         {
-            var _tenant = TenantProvider.CurrentTenantId;
-            foreach (var tenant in TenantProvider.GetTenants())
+           
+            foreach (var tenant in ContextProvider.GetTenantIds())
             {
-                TenantProvider.SetTenant(tenant);
-                var user = new ServicioUsuarios(ContextKeyProvider, UnitOfWorkFactory, TenantProvider);
+                ContextProvider.TenantId = tenant;
+                var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);
 
             }
-            TenantProvider.SetTenant(_tenant);
+  
         }
         catch (Exception ex)
         {
@@ -119,7 +109,7 @@ else
 
     private void Dispose()
     {
-        ContextKeyProvider.OnContextKeyChanged -= _onContextKeyChangedHandler;
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
 
 
     }

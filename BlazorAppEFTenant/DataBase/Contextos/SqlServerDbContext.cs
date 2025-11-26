@@ -38,7 +38,7 @@ namespace DataBase.Contextos
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.TenantProvider.CurrentTenantId;
+            TenantId = _tenantInterceptor.ContextProvider.TenantId;
           
         }
 
@@ -59,7 +59,7 @@ namespace DataBase.Contextos
                     var parameter = Expression.Parameter(entityType.ClrType, "e");
                     var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
 
-                    // this.CurrentTenantId
+                    // this.TenantId
                     var currentTenantId = Expression.Property(
                         Expression.Constant(this),
                         nameof(TenantId));

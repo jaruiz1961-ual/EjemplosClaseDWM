@@ -9,7 +9,7 @@ namespace DataBase.Genericos
 {
     public interface IUnitOfWorkFactory
     {
-        IUnitOfWork Create(IContextKeyProvider cp);
+        IUnitOfWork Create(IContextProvider cp);
     }
 
 }

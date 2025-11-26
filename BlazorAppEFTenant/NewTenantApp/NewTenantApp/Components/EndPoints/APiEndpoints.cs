@@ -13,12 +13,16 @@ namespace BlazorAppEFTenant.Components.EndPoints
             // GET: listar todos
             app.MapGet("/api/{contexto}/usuarios", async (
                 string contexto,
-                IContextKeyProvider contextKeyProvider,
-                IUnitOfWorkFactory uowFactory,
-                ITenantProvider tenantProvider
+                int tenantId,           
+                IUnitOfWorkFactory uowFactory
+              
                 ) =>
             {
-                var service = new GenericDataService<T>(contextKeyProvider, uowFactory, tenantProvider);
+                var cp = new ContextProvider();
+                cp.DbKey = contexto;
+                cp.TenantId = tenantId;
+                cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
+                var service = new GenericDataService<T>(cp, uowFactory);
                 var usuarios = await service.GetAllAsync();
                 return Results.Ok(usuarios);
             });
@@ -27,12 +31,15 @@ namespace BlazorAppEFTenant.Components.EndPoints
             app.MapGet("/api/{contexto}/usuarios/{id:int}", async (
                 string contexto,
                 int id,
-                IContextKeyProvider contextKeyProvider,
-                IUnitOfWorkFactory uowFactory,
-                ITenantProvider tenantProvider
+                int tenantId,           
+                IUnitOfWorkFactory uowFactory
                 ) =>
             {
-                var service = new GenericDataService<T>(contextKeyProvider, uowFactory, tenantProvider);
+                var cp = new ContextProvider();
+                cp.DbKey = contexto;
+                cp.TenantId = tenantId;
+                cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
+                var service = new GenericDataService<T>(cp, uowFactory);
                 var usuario = await service.GetByIdAsync(id);
                 return usuario is not null ? Results.Ok(usuario) : Results.NotFound();
             });
@@ -41,12 +48,15 @@ namespace BlazorAppEFTenant.Components.EndPoints
             app.MapPost("/api/{contexto}/usuarios", async (
                 string contexto,
                 T usuario,
-                IContextKeyProvider contextKeyProvider,
-                IUnitOfWorkFactory uowFactory,
-                ITenantProvider tenantProvider
+                int tenantId,
+                IUnitOfWorkFactory uowFactory
                 ) =>
             {
-                var service = new GenericDataService<T>(contextKeyProvider, uowFactory, tenantProvider);
+                var cp = new ContextProvider();
+                cp.DbKey = contexto;
+                cp.TenantId = tenantId;
+                cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
+                var service = new GenericDataService<T>(cp, uowFactory);
                 await service.AddAsync(usuario);
                 return Results.Created($"/api/{contexto}/usuarios/{usuario.Id}", usuario);
             });
@@ -56,12 +66,15 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string contexto,
                 int id,
                 T usuario,
-               IContextKeyProvider contextKeyProvider,
-                IUnitOfWorkFactory uowFactory,
-                ITenantProvider tenantProvider
+                int tenantId,
+                IUnitOfWorkFactory uowFactory
                 ) =>
             {
-                var service = new GenericDataService<T>(contextKeyProvider, uowFactory, tenantProvider);
+                var cp = new ContextProvider();
+                cp.DbKey = contexto;
+                cp.TenantId = tenantId;
+                cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
+                var service = new GenericDataService<T>(cp, uowFactory);
                 var actual = await service.GetByIdAsync(id);
                 if (actual is null)
                     return Results.NotFound();
@@ -80,12 +93,15 @@ namespace BlazorAppEFTenant.Components.EndPoints
             app.MapDelete("/api/{contexto}/usuarios/{id:int}", async (
                 string contexto,
                 int id,
-                IContextKeyProvider contextKeyProvider,
-                IUnitOfWorkFactory uowFactory,
-                ITenantProvider tenantProvider
+                int tenantId,
+                IUnitOfWorkFactory uowFactory
                 ) =>
             {
-                var service = new GenericDataService<T>(contextKeyProvider, uowFactory, tenantProvider);
+                var cp = new ContextProvider();
+                cp.DbKey = contexto;
+                cp.TenantId = tenantId;
+                cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
+                var service = new GenericDataService<T>(cp, uowFactory);
                 var usuario = await service.GetByIdAsync(id);
                 if (usuario is null)
                     return Results.NotFound();
