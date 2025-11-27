@@ -14,9 +14,9 @@ namespace DataBase.Genericos
     {
         private readonly IServiceProvider _provider;
         private readonly IGenericRepositoryFactory _repoFactory;
-        private readonly bool _isApi;
+ 
 
-        public UnitOfWorkFactory(IServiceProvider provider, IGenericRepositoryFactory repoFactory)
+        public UnitOfWorkFactory(IServiceProvider provider, IContextProvider cp, IGenericRepositoryFactory repoFactory)
         {
             _provider = provider;
             _repoFactory = repoFactory;
@@ -39,9 +39,11 @@ namespace DataBase.Genericos
                 switch (cp.DbKey.ToLower())
                 {
                     case "sqlserver":
-                        var sqlDb = _provider.GetRequiredService<SqlServerDbContext>();
-
-                        return new UnitOfWork<SqlServerDbContext>(sqlDb, cp, _repoFactory);
+                        var dbFactory = _provider.GetRequiredService<IDbContextFactory<SqlServerDbContext>>();
+                        SqlServerDbContext db = dbFactory.CreateDbContext(); // nuevo contexto por llamada
+                        db.TenantId = cp.TenantId;
+                        return new UnitOfWork<SqlServerDbContext>(db, cp, _repoFactory );
+                  
                     case "sqlite":
                         var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
                         return new UnitOfWork<SqLiteDbContext>(sqLite, cp, _repoFactory);
