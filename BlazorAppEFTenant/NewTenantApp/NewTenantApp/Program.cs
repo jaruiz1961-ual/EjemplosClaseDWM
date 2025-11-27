@@ -29,7 +29,7 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 builder.Services.AddScoped<IContextProvider>(sp =>
 {
     var provider = new ContextProvider();
-    provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7031/"), "Ef"); // Asigna aquí el valor inicial por defecto
+    provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7013/"), "Ef"); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 
@@ -62,13 +62,15 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
 
-// NO REGISTRES IGenericRepository<,> como open-generic
-// SÓLO REGISTRA LAS FACTORÍAS NECESARIAS:
-builder.Services.AddScoped<IGenericRepositoryFactory, GenericRepositoryFactory>();
+// Factoría genérica por entidad
+builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRepositoryFactory<>));
+
+// Factoría de UoW
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
+
 // OJO: Si tu UnitOfWork generic depende solo de DI-resolvable (DbContext y factory)
-builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+//builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWorkEf<>));
 
 // Inicialización/Migración de BD al arrancar
 using (var scope = builder.Services.BuildServiceProvider().CreateScope())

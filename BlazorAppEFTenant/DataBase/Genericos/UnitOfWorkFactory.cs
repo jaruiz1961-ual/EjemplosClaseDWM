@@ -13,43 +13,44 @@ namespace DataBase.Genericos
     public class UnitOfWorkFactory : IUnitOfWorkFactory
     {
         private readonly IServiceProvider _provider;
-        private readonly IGenericRepositoryFactory _repoFactory;
- 
+      
 
-        public UnitOfWorkFactory(IServiceProvider provider, IContextProvider cp, IGenericRepositoryFactory repoFactory)
+        public UnitOfWorkFactory(IServiceProvider provider, IContextProvider cp)
         {
             _provider = provider;
-            _repoFactory = repoFactory;
+      
         }
 
         public IUnitOfWork Create(IContextProvider cp)
         {
-      
-     
             if (cp.ConnectionMode.ToLower() == "apiclient")
             {
-                return new UnitOfWorkApi<DbContext>(cp, _repoFactory);
+                return new UnitOfWorkApi(cp, _provider);
             }
             else
             if (cp.ConnectionMode.ToLower() == "apiserver")
             {
-                return new UnitOfWorkApi<DbContext>(cp, _repoFactory);
+                return new UnitOfWorkApi(cp, _provider);
             }
             else if (cp.ConnectionMode.ToLower() == "ef")
                 switch (cp.DbKey.ToLower())
                 {
                     case "sqlserver":
-                        var dbFactory = _provider.GetRequiredService<IDbContextFactory<SqlServerDbContext>>();
-                        SqlServerDbContext db = dbFactory.CreateDbContext(); // nuevo contexto por llamada
-                        db.TenantId = cp.TenantId;
-                        return new UnitOfWork<SqlServerDbContext>(db, cp, _repoFactory );
+                        var dbFactorySqlServer = _provider.GetRequiredService<IDbContextFactory<SqlServerDbContext>>();
+                        SqlServerDbContext dbSqlServer = dbFactorySqlServer.CreateDbContext(); // nuevo contexto por llamada
+                        dbSqlServer.TenantId = cp.TenantId;
+                        return new UnitOfWorkEf<SqlServerDbContext>(dbSqlServer,_provider, cp );
                   
                     case "sqlite":
-                        var sqLite = _provider.GetRequiredService<SqLiteDbContext>();
-                        return new UnitOfWork<SqLiteDbContext>(sqLite, cp, _repoFactory);
+                        var dbFactorySqLite = _provider.GetRequiredService<IDbContextFactory<SqLiteDbContext>>();
+                        SqLiteDbContext dbSqLite = dbFactorySqLite.CreateDbContext(); // nuevo contexto por llamada
+                        dbSqLite.TenantId = cp.TenantId;
+                        return new UnitOfWorkEf<SqLiteDbContext>(dbSqLite, _provider, cp);
                     case "inmemory":
-                        var inMemory = _provider.GetRequiredService<InMemoryDbContext>();
-                        return new UnitOfWork<InMemoryDbContext>(inMemory, cp, _repoFactory);
+                        var dbFactoryInMemory = _provider.GetRequiredService<IDbContextFactory<InMemoryDbContext>>();
+                        InMemoryDbContext dbInMemory = dbFactoryInMemory.CreateDbContext(); // nuevo contexto por llamada
+                        dbInMemory.TenantId = cp.TenantId;
+                        return new UnitOfWorkEf<InMemoryDbContext>(dbInMemory, _provider, cp);
                     default: throw new NotSupportedException($"Contexto '{cp.DbKey}' no soportado.");
                 }
             throw new NotSupportedException($"Tipo de acceso '{cp.ConnectionMode}' no soportado.");

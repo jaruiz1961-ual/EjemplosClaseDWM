@@ -9,17 +9,11 @@ namespace DataBase.Genericos
 {
     public interface IUnitOfWork : IDisposable
     {
-        DbContext Context { get; }
-        IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class;
+        IGenericRepository<TEntity> GetRepository<TEntity>() where TEntity : class,IEntity;
         Task<int> SaveChangesAsync();
     }
 
-    public interface IUnitOfWork<TContext> : IUnitOfWork
-        where TContext : DbContext
-    {
-        new TContext Context { get; }
-        new IGenericRepository<TEntity, TContext> GetRepository<TEntity>() where TEntity : class;
-    }
+
 
 
 }

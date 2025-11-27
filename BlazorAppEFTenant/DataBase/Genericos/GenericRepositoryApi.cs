@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class GenericRepositoryApi<TEntity, TContext> : IGenericRepository<TEntity, TContext>
+    public class GenericRepositoryApi<TEntity> : IGenericRepository<TEntity>
      where TEntity : class
-     where TContext : DbContext
+     
     {
         private readonly HttpClient _httpClient;
         private readonly string _resourceName;
@@ -29,7 +29,7 @@ namespace DataBase.Genericos
         }
 
         // Propiedad Context: solo para cumplimiento de la interfaz
-        public TContext Context => throw new NotSupportedException("Api repo does not have a DbContext.");
+
 
         // Métodos de la interfaz base
         public async Task<TEntity?> GetByIdAsync(object id) =>

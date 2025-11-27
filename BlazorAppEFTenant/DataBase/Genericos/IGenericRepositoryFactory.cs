@@ -7,11 +7,9 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public interface IGenericRepositoryFactory
+    public interface IGenericRepositoryFactory<TEntity> where TEntity : class,IEntity
     {
+        public IGenericRepository<TEntity> Create(IContextProvider ic, DbContext context = null);
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(TContext  context,IContextProvider ic)
-           where TEntity : class
-           where TContext : DbContext;
     }
 }

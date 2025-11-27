@@ -1,11 +1,13 @@
 ﻿using DataBase.Contextos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DataBase.Genericos
 {
 
-    public class GenericRepositoryFactory : IGenericRepositoryFactory
+    public class GenericRepositoryFactory<TEntity> : IGenericRepositoryFactory<TEntity>
+    where TEntity : class, IEntity
     {
         private readonly IServiceProvider _provider;
 
@@ -14,46 +16,61 @@ namespace DataBase.Genericos
             _provider = provider;
         }
 
-        public IGenericRepository<TEntity, TContext> Create<TEntity, TContext>(TContext context, IContextProvider cp )
-            where TEntity : class
-            where TContext : DbContext
+        public IGenericRepository<TEntity> Create(IContextProvider cp, DbContext? context = null)
         {
-            if (cp.ConnectionMode.ToLower() == "apiclient" )
+            var mode = cp.ConnectionMode?.ToLowerInvariant();
+
+            if (mode == "apiclient")
             {
-                var httpClient = _provider.GetRequiredService<HttpClient>();
-                httpClient.BaseAddress = cp.DirBase;
-                Console.WriteLine("BaseAddress: " + httpClient.BaseAddress);
-                var resource =  typeof(TEntity).Name.ToLower() + "s";
-                return new GenericRepositoryApi<TEntity, TContext>(httpClient, cp, resource);
+                var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
+                var httpClient = httpClientFactory.CreateClient("ApiRest");
+
+                var resource = typeof(TEntity).Name.ToLower() + "s";
+                return new GenericRepositoryApi<TEntity>(httpClient, cp, resource);
             }
-            else
-            if (cp.ConnectionMode.ToLower() == "apiserver")
+
+            if (mode == "apiserver")
             {
-                var httpClient = _provider.GetRequiredService<IHttpClientFactory>().CreateClient(cp.ApiName);
-                Console.WriteLine("BaseAddress: " + httpClient.BaseAddress);
-                var resource =  typeof(TEntity).Name.ToLower() + "s";
-                return new GenericRepositoryApi<TEntity, TContext>(httpClient, cp, resource);
+                var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
+                var httpClient = httpClientFactory.CreateClient(cp.ApiName);
+
+                var resource = typeof(TEntity).Name.ToLower() + "s";
+                return new GenericRepositoryApi<TEntity>(httpClient, cp, resource);
             }
-            else
-            if (cp.ConnectionMode.ToLower() == "ef")
-                switch (cp.DbKey.ToLower())
+
+            if (mode == "ef")
+            {
+                if (context is null)
+                    throw new ArgumentNullException(nameof(context), "Para EF se requiere un DbContext.");
+
+                switch (cp.DbKey?.ToLowerInvariant())
                 {
                     case "sqlserver":
-                        var sqlDb = context as SqlServerDbContext;
-                        return new GenericRepository<TEntity, SqlServerDbContext>(sqlDb) as IGenericRepository<TEntity, TContext>;
+                        {
+                            var sqlServerDbContext = context as SqlServerDbContext;
+                            return new GenericRepositoryEF<TEntity, SqlServerDbContext>(sqlServerDbContext);
+                        }
+
                     case "sqlite":
-                        var sqliteDb = context as SqLiteDbContext;
-                        return new GenericRepository<TEntity, SqLiteDbContext>(sqliteDb) as IGenericRepository<TEntity, TContext>;
+                        {
+                            var sqLiteDbContext = context as SqLiteDbContext;
+                            return new GenericRepositoryEF<TEntity, SqLiteDbContext>(sqLiteDbContext);
+                        }
+
                     case "inmemory":
-                        var memDb = context as InMemoryDbContext;
-                        return new GenericRepository<TEntity, InMemoryDbContext>(memDb) as IGenericRepository<TEntity, TContext>;
+                        {
+                            var inMemoryDbContext = context as InMemoryDbContext;
+                            return new GenericRepositoryEF<TEntity, InMemoryDbContext> (inMemoryDbContext);
+                        }
+
                     default:
                         throw new NotSupportedException($"Contexto '{cp.DbKey}' no soportado.");
                 }
+            }
+
             throw new NotSupportedException($"Tipo de acceso '{cp.ConnectionMode}' no soportado.");
         }
-
-       
     }
+
 
 }

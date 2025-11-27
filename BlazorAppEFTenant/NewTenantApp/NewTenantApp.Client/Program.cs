@@ -15,11 +15,17 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 //    client.BaseAddress = new Uri(UrlApi);
 //});
 var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
-Uri DirBase = new Uri(apiUrl!);
-builder.Services.AddScoped(sp =>
-    new HttpClient { BaseAddress = DirBase }
-);
 
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+});
+
+
+builder.Services.AddHttpClient("ApiRest", client =>
+{
+    client.BaseAddress = new Uri(apiUrl);
+});
 
 
 
@@ -34,13 +40,16 @@ builder.Services.AddScoped<IContextProvider>(sp =>
 
 
 
-// NO REGISTRES IGenericRepository<,> como open-generic
-// SÓLO REGISTRA LAS FACTORÍAS NECESARIAS:
-builder.Services.AddScoped<IGenericRepositoryFactory, GenericRepositoryFactory>();
+// NO REGISTRES IGenericRepository<,> como open-generic ??
+
+builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRepositoryFactory<>));
+
+// Factoría de UoW
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
+
 // OJO: Si tu UnitOfWork generic depende solo de DI-resolvable (DbContext y factory)
-builder.Services.AddScoped(typeof(IUnitOfWork<>), typeof(UnitOfWork<>));
+
 
 
 

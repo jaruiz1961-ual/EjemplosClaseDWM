@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,46 +10,42 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class UnitOfWorkApi<TContext> : IUnitOfWork<TContext>
-    where TContext : DbContext
+    public class UnitOfWorkApi : IUnitOfWork
     {
+        private readonly IContextProvider _cp;
+        private readonly IServiceProvider _provider;
         private readonly Dictionary<Type, object> _repositories = new();
 
-        public TContext Context { get; }
-        DbContext IUnitOfWork.Context => Context;
-
-        
-        IGenericRepository<Entidad, TContext> repo = null;
-        private  IGenericRepositoryFactory _repositoryFactory;
-        IContextProvider _cp;
-
-        public UnitOfWorkApi(IContextProvider cp,  IGenericRepositoryFactory factory) 
+        public UnitOfWorkApi(IContextProvider cp, IServiceProvider provider)
         {
- 
-            _repositoryFactory = factory;
             _cp = cp;
+            _provider = provider;
         }
 
-        public IGenericRepository<TEntity, TContext> GetRepository<TEntity>()
-    where TEntity : class
+        public IGenericRepository<TEntity> GetRepository<TEntity>()
+            where TEntity : class,IEntity
         {
             var type = typeof(TEntity);
 
-            var repo = _repositoryFactory.Create<TEntity, TContext>(Context, _cp);
-            _repositories[type] = repo; // Siempre actualiza (o reemplaza)
+            //if (!_repositories.TryGetValue(type, out var repo))
+            //{
+                // Resolvemos la factoría específica para TEntity
+                var factory = _provider.GetRequiredService<IGenericRepositoryFactory<TEntity>>();
+                // Para API no pasas DbContext
+                var repo = factory.Create(_cp);
+                _repositories[type] = repo;
+            //}
 
-            return (IGenericRepository<TEntity, TContext>)repo!;
+            return (IGenericRepository<TEntity>)repo!;
         }
-
-
 
         IGenericRepository<TEntity> IUnitOfWork.GetRepository<TEntity>()
             where TEntity : class
-            => GetRepository<TEntity>();   // aquí ya compila, porque el return es IGenericRepository<TEntity, TContext> : IGenericRepository<TEntity>
+            => GetRepository<TEntity>();
 
         public Task<int> SaveChangesAsync() => Task.FromResult(0);
 
-        public void Dispose() => Task.FromResult(0);
+        public void Dispose() { }
     }
 
 

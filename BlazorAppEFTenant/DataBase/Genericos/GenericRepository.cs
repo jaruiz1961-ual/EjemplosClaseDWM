@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class GenericRepository<TEntity, TContext> : IGenericRepository<TEntity, TContext>, IGenericRepository<TEntity>
+    public class GenericRepositoryEF<TEntity, TContext> : IGenericRepositoryEF<TEntity, TContext>, IGenericRepository<TEntity>
     where TEntity : class
     where TContext : DbContext
     {
         public TContext Context { get; }
         public DbSet<TEntity> Set;
 
-        public GenericRepository(TContext context)
+        public GenericRepositoryEF(TContext context)
         {
             Context = context;
             Set = context.Set<TEntity>();
