@@ -1,6 +1,6 @@
 ﻿@page "/DetalleUsuarioCliente"
 @page "/DetalleUsuarioCliente/{Id:int}"    //esta página se puede acceder tambien en modo de edición
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
@@ -11,9 +11,14 @@
 @implements IDisposable
 
 <PageTitle> Detalle Cliente</PageTitle>
+
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
 <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+<p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
+@if (@ContextProvider.ConnectionMode != "Ef")
+{
+    <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+}
 
 <div class="container">
     @if (NewUser != null)

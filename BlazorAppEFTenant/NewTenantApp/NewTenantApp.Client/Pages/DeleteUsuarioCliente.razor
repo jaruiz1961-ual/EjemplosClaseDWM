@@ -1,5 +1,5 @@
 ﻿@page "/DeteteUsuarioCliente/{Id:int}"   
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
@@ -10,9 +10,14 @@
 @implements IDisposable
 
 <PageTitle> Delete Cliente</PageTitle>
+
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
 <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+<p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
+@if (@ContextProvider.ConnectionMode != "Ef")
+{
+    <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+}
 
 @if (NewUser != null)
 {

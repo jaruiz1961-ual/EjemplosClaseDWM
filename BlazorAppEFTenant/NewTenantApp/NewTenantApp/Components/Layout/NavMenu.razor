@@ -18,13 +18,7 @@
             <option value="@opcion">@opcion</option>
         }
     </select>
-    <select class="form-select" @bind="ApiName">
 
-        @foreach (var opcion in ContextProvider.GetApiNames())
-        {
-            <option value="@opcion">@opcion</option>
-        }
-    </select>
     <select class="form-select" @bind="Mode">
 
         @foreach (var opcion in ContextProvider.GetConnectionModes())
@@ -32,6 +26,16 @@
             <option value="@opcion">@opcion</option>
         }
     </select>
+    @if (Mode!="Ef")
+    {
+    <select class="form-select" @bind="ApiName">
+
+        @foreach (var opcion in ContextProvider.GetApiNames())
+        {
+            <option value="@opcion">@opcion</option>
+        }
+    </select>
+    }
  
 </div>
 

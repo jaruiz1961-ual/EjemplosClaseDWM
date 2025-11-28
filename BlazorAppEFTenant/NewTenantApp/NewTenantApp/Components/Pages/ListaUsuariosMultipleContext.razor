@@ -10,13 +10,16 @@
 @implements IDisposable
 
 
-<h3>Listado de usuarios (Genérico)</h3>
+<h3>Listado de usuarios Multiple Context (Genérico)</h3>
+
 
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
 <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
-
-
+<p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
+@if (@ContextProvider.ConnectionMode != "Ef")
+{
+    <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+}
 @if (usuarios is null)
 {
     <p><em>Cargando...</em></p>

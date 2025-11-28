@@ -43,7 +43,7 @@ namespace DataBase.Genericos
         }
         public async Task AddAsync(TEntity entity)
         {
-            var resp = await _httpClient.PostAsJsonAsync($"/api/{_contexto}/{_resourceName}", entity);
+            var resp = await _httpClient.PostAsJsonAsync($"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}", entity);
             resp.EnsureSuccessStatusCode();
         }
 
@@ -53,7 +53,7 @@ namespace DataBase.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var resp = _httpClient.PutAsJsonAsync($"/api/{_contexto}/{_resourceName}/{id}", entity).Result;
+            var resp = _httpClient.PutAsJsonAsync($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}", entity).Result;
             resp.EnsureSuccessStatusCode();
         }
 
@@ -62,7 +62,7 @@ namespace DataBase.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var resp = _httpClient.DeleteAsync($"/api/{_contexto}/{_resourceName}/{id}").Result;
+            var resp = _httpClient.DeleteAsync($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}").Result;
             resp.EnsureSuccessStatusCode();
         }
     }
