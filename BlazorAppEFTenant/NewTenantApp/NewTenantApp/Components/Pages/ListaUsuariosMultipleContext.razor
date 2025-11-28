@@ -86,19 +86,20 @@ else
 
     private async Task CargarAsync()
     {
-        var cp = new ContextProvider();
         try
         {
+            IContextProvider cp = ContextProvider.Copia();
             foreach (var contextKey in ContextProvider.GetContextKeyDbs())
             {
-                cp.SetContext(ContextProvider.TenantId,contextKey, ContextProvider.ApiName,ContextProvider.DirBase,ContextProvider.ConnectionMode);
+                cp.DbKey = contextKey;
                 var user = new ServicioUsuarios(cp, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);
- 
+
             }
 
         }
+        
         catch (Exception ex)
         {
             Console.WriteLine("EX: " + ex.GetType().FullName);

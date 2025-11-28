@@ -1,0 +1,172 @@
+﻿@page "/DeteteUsuarioCliente/{Id:int}"   
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using DataBase.Genericos
+@using DataBase.Modelo
+@using DataBase.Servicios
+@inject IUnitOfWorkFactory UnitOfWorkFactory 
+
+@inject IContextProvider ContextProvider
+@inject NavigationManager nav
+@implements IDisposable
+
+<PageTitle> Delete Cliente</PageTitle>
+<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+
+@if (NewUser != null)
+{
+    <div class="container">
+        <EditForm Model="@NewUser" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" FormName="DetalleUsuarioForm">
+            <DataAnnotationsValidator />
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="Codigo">Codigo #</label>
+                            <input type="text" class="form-control" id="Codigo" @bind-value="NewUser.Codigo" placeholder="enter codigo ..." />
+                            <ValidationMessage For="@(() => NewUser.Codigo)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="UserName">UsertName #</label>
+                            <input type="text" class="form-control" id="UserName" @bind-value="NewUser.UserName" placeholder="enter UserName ..." />
+                            <ValidationMessage For="@(() => NewUser.UserName)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="NivelAcceso">NivelAcceso #</label>
+                            <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.Contexto" placeholder="enter NivelAcceso ..." />
+                            <ValidationMessage For="@(() => NewUser.Contexto)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="Password">Password #</label>
+                            <input type="text" class="form-control" id="Password" @bind-value="NewUser.Password" placeholder="enter Password ..." />
+                            <ValidationMessage For="@(() => NewUser.Password)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="email">email #</label>
+                            <input type="text" class="form-control" id="email" @bind-value="NewUser.email" placeholder="enter email ..." />
+                            <ValidationMessage For="@(() => NewUser.email)" />
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="email">email #</label>
+                            <input type="text" class="form-control" id="tenant" @bind-value="NewUser.TenantId" placeholder="enter tenant ..." />
+                            <ValidationMessage For="@(() => NewUser.TenantId)" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-info" style="margin-top:10px">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel" style="margin-top:10px">Cancel</button>
+                </div>
+                @if (displayValidationErrorMessages)
+                {
+                    <div class="col-md-4" style="margin-top:10px">
+                        <label>Validation Messages: </label>
+                        <ValidationSummary />
+                    </div>
+                }
+            </div>
+        </EditForm>
+
+    </div>
+}
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    private Usuario NewUser = new Usuario();
+
+    bool displayValidationErrorMessages = false;
+    bool displayUserAddedToDB = false;
+
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarAsync();
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = false;
+        displayUserAddedToDB = true;
+        var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+        if (Id != 0)
+            servicioUsuario.DeleteAsync(Id);
+
+        nav.NavigateTo("javascript:history.back()");
+
+        //  nav.NavigateTo("/ListaUsuarios");
+    }
+
+
+    private void HandleInvalidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = true;
+        displayUserAddedToDB = false;
+        //  nav.NavigateTo("/ListaUsuarios");
+    }
+
+
+
+    private async Task CargarAsync()
+    {
+        try
+        {
+            if (Id != 0)
+            {
+                var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                NewUser = await servicioUsuario.GetByIdAsync(Id);
+            }
+            else 
+            {
+                NewUser = new Usuario();
+                NewUser.TenantId = ContextProvider.TenantId;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
+    }
+
+    protected void Cancel()
+    {
+        //nav.NavigateTo("/ListaUsuarios");
+        nav.NavigateTo("javascript:history.back()");
+    }
+
+   
+    void IDisposable.Dispose()
+    {
+        Dispose();
+    }
+    private void Dispose()
+    {
+
+
+    }
+}
+

@@ -23,12 +23,8 @@ namespace DataBase.Genericos
 
         public IUnitOfWork Create(IContextProvider cp)
         {
-            if (cp.ConnectionMode.ToLower() == "apiclient")
-            {
-                return new UnitOfWorkApi(cp, _provider);
-            }
-            else
-            if (cp.ConnectionMode.ToLower() == "apiserver")
+            
+            if (cp.ConnectionMode.ToLower() == "api")
             {
                 return new UnitOfWorkApi(cp, _provider);
             }

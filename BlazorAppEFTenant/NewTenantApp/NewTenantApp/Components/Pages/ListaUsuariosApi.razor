@@ -11,7 +11,7 @@
 @implements IDisposable
 
 
-<h3>Listado de usuarios (Genérico)</h3>
+<h3>Listado de usuarios A Apis Server</h3>
 
 
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
@@ -83,12 +83,12 @@ else
 
     private async Task CargarAsync()
     {
+
         try
         {
+            IContextProvider cp = ContextProvider.Copia();
+            cp.ConnectionMode = "Api";
 
-            var cp = new ContextProvider();
-            cp.SetContext(ContextProvider.TenantId, ContextProvider.DbKey, 
-                ContextProvider.ApiName, ContextProvider.DirBase, "ApiServer");
             usuarioService = new ServicioUsuarios(cp, UowFactory);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();

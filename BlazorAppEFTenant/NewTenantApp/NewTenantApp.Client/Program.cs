@@ -34,7 +34,7 @@ builder.Services.AddHttpClient("ApiRest", client =>
 builder.Services.AddScoped<IContextProvider>(sp =>
 {
     var provider = new ContextProvider();
-    provider.SetContext(1,"InMemory","ApiRest",new Uri(@"https://localhost:7013/"),"ApiServer"); // Asigna aquí el valor inicial por defecto
+    provider.SetContext(1,"InMemory","ApiRest",new Uri(@"https://localhost:7013/"),"Api"); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 

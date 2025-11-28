@@ -23,6 +23,7 @@ namespace DataBase.Genericos
         public string[] GetConnectionModes();
 
         void SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode);
+        public ContextProvider Copia();
 
     }
 }

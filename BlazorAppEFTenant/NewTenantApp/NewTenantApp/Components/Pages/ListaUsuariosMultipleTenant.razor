@@ -62,7 +62,7 @@ else
 
 @code {
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
- 
+
     private Func<Task>? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
@@ -81,11 +81,11 @@ else
     {
         try
         {
-           
-            foreach (var tenant in ContextProvider.GetTenantIds())
+            IContextProvider cp = ContextProvider.Copia();
+            foreach (var tenant in cp.GetTenantIds())
             {
-                ContextProvider.TenantId = tenant;
-                var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                cp.TenantId = tenant;
+                var user = new ServicioUsuarios(cp, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 usuarios.AddRange(list);
 

@@ -11,7 +11,7 @@
 @implements IDisposable
 
 
-<h3>Listado de usuarios (Genérico) en Cliente</h3>
+<h3>Listado de usuarios Especifica Cliente</h3>
 
 
 
@@ -97,12 +97,14 @@ else
         try
         {
           
-            var cp = new ContextProvider();
-            cp.SetContext(ContextProvider.TenantId, ContextProvider.DbKey,
-                ContextProvider.ApiName, ContextProvider.DirBase, "ApiClient");
+        
+            IContextProvider cp = ContextProvider.Copia();
+            cp.ConnectionMode = "ApiClient";
+
             usuarioService = new ServicioUsuarios(cp, UowFactory);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
+
 
         }
         catch (Exception ex)

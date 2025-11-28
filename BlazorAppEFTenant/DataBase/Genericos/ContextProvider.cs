@@ -37,9 +37,20 @@ namespace DataBase.Genericos
         };
         public string[] GetConnectionModes() => new[]
     {
-            "Ef","ApiClient","ApiServer"
+            "Ef","Api"
         };
 
+        public ContextProvider Copia()
+            {
+            return new ContextProvider
+            {
+                TenantId = this.TenantId,
+                DbKey = this.DbKey,
+                ConnectionMode = this.ConnectionMode,
+                ApiName = this.ApiName,
+                DirBase = this.DirBase
+            };
+        }
 
         public void SetContext(int? tenantId,string contextDbKey, string apiName, Uri dirBase, string conectionMode)
         {

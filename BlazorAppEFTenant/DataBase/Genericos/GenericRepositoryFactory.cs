@@ -20,16 +20,9 @@ namespace DataBase.Genericos
         {
             var mode = cp.ConnectionMode?.ToLowerInvariant();
 
-            if (mode == "apiclient")
-            {
-                var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
-                var httpClient = httpClientFactory.CreateClient("ApiRest");
 
-                var resource = typeof(TEntity).Name.ToLower() + "s";
-                return new GenericRepositoryApi<TEntity>(httpClient, cp, resource);
-            }
 
-            if (mode == "apiserver")
+            if (mode == "api")
             {
                 var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
                 var httpClient = httpClientFactory.CreateClient(cp.ApiName);
