@@ -13,17 +13,12 @@
 
 <h3>Listado de usuarios CLIENTE</h3>
 
-
-
 @if (ContextProvider.TenantId == null)
 {
     <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
 }
 else
 {
-    <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
-
-
     <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
     <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
     <p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
@@ -73,7 +68,7 @@ else
             </tbody>
         </table>
 }
-}
+
 
 
 @code {
@@ -95,7 +90,6 @@ else
             StateHasChanged();
         };
 
-
         ContextProvider.OnContextChanged += _onContextChangedHandler;
         await CargarAsync();
     }
@@ -104,19 +98,12 @@ else
     {
         try
         {
-
-
             IContextProvider cp = ContextProvider.Copia();
             cp.ConnectionMode = "Api";
 
             usuarioService = new ServicioUsuarios(cp, UowFactory);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
-
-            usuarioService = new ServicioUsuarios(cp, UowFactory);
-            var list2 = await usuarioService.GetAllAsync();
-            usuarios.AddRange(list2.ToList()); ;
-
 
         }
         catch (Exception ex)
