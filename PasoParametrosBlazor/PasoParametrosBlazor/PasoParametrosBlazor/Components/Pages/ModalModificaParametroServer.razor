@@ -1,5 +1,5 @@
 ﻿@page "/modalModificaParametroServer"
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using PasoParametrosBlazor.Client.Components
 
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
