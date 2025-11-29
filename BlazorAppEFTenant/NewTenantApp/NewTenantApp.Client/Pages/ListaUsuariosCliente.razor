@@ -1,6 +1,8 @@
 ﻿@page "/ListaUsuariosCliente"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
+
+@using BlazorAppEFTenant.Client.Layout
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
@@ -9,7 +11,7 @@
 
 @inject NavigationManager nav
 @implements IDisposable
-
+@layout MainClientLayout
 
 <h3>Listado de usuarios CLIENTE</h3>
 
@@ -26,6 +28,7 @@ else
     {
         <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
     }
+}
 
 
 @if (usuarios is null)
@@ -78,12 +81,12 @@ else
 
 
     private Func<Task>? _onContextChangedHandler;
-
-    private GenericDataService<Usuario> usuarioService;
+    ServicioUsuariosCliente scUsuario;
 
 
     protected override async Task OnInitializedAsync()
     {
+        await ContextProvider.ReadContext();
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
@@ -91,6 +94,7 @@ else
         };
 
         ContextProvider.OnContextChanged += _onContextChangedHandler;
+
         await CargarAsync();
     }
 
@@ -98,11 +102,12 @@ else
     {
         try
         {
-            IContextProvider cp = ContextProvider.Copia();
-            cp.ConnectionMode = "Api";
+            // ContextProvider = await ContextProvider.ReadContext();
+            // ContextProvider.ConnectionMode = "Api";
+            scUsuario = new ServicioUsuariosCliente(ContextProvider, UowFactory);
 
-            usuarioService = new ServicioUsuarios(cp, UowFactory);
-            var list = await usuarioService.GetAllAsync();
+            
+            var list = await scUsuario.GetAllAsync();
             usuarios = list.ToList();
 
         }

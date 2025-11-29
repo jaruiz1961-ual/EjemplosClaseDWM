@@ -15,9 +15,14 @@ namespace DataBase.Servicios
         {
 
         }
-  
+    }
 
-
+    public class ServicioUsuariosCliente : GenericDataService<Usuario>, IGenericDataService<Usuario>
+    {
+        public ServicioUsuariosCliente(IContextProvider cp, IUnitOfWorkFactory uowFactory) : base(cp, uowFactory)
+        {
+            cp.ConnectionMode = "Api";
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 using BlazorAppEFTenant.Components;
 using BlazorAppEFTenant.Components.EndPoints;
+using Blazored.LocalStorage;
 using DataBase.Contextos;
 using DataBase.Genericos;
 using DataBase.Modelo;
@@ -24,11 +25,11 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 
 
 // Tenant Provider y Context Provider
-
+builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IContextProvider>(sp =>
 {
-    var provider = new ContextProvider();
+    var provider = ActivatorUtilities.CreateInstance<ContextProvider>(sp);
     provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7013/"), "Ef"); // Asigna aquí el valor inicial por defecto
     return provider;
 });

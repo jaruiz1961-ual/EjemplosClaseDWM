@@ -4,6 +4,9 @@
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
+@layout MainClientLayout
+
+@using BlazorAppEFTenant.Client.Layout
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject IContextProvider ContextProvider
 
@@ -97,6 +100,7 @@
     public int Id { get; set; }
 
     private Usuario NewUser = new Usuario();
+    ServicioUsuariosCliente suCliente ; 
 
 
     bool displayValidationErrorMessages = false;
@@ -105,24 +109,22 @@
 
     protected override async Task OnInitializedAsync()
     {
-            await CargarAsync();           
-           StateHasChanged();
+        suCliente = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+        await CargarAsync();           
+        StateHasChanged();
     }
 
 
     private async Task HandleValidSubmit(EditContext context)
     {
-        displayValidationErrorMessages = false;
-        displayUserAddedToDB = true;
-        var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
-        if (Id != 0)
-            servicioUsuario.UpdateAsync(NewUser);
-        else
-            servicioUsuario.AddAsync(NewUser);
 
-        nav.NavigateTo("javascript:history.back()");
-     
-        //nav.NavigateTo("/ListaUsuarios");
+
+        if (Id != 0)
+            suCliente.UpdateAsync(NewUser);
+        else
+            suCliente.AddAsync(NewUser);
+
+        nav.NavigateTo("/ListaUsuariosCliente");
     }
 
 
@@ -138,12 +140,14 @@
 
     private async Task CargarAsync()
     {
- 
+        displayValidationErrorMessages = false;
+        displayUserAddedToDB = true;
+
         try
         {
             if (Id != 0)
             {
-                var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                var servicioUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
                 NewUser = await servicioUsuario.GetByIdAsync(Id);
             }
             else 

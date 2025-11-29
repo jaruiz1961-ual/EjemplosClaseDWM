@@ -3,7 +3,10 @@
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
-@inject IUnitOfWorkFactory UnitOfWorkFactory 
+@layout MainClientLayout
+
+@using BlazorAppEFTenant.Client.Layout
+@inject IUnitOfWorkFactory UowFactory
 
 @inject IContextProvider ContextProvider
 @inject NavigationManager nav
@@ -95,6 +98,7 @@
     public int Id { get; set; }
 
     private Usuario NewUser = new Usuario();
+    ServicioUsuariosCliente sUsuarioCliente;
 
     bool displayValidationErrorMessages = false;
     bool displayUserAddedToDB = false;
@@ -104,6 +108,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        sUsuarioCliente = new ServicioUsuariosCliente(ContextProvider, UowFactory);
         await CargarAsync();
         StateHasChanged();
     }
@@ -112,9 +117,11 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+        // ContextProvider = await ContextProvider.ReadContext();
+        // ContextProvider.ConnectionMode = "Api";
+       // var servicioUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
         if (Id != 0)
-            servicioUsuario.DeleteAsync(Id);
+            sUsuarioCliente.DeleteAsync(Id);
 
         nav.NavigateTo("javascript:history.back()");
 
@@ -137,8 +144,8 @@
         {
             if (Id != 0)
             {
-                var servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
-                NewUser = await servicioUsuario.GetByIdAsync(Id);
+               // var servicioUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+                NewUser = await sUsuarioCliente.GetByIdAsync(Id);
             }
             else 
             {

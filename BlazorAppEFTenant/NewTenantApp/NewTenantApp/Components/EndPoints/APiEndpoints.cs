@@ -15,7 +15,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string contexto,
                 int tenantId,           
                 IUnitOfWorkFactory uowFactory
-              
+
+
                 ) =>
             {
                 var cp = new ContextProvider();

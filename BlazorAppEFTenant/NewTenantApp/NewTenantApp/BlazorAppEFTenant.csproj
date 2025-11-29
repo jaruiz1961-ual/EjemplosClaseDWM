@@ -17,8 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\NewTenantApp.Client\Layout\NavMenuCliente.razor" Link="NavMenuCliente.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\DataBase\DataBase.csproj" />
     <ProjectReference Include="..\NewTenantApp.Client\BlazorAppEFTenant.Client.csproj" />
+    <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="9.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
       <PrivateAssets>all</PrivateAssets>

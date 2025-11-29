@@ -1,5 +1,7 @@
+using Blazored.LocalStorage;
 using DataBase.Contextos;
 using DataBase.Genericos;
+using DataBase.Servicios;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,15 +30,9 @@ builder.Services.AddHttpClient("ApiRest", client =>
 });
 
 
+builder.Services.AddBlazoredLocalStorage();
 
-
-
-builder.Services.AddScoped<IContextProvider>(sp =>
-{
-    var provider = new ContextProvider();
-    provider.SetContext(1,"InMemory","ApiRest",new Uri(@"https://localhost:7013/"),"Api"); // Asigna aquí el valor inicial por defecto
-    return provider;
-});
+builder.Services.AddScoped<IContextProvider, ContextProvider>();
 
 
 
@@ -46,6 +42,9 @@ builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRe
 
 // Factoría de UoW
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+
+// y, si ServicioUsuariosCliente es una especialización, también su propio registro concreto
+
 
 
 // OJO: Si tu UnitOfWork generic depende solo de DI-resolvable (DbContext y factory)

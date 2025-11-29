@@ -10,6 +10,12 @@ namespace DataBase.Genericos
         public string ApiName { get; set; }
         public Uri DirBase { get; set; }
 
+        public  void SaveContext(IContextProvider cp);
+        public void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode);
+
+
+        public Task ReadContext();
+
 
 
 

@@ -1,4 +1,4 @@
-﻿@rendermode InteractiveServer
+﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using DataBase.Genericos
 @inject IContextProvider ContextProvider
 
@@ -93,17 +93,17 @@
     private static readonly List<MenuItem> Items =
     [
   
-        new("Lista  Context/Tenant (server)", "/ListaUsuarios", MenuTarget.Both),
+        new("Lista  Context/Tenant (server)", "/ListaUsuarios", MenuTarget.Client),
         new("Lista  Fijo-Api (server)", "/ListaUsuariosApi", MenuTarget.Server),
         new("Lista  Multiple Context (server)", "/ListaUsuariosMultipleContext", MenuTarget.Server),
          new("Lista Multiple Tenant (server)", "/ListaUsuariosMultipleTenant", MenuTarget.Server),
          new("Detalle (server)", "/DetalleUsuario", MenuTarget.Server),
          new("Delete (server)", "/DeleteUsuario", MenuTarget.Server),
          new("Weather (server)", "/Weather", MenuTarget.Server),
-        new("Lista  Fijos WASM", "/ListaUsuariosCliente", MenuTarget.Both),
-        new("Delete WASM", "/DeleteUsuarioCliente", MenuTarget.Server),
-        new("Detalle WASM", "/DetalleUsuarioCliente", MenuTarget.Server),
-        new("Counter WASM", "/Counter", MenuTarget.Server)
+        new("Lista  Fijos WASM", "/ListaUsuariosCliente", MenuTarget.Client),
+        new("Delete WASM", "/DeleteUsuarioCliente", MenuTarget.Client),
+        new("Detalle WASM", "/DetalleUsuarioCliente", MenuTarget.Client),
+        new("Counter WASM", "/Counter", MenuTarget.Client)
     ];
 
     private IEnumerable<MenuItem> GetVisibleItems()
