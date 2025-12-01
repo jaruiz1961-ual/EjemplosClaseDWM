@@ -1,6 +1,7 @@
 ﻿using DataBase.Genericos;
 using System.ComponentModel;
 using System.Globalization;
+using System.Security;
 using System.Text.Json;
 
 namespace DataBase.Genericos
@@ -14,6 +15,8 @@ namespace DataBase.Genericos
         public string ConnectionMode { get; set; }
         public string ApiName { get; set; }
         public Uri DirBase { get; set; }
+
+        public string Token { get; set; }
 
     }
     

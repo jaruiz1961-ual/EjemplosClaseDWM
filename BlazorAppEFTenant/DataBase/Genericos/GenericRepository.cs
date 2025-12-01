@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,8 +22,11 @@ namespace DataBase.Genericos
             Set = context.Set<TEntity>();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync() => await Set.ToListAsync();
+        public async Task<IEnumerable<TEntity>> GetAllAsync() => await Set.ToListAsync<TEntity>();
 
+        public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate) => 
+            await Set.Where(predicate).ToListAsync<TEntity>();
+        
         public async Task<TEntity?> GetByIdAsync(object id) => await Set.FindAsync(id);
 
         public async Task AddAsync(TEntity entity) => await Set.AddAsync(entity);

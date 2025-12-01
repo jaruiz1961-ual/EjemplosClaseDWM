@@ -4,6 +4,7 @@ using DataBase.Genericos;
 using DataBase.Servicios;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.EntityFrameworkCore;
+using DataBase;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
@@ -17,6 +18,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 //    client.BaseAddress = new Uri(UrlApi);
 //});
 var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
+builder.Services.AddTransient<CookieBearerTokenHandler>();
 
 builder.Services.AddScoped(sp => new HttpClient
 {
@@ -27,7 +29,7 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddHttpClient("ApiRest", client =>
 {
     client.BaseAddress = new Uri(apiUrl);
-});
+}).AddHttpMessageHandler<CookieBearerTokenHandler>();
 
 
 builder.Services.AddBlazoredLocalStorage();

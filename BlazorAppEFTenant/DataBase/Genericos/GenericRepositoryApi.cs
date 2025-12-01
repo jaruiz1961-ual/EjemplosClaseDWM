@@ -3,9 +3,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net.Http.Json;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace DataBase.Genericos
 {
@@ -17,6 +20,7 @@ namespace DataBase.Genericos
         private readonly string _resourceName;
         private readonly string _contexto;
         int _tenantId;
+        string _token;
 
         public GenericRepositoryApi(HttpClient httpClient, IContextProvider cp, string resourceName)
         {
@@ -24,6 +28,7 @@ namespace DataBase.Genericos
             _resourceName = resourceName.ToLower();
             _contexto = cp.DbKey;
             _tenantId = cp.TenantId ?? 0;
+            _token = cp.Token;
             if (httpClient.BaseAddress == null)
                 _httpClient.BaseAddress = cp.DirBase;
         }
@@ -32,12 +37,26 @@ namespace DataBase.Genericos
 
 
         // Métodos de la interfaz base
-        public async Task<TEntity?> GetByIdAsync(object id) =>
-            await _httpClient.GetFromJsonAsync<TEntity>($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}");
+        public async Task<TEntity?> GetByIdAsync(object id)
+        {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            }
 
+            return await _httpClient.GetFromJsonAsync<TEntity>($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}");
+        }
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
             var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}";
+            var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
+            return resultado ?? Enumerable.Empty<TEntity>();
+        }
+
+        public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate)
+        {          
+            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&predicate={predicate}";
             var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
             return resultado ?? Enumerable.Empty<TEntity>();
         }

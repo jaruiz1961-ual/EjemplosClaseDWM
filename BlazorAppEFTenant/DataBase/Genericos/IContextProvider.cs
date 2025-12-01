@@ -1,4 +1,6 @@
 ﻿
+using System.Security;
+
 namespace DataBase.Genericos
 {
     public interface IContextProvider
@@ -9,9 +11,10 @@ namespace DataBase.Genericos
         public string ConnectionMode { get; set; }
         public string ApiName { get; set; }
         public Uri DirBase { get; set; }
+        public string Token { get; set; }
 
-        public  void SaveContext(IContextProvider cp);
-        public void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode);
+        public  void SaveContext(IContextProvider cp = null);
+        public void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token=null);
 
 
         public Task ReadContext();
@@ -28,7 +31,7 @@ namespace DataBase.Genericos
         public int[] GetTenantIds();
         public string[] GetConnectionModes();
 
-        void SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode);
+        void SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token = null);
         public ContextProvider Copia();
 
     }

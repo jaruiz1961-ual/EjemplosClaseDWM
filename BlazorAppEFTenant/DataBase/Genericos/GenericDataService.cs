@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -30,6 +31,15 @@ namespace DataBase.Servicios
             var repo = uow.GetRepository<T>();
             var allEntities = await repo.GetAllAsync();
             return allEntities.ToList();
+            //return allEntities.Where(e => e.TenantId == _tenantProvider.TenantId).ToList();
+        }
+
+        public async Task<List<T>> GetFilterAsync(Expression<Func<T, bool>> predicate)
+        {
+            var uow = _unitOfWorkFactory.Create(_contextProvider);
+            var repo = uow.GetRepository<T>();
+            var filterEntities = await repo.GetFilterAsync(predicate);
+            return filterEntities.ToList();
             //return allEntities.Where(e => e.TenantId == _tenantProvider.TenantId).ToList();
         }
         public async Task<T?> GetByIdAsync(int id)

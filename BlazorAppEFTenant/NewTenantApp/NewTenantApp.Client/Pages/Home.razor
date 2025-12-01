@@ -1,0 +1,68 @@
+﻿@page "/"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+
+@using BlazorAppEFTenant.Client.Layout
+@using DataBase
+@using DataBase.Genericos
+@using DataBase.Modelo
+@using DataBase.Servicios
+@inject IUnitOfWorkFactory UowFactory
+@inject IContextProvider ContextProvider
+@inject ITokenService TokenService
+
+@inject NavigationManager nav
+
+@layout MainClientLayout
+
+
+
+<h3>Login para obtener token JWT  desde el cliente</h3>
+
+<div>
+    <input @bind="username" placeholder="Usuario" />
+    <input @bind="password" placeholder="Password" />
+</div>
+
+<button @onclick="LoginAsync">Acceder</button>
+
+
+
+@code {
+    string username = "";
+    string password = "";
+    string token = "";
+    string tokenCookie = "";
+
+    string protectedApiResponse = "";
+    string protectedApiResponseCookie = "";
+
+    ServicioSeguridadCliente scUsuario;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ContextProvider.ReadContext();
+
+    }
+
+
+    async Task LoginAsync()
+    {
+        scUsuario = new ServicioSeguridadCliente(ContextProvider, UowFactory, TokenService);
+
+        var list = await scUsuario.GetFilterAsync(
+            u => u.UserName == username && u.Password == password
+            );
+        if (list !=null && list.Count()>0)
+        {
+            var user = list.First();
+            token =  scUsuario.LoginAndGetTokenAsync(user);
+            ContextProvider.Token = token;
+            ContextProvider.SaveContext();
+        }
+    }
+
+   
+}
+

@@ -56,23 +56,25 @@ namespace DataBase.Genericos
         }
 
 
-        public async void SetContext(int? tenantId,string contextDbKey, string apiName, Uri dirBase, string conectionMode)
+        public async void SetContext(int? tenantId,string contextDbKey, string apiName, Uri dirBase, string conectionMode, string token=null)
         {
             TenantId = tenantId;
             DbKey = contextDbKey;
             ConnectionMode = conectionMode;
             ApiName = apiName;
             DirBase = dirBase;
+            Token = token;
             AppState appState = this;
             OnContextChanged?.Invoke();
         }
-        public async void SaveContext(IContextProvider cp)
+        public async void SaveContext(IContextProvider cp=null)
         {
             var appState = cp??this;
             await _localStorage.SetItemAsync("appstate", appState);
         }
+ 
 
-        public async void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode)
+        public async void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string token=null)
         {
             AppState appState = new AppState
             {
@@ -80,7 +82,8 @@ namespace DataBase.Genericos
                 DbKey = contextDbKey,
                 ConnectionMode = conectionMode,
                 ApiName = apiName,
-                DirBase = dirBase
+                DirBase = dirBase,
+                Token = token
             };
 
             await _localStorage.SetItemAsync("appstate", appState);
