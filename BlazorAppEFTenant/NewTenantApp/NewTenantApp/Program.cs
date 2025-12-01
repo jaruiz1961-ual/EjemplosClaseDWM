@@ -1,6 +1,7 @@
 using BlazorAppEFTenant.Components;
 using BlazorAppEFTenant.Components.EndPoints;
 using Blazored.LocalStorage;
+using DataBase;
 using DataBase.Contextos;
 using DataBase.Genericos;
 using DataBase.Modelo;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using minimalapp;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -56,8 +56,9 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddScoped<CookieBearerTokenHandler>();
 // Registrar TokenService en DI
-builder.Services.AddSingleton<TokenService>();
+builder.Services.AddSingleton<ITokenService,TokenService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

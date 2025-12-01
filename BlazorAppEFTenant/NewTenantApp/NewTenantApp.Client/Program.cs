@@ -18,7 +18,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 //    client.BaseAddress = new Uri(UrlApi);
 //});
 var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
-builder.Services.AddTransient<CookieBearerTokenHandler>();
+
 
 builder.Services.AddScoped(sp => new HttpClient
 {
@@ -35,6 +35,7 @@ builder.Services.AddHttpClient("ApiRest", client =>
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IContextProvider, ContextProvider>();
+builder.Services.AddTransient<CookieBearerTokenHandler>();
 
 
 

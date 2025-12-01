@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using minimalapp;
 using System.Linq.Expressions;
 
 namespace BlazorAppEFTenant.Components.EndPoints
@@ -16,26 +15,20 @@ namespace BlazorAppEFTenant.Components.EndPoints
     {
         public static void MapApisBase<T> (this WebApplication app) where T: class,ITenantEntity,IEntity
         {
-            app.MapGet("secured-route", () => "Hello, you are authorized to see this!").RequireAuthorization();
-
-            app.MapPost("/login", ([FromBody] string login, [FromServices] TokenService tokenService, HttpContext httpContext) =>
-            {
-                if (login != "admin") return Results.Unauthorized();
-                var token = tokenService.GenerateToken(login);
-                return Results.Ok(new { Token = token });
-            });
+    
 
             // GET: listar todos
             app.MapGet("/api/{contexto}/{nombreEntidad}", async (
                 string contexto,
                 string nombreEntidad,
                 int tenantId,           
-                IUnitOfWorkFactory uowFactory
+                IUnitOfWorkFactory uowFactory,
+                 IContextProvider cp
 
 
                 ) =>
             {
-                var cp = new ContextProvider();
+      
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
@@ -45,22 +38,23 @@ namespace BlazorAppEFTenant.Components.EndPoints
             }).RequireAuthorization();
 
             // GET: listar filtro 
-            app.MapGet("/api/{contexto}/{nombreEntidad}", async (
+            app.MapGet("/api/{contexto}/{nombreEntidad}/filtrar", async (
                 string contexto,
                 string nombreEntidad,
-                Expression <Func<T, bool>> predicate,
+                string filtro,
                 int tenantId,
-                IUnitOfWorkFactory uowFactory
+                IUnitOfWorkFactory uowFactory,
+                IContextProvider cp  // ← DI
 
 
                 ) =>
             {
-                var cp = new ContextProvider();
+
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var usuarios = await service.GetFilterAsync(predicate);
+                var usuarios = await service.GetFilterAsync(filtro);
                 return Results.Ok(usuarios);
             }).RequireAuthorization();
 
@@ -69,10 +63,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string contexto,
                 int id,
                 int tenantId,           
-                IUnitOfWorkFactory uowFactory
+                IUnitOfWorkFactory uowFactory,
+                 IContextProvider cp
                 ) =>
             {
-                var cp = new ContextProvider();
+                
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
@@ -86,10 +81,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string contexto,
                 T usuario,
                 int tenantId,
-                IUnitOfWorkFactory uowFactory
+                IUnitOfWorkFactory uowFactory,
+                 IContextProvider cp
                 ) =>
             {
-                var cp = new ContextProvider();
+                
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
@@ -104,10 +100,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 int id,
                 T usuario,
                 int tenantId,
-                IUnitOfWorkFactory uowFactory
+                IUnitOfWorkFactory uowFactory,
+                 IContextProvider cp
                 ) =>
             {
-                var cp = new ContextProvider();
+                
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
@@ -131,10 +128,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string contexto,
                 int id,
                 int tenantId,
-                IUnitOfWorkFactory uowFactory
+                IUnitOfWorkFactory uowFactory,
+                 IContextProvider cp
                 ) =>
             {
-                var cp = new ContextProvider();
+              
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica

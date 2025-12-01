@@ -12,9 +12,14 @@ namespace DataBase.Servicios
 {
     public class ServicioSeguridad : GenericDataService<Seguridad>, IGenericDataService<Seguridad>
     {
-        public ServicioSeguridad(IContextProvider cp,IUnitOfWorkFactory uowFactory):base(cp, uowFactory)
+        ITokenService _tokenService;
+        public ServicioSeguridad(IContextProvider cp,IUnitOfWorkFactory uowFactory, ITokenService tokenService) :base(cp, uowFactory)
         {
-
+            _tokenService = tokenService;
+        }
+        public string LoginAndGetTokenAsync(Seguridad user)
+        {
+            return _tokenService.GenerateToken(user);
         }
     }
 
@@ -26,10 +31,7 @@ namespace DataBase.Servicios
             cp.ConnectionMode = "Api";
             _tokenService = tokenService;
         }
-        public string LoginAndGetTokenAsync(Seguridad user)
-        { 
-            return _tokenService.GenerateToken(user);
-        }
+
 
     }
 

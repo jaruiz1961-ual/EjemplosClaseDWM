@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace DataBase.Servicios
         }
 
  
-        public async Task<List<T>> GetAllAsync()
+        public async Task<IEnumerable<T>> GetAllAsync()
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
@@ -34,7 +35,29 @@ namespace DataBase.Servicios
             //return allEntities.Where(e => e.TenantId == _tenantProvider.TenantId).ToList();
         }
 
-        public async Task<List<T>> GetFilterAsync(Expression<Func<T, bool>> predicate)
+        public static Expression<Func<Usuario, bool>> ParseUsuarioPredicate(string filtro)
+        {
+            // filtro: por ejemplo "Nombre == \"Pepe\" && Activo == true"
+            var expr = DynamicExpressionParser.ParseLambda<Usuario, bool>(
+                ParsingConfig.Default,
+                false,
+                filtro
+            );
+            return expr; // Expression<Func<Usuario,bool>>
+        }
+
+        public async Task<IEnumerable<T>> GetFilterAsync(string filtro)
+        {
+            var predicate = DynamicExpressionParser.ParseLambda<T, bool>(
+                ParsingConfig.Default,false,filtro );
+
+            var uow = _unitOfWorkFactory.Create(_contextProvider);
+            var repo = uow.GetRepository<T>();
+            var filterEntities = await repo.GetFilterAsync(predicate);
+            return filterEntities.ToList();
+            //return allEntities.Where(e => e.TenantId == _tenantProvider.TenantId).ToList();
+        }
+        public async Task<IEnumerable<T>> GetFilterAsync(Expression<Func<T, bool>> predicate)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();

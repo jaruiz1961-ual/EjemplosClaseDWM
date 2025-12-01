@@ -98,6 +98,7 @@ namespace DataBase.Genericos
             ConnectionMode = appState.ConnectionMode;
             ApiName = appState.ApiName;
             DirBase = appState.DirBase;
+            Token = appState.Token;
             _initialized = true;        
         }
 
