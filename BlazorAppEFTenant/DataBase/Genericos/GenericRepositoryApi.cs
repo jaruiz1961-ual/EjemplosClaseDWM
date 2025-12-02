@@ -49,25 +49,45 @@ namespace DataBase.Genericos
         }
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            }
             var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}";
             var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
             return resultado ?? Enumerable.Empty<TEntity>();
         }
 
         public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate)
-        {          
+        {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            }
             var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&predicate={predicate}";
             var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
             return resultado ?? Enumerable.Empty<TEntity>();
         }
         public async Task AddAsync(TEntity entity)
         {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            }
             var resp = await _httpClient.PostAsJsonAsync($"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}", entity);
             resp.EnsureSuccessStatusCode();
         }
 
         public void Update(TEntity entity)
         {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            }
             // En acceso API, lo típico es usar PUT por id:
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
@@ -78,6 +98,11 @@ namespace DataBase.Genericos
 
         public void Remove(TEntity entity)
         {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+            }
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");

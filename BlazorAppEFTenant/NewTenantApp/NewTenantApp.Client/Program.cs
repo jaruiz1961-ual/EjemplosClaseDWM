@@ -29,13 +29,13 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddHttpClient("ApiRest", client =>
 {
     client.BaseAddress = new Uri(apiUrl);
-}).AddHttpMessageHandler<CookieBearerTokenHandler>();
+});
 
 
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IContextProvider, ContextProvider>();
-builder.Services.AddTransient<CookieBearerTokenHandler>();
+//builder.Services.AddTransient<CookieBearerTokenHandler>();
 
 
 

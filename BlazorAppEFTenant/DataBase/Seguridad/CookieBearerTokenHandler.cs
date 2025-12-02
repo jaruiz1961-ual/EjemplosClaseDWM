@@ -2,7 +2,7 @@
 using System.Net.Http.Headers;
 
 
-namespace DataBase
+namespace DataBase2
 {
     // Asegúrate de que este Handler esté registrado como 'Transient' en Program.cs
     public class CookieBearerTokenHandler : DelegatingHandler

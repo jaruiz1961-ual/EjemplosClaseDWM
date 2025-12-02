@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-builder.Services.AddScoped<CookieBearerTokenHandler>();
+//builder.Services.AddScoped<CookieBearerTokenHandler>();
 // Registrar TokenService en DI
 builder.Services.AddSingleton<ITokenService,TokenService>();
 
