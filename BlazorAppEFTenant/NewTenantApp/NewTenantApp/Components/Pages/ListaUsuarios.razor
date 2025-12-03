@@ -92,7 +92,7 @@ else
     {
         try
         {
-
+            await ContextProvider.ReadContext();
             var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();

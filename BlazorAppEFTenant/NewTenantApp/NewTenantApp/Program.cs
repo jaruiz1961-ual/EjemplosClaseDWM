@@ -56,7 +56,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-//builder.Services.AddScoped<CookieBearerTokenHandler>();
+
 // Registrar TokenService en DI
 builder.Services.AddSingleton<ITokenService,TokenService>();
 
@@ -102,7 +102,7 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<IContextProvider>(sp =>
 {
     var provider = ActivatorUtilities.CreateInstance<ContextProvider>(sp);
-    provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7013/"), "Ef"); // Asigna aquí el valor inicial por defecto
+    provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7013/"), "Ef",null); // Asigna aquí el valor inicial por defecto
     return provider;
 });
 

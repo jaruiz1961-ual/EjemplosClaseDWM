@@ -35,16 +35,7 @@ namespace DataBase.Servicios
             //return allEntities.Where(e => e.TenantId == _tenantProvider.TenantId).ToList();
         }
 
-        public static Expression<Func<Usuario, bool>> ParseUsuarioPredicate(string filtro)
-        {
-            // filtro: por ejemplo "Nombre == \"Pepe\" && Activo == true"
-            var expr = DynamicExpressionParser.ParseLambda<Usuario, bool>(
-                ParsingConfig.Default,
-                false,
-                filtro
-            );
-            return expr; // Expression<Func<Usuario,bool>>
-        }
+
 
         public async Task<IEnumerable<T>> GetFilterAsync(string filtro)
         {

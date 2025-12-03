@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace DataBase.Modelo
 {
-    public class Usuario: Entidad
+    public class Usuario: Entidad, IUpdatableFrom<Usuario>
     {
         public string Codigo { get; set; }
 
@@ -19,5 +19,17 @@ namespace DataBase.Modelo
         public string Contexto { get; set; }
         public string Password { get; set; }
         public string? email { get; set; }
+
+        public void UpdateFrom(Usuario source)
+        {
+            // Copias solo los campos actualizables
+            UserName = source.UserName;
+            Password = source.Password;
+            Contexto = source.Contexto;
+            email = source.email;
+            Codigo = source.Codigo;
+
+            // No tocas Id ni TenantId aquí
+        }
     }
 }

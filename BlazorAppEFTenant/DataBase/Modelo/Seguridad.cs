@@ -8,10 +8,18 @@ using System.Threading.Tasks;
 
 namespace DataBase.Modelo
 {
-    public class Seguridad: Entidad
+    public class Seguridad: Entidad, IUpdatableFrom<Seguridad>
     {
         public string UserName { get; set; }
         public string Password { get; set; }
         public string? email { get; set; }
+        public void UpdateFrom(Seguridad source)
+        {
+            // Copias solo los campos actualizables
+            UserName = source.UserName;
+            Password = source.Password;
+            email = source.email;
+            // No tocas Id ni TenantId aquí
+        }
     }
 }

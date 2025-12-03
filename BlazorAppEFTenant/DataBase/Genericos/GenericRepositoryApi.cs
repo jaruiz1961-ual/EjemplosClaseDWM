@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Azure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -33,19 +34,32 @@ namespace DataBase.Genericos
                 _httpClient.BaseAddress = cp.DirBase;
         }
 
-        // Propiedad Context: solo para cumplimiento de la interfaz
-
-
         // Métodos de la interfaz base
         public async Task<TEntity?> GetByIdAsync(object id)
         {
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
-         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}";
+            var response = await _httpClient.GetAsync(url); // HttpResponseMessage
 
-            return await _httpClient.GetFromJsonAsync<TEntity>($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}");
+            // Controlar 401 (no autenticado)
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                return default(TEntity);
+            }
+            // Opcional: controlar otros errores
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar otros códigos (404, 500, etc.)
+                return default(TEntity);
+            }
+            var resultado= await _httpClient.GetFromJsonAsync<TEntity>(url);
+            return resultado ?? default(TEntity);
+
         }
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
@@ -55,7 +69,25 @@ namespace DataBase.Genericos
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
             var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}";
-            var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
+            var response = await _httpClient.GetAsync(url); // HttpResponseMessage
+
+            // Controlar 401 (no autenticado)
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                return Enumerable.Empty<TEntity>();
+            }
+
+            // Opcional: controlar otros errores
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar otros códigos (404, 500, etc.)
+                return Enumerable.Empty<TEntity>();
+            }
+
+            var resultado = await response.Content
+                .ReadFromJsonAsync<IEnumerable<TEntity>>();
+
             return resultado ?? Enumerable.Empty<TEntity>();
         }
 

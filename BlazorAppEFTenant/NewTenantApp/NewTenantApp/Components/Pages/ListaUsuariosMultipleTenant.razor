@@ -16,6 +16,7 @@
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
 <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
 <p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
+<p>Token <strong>@ContextProvider.Token</strong>:</p>
 @if (@ContextProvider.ConnectionMode != "Ef")
 {
     <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
@@ -85,6 +86,7 @@ else
     {
         try
         {
+            await ContextProvider.ReadContext();
             IContextProvider cp = ContextProvider.Copia();
             foreach (var tenant in cp.GetTenantIds())
             {

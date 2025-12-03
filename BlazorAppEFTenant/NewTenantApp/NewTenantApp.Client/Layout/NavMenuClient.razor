@@ -2,16 +2,16 @@
 @using DataBase.Genericos
 @inject IContextProvider ContextProvider
 
-<div class="top-row ps-3 navbar navbar-dark">
+<div class="top-row navbar navbar-dark w-25">
     <div class="container-fluid" />
-    <select class="form-select" @bind="TenantId">
+    <select class="form-select" style="min-width: 200px;" @bind="TenantId">
 
         @foreach (var opcion in ContextProvider.GetTenantIds())
         {
             <option value="@opcion">@opcion</option>
         }
     </select>
-    <select class="form-select" @bind="ContextKey">
+    <select class="form-select" style="min-width: 200px;" @bind="ContextKey">
 
         @foreach (var opcion in ContextProvider.GetContextKeyDbs())
         {
@@ -19,7 +19,7 @@
         }
     </select>
 
-    <select class="form-select" @bind="Mode">
+    <select class="form-select" style="min-width: 200px;" @bind="Mode">
 
         @foreach (var opcion in ContextProvider.GetConnectionModes())
         {
@@ -28,7 +28,7 @@
     </select>
     @if (Mode!="Ef")
     {
-    <select class="form-select" @bind="ApiName">
+        <select class="form-select" style="min-width: 200px;" @bind="ApiName">
 
         @foreach (var opcion in ContextProvider.GetApiNames())
         {
@@ -67,7 +67,7 @@
     </nav>
     
 </div>
-@code{
+@code {
     int TenantId = 0;
     string ContextKey = "SqLite";
     string ApiName = "ApiRest";
@@ -75,11 +75,38 @@
     private bool IsClient => OperatingSystem.IsBrowser();
     private bool IsServer => !OperatingSystem.IsBrowser();
 
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await CargarAsync();
+    }
+
+    private async Task CargarAsync()
+    {
+        try
+        {
+            await ContextProvider.ReadContext();
+            TenantId = ContextProvider?.TenantId ?? 0;
+            ContextKey = ContextProvider?.DbKey ?? "SqLite";
+            ApiName = ContextProvider?.ApiName ?? "ApiRest";
+            Mode = ContextProvider?.ConnectionMode ?? "Ef";
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
+    }
 
     private async Task Actualizar()
     {
-        ContextProvider.SetContext(TenantId,ContextKey,ApiName,ContextProvider.DirBase,Mode);
-        ContextProvider.SaveContext(TenantId, ContextKey, ApiName, ContextProvider.DirBase, Mode);
+        var Token = ContextProvider.Token;
+        ContextProvider.SetContext(TenantId, ContextKey, ApiName, ContextProvider.DirBase, Mode, Token);
+        ContextProvider.SaveContext(TenantId, ContextKey, ApiName, ContextProvider.DirBase, Mode, Token);
 
     }
 
@@ -92,18 +119,18 @@
     public record MenuItem(string Text, string Url, MenuTarget Target);
     private static readonly List<MenuItem> Items =
     [
-  
-        new("Lista  Context/Tenant (server)", "/ListaUsuarios", MenuTarget.Client),
+
+        new("Lista  Context/Tenant (server)", "/ListaUsuarios", MenuTarget.Both),
         new("Lista  Fijo-Api (server)", "/ListaUsuariosApi", MenuTarget.Server),
         new("Lista  Multiple Context (server)", "/ListaUsuariosMultipleContext", MenuTarget.Server),
          new("Lista Multiple Tenant (server)", "/ListaUsuariosMultipleTenant", MenuTarget.Server),
          new("Detalle (server)", "/DetalleUsuario", MenuTarget.Server),
          new("Delete (server)", "/DeleteUsuario", MenuTarget.Server),
          new("Weather (server)", "/Weather", MenuTarget.Server),
-        new("Lista  Fijos WASM", "/ListaUsuariosCliente", MenuTarget.Client),
-        new("Delete WASM", "/DeleteUsuarioCliente", MenuTarget.Client),
-        new("Detalle WASM", "/DetalleUsuarioCliente", MenuTarget.Client),
-        new("Counter WASM", "/Counter", MenuTarget.Client)
+        new("Lista  Fijos WASM", "/ListaUsuariosCliente", MenuTarget.Both),
+        new("Delete WASM", "/DeleteUsuarioCliente", MenuTarget.Server),
+        new("Detalle WASM", "/DetalleUsuarioCliente", MenuTarget.Server),
+        new("Counter WASM", "/Counter", MenuTarget.Server)
     ];
 
     private IEnumerable<MenuItem> GetVisibleItems()
@@ -114,5 +141,5 @@
         return Items.Where(i => i.Target is MenuTarget.Server or MenuTarget.Both);
     }
 
-    }
-    
+}
+

@@ -18,6 +18,7 @@
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
 <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
 <p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
+<p>Token <strong>@ContextProvider.Token</strong>:</p>
 @if (@ContextProvider.ConnectionMode != "Ef")
 {
     <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
@@ -109,6 +110,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        await ContextProvider.ReadContext();
         suCliente = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
         await CargarAsync();           
         StateHasChanged();

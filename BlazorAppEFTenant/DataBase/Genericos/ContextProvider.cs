@@ -51,12 +51,13 @@ namespace DataBase.Genericos
                 DbKey = this.DbKey,
                 ConnectionMode = this.ConnectionMode,
                 ApiName = this.ApiName,
-                DirBase = this.DirBase
+                DirBase = this.DirBase,
+                Token = this.Token
             };
         }
 
 
-        public async void SetContext(int? tenantId,string contextDbKey, string apiName, Uri dirBase, string conectionMode, string token=null)
+        public async void SetContext(int? tenantId,string contextDbKey, string apiName, Uri dirBase, string conectionMode, string token)
         {
             TenantId = tenantId;
             DbKey = contextDbKey;

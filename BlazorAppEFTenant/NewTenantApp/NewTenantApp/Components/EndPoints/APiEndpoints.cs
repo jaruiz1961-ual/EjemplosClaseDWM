@@ -13,32 +13,43 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
     public static class ApiEndpoints
     {
-        public static void MapApisBase<T> (this WebApplication app) where T: class,ITenantEntity,IEntity
+        public static void MapApisBase<T> (this WebApplication app) where T: class,ITenantEntity,IEntity, IUpdatableFrom<T>
         {
     
 
             // GET: listar todos
             app.MapGet("/api/{contexto}/{nombreEntidad}", async (
+                HttpContext httpContext,
                 string contexto,
                 string nombreEntidad,
                 int tenantId,           
                 IUnitOfWorkFactory uowFactory,
                  IContextProvider cp
-
-
                 ) =>
-            {
-      
-                cp.DbKey = contexto;
-                cp.TenantId = tenantId;
-                cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory);
-                var usuarios = await service.GetAllAsync();
-                return Results.Ok(usuarios);
-            }).RequireAuthorization();
+                {
+                if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
+                    cp.DbKey = contexto;
+                    cp.TenantId = tenantId;
+                    cp.ConnectionMode = "Ef";
+
+                    var service = new GenericDataService<T>(cp, uowFactory);
+                    try
+                    {
+                        var usuarios = await service.GetAllAsync();
+                        return Results.Ok(usuarios);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        return Results.Unauthorized();
+                    }
+                }).RequireAuthorization(); ;
 
             // GET: listar filtro 
             app.MapGet("/api/{contexto}/{nombreEntidad}/filtrar", async (
+                HttpContext httpContext,
                 string contexto,
                 string nombreEntidad,
                 string filtro,
@@ -49,7 +60,10 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
                 ) =>
             {
-
+                if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
@@ -59,44 +73,72 @@ namespace BlazorAppEFTenant.Components.EndPoints
             }).RequireAuthorization();
 
             // GET: obtener por id
-            app.MapGet("/api/{contexto}/usuarios/{id:int}", async (
+            app.MapGet("/api/{contexto}/{nombreEntidad}/{id:int}", async (
+                HttpContext httpContext,
                 string contexto,
+                string nombreEntidad,
                 int id,
                 int tenantId,           
                 IUnitOfWorkFactory uowFactory,
                  IContextProvider cp
                 ) =>
             {
-                
+                if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var usuario = await service.GetByIdAsync(id);
-                return usuario is not null ? Results.Ok(usuario) : Results.NotFound();
-            });
+                try
+                {
+                    var usuario = await service.GetByIdAsync(id);
+                    return usuario is not null ? Results.Ok(usuario) : Results.NotFound();
+
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Results.Unauthorized();
+                }
+              }).RequireAuthorization(); 
 
             // POST: crear usuario
-            app.MapPost("/api/{contexto}/usuarios", async (
+            app.MapPost("/api/{contexto}/{nombreEntidad}", async (
+                HttpContext httpContext,
                 string contexto,
+                string nombreEntidad,
                 T usuario,
                 int tenantId,
                 IUnitOfWorkFactory uowFactory,
                  IContextProvider cp
                 ) =>
             {
-                
+                if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                await service.AddAsync(usuario);
-                return Results.Created($"/api/{contexto}/usuarios/{usuario.Id}", usuario);
-            });
+                try
+                {
+                    await service.AddAsync(usuario);
+                    return Results.Created($"/api/{contexto}/{nombreEntidad}/{usuario.Id}", usuario);
+
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Results.Unauthorized();
+                }
+        }).RequireAuthorization(); 
 
             // PUT: actualizar usuario
-            app.MapPut("/api/{contexto}/usuarios/{id:int}", async (
+            app.MapPut("/api/{contexto}/{nombreEntidad}/{id:int}", async (
+                HttpContext httpContext,
                 string contexto,
+                string nombreEntidad,
                 int id,
                 T usuario,
                 int tenantId,
@@ -104,35 +146,49 @@ namespace BlazorAppEFTenant.Components.EndPoints
                  IContextProvider cp
                 ) =>
             {
-                
+                if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var actual = await service.GetByIdAsync(id);
-                if (actual is null)
-                    return Results.NotFound();
-                // Copia campos actualizables
-                actual = usuario;
-                //actual.UserName = usuario.UserName;
-                //actual.Codigo = usuario.Codigo;
-                //actual.Contexto = usuario.Contexto;
-                //actual.Password = usuario.Password;
-                //actual.TenantId = usuario.TenantId;
-                await service.UpdateAsync(actual);
-                return Results.Ok(actual);
-            });
+                try
+                {
+                    var actual = await service.GetByIdAsync(id);
+                    if (actual is null)
+                        return Results.NotFound();
+                    actual.UpdateFrom(usuario);
+                    // Copia campos actualizables -.. no puedo hacer esto 
+                    // porque T es desconocido necesito una interfaz que lo permita
+
+                    await service.UpdateAsync(actual);
+                    return Results.Ok(actual);
+
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Results.Unauthorized();
+                }
+
+            }).RequireAuthorization(); 
 
             // DELETE: eliminar usuario
-            app.MapDelete("/api/{contexto}/usuarios/{id:int}", async (
+            app.MapDelete("/api/{contexto}/{nombreEntidad}/{id:int}", async (
+                HttpContext httpContext,
                 string contexto,
+                string nombreEntidad,
                 int id,
                 int tenantId,
                 IUnitOfWorkFactory uowFactory,
                  IContextProvider cp
                 ) =>
             {
-              
+                if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
+                {
+                    return Results.Unauthorized();
+                }
                 cp.DbKey = contexto;
                 cp.TenantId = tenantId;
                 cp.ConnectionMode = "Ef"; // Ajusta según tu lógica
@@ -141,8 +197,15 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 if (usuario is null)
                     return Results.NotFound();
                 await service.DeleteAsync(id);
-                return Results.Ok(usuario);
-            });
+                try
+                {
+                    return Results.Ok(usuario);
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    return Results.Unauthorized();
+                }
+        }).RequireAuthorization(); 
         }
     }
 
