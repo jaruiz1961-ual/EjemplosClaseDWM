@@ -4,46 +4,57 @@
 @inject IContextProvider ContextProvider
 @inject ITokenService TokenService
 
-@if (_isAuthorized)
+@if (_initialized && _isAuthorized)
 {
     @Authorized
 }
-else
+else if (_initialized && !_isAuthorized)
 {
     @NotAuthorized
+}
+else
+{
+    <text>Cargando...</text>
 }
 
 @code {
     [Parameter] public RenderFragment? Authorized { get; set; }
     [Parameter] public RenderFragment? NotAuthorized { get; set; }
-
-    // Opcional: rol/categoría propia
     [Parameter] public string? RequiredRole { get; set; }
 
-
     private bool _isAuthorized;
+    private bool _initialized;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-
         ContextProvider.OnContextChanged += ContextChanged;
     }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await ContextProvider.ReadContext();
-        EvaluateAuthorization();
-
+        if (firstRender)
+        {
+            // Aquí ya hay JS disponible para Blazored.LocalStorage
+            await ContextProvider.ReadContext();
+            EvaluateAuthorization();
+            _initialized = true;
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
-    private async Task ContextChanged()
+    private void ContextChanged()
     {
-        EvaluateAuthorization();
-        await InvokeAsync(StateHasChanged);
+        if (_initialized)
+        {
+            EvaluateAuthorization();
+            InvokeAsync(StateHasChanged);
+        }
     }
 
     private void EvaluateAuthorization()
     {
         var token = ContextProvider.Token;
+
         if (string.IsNullOrEmpty(token) || !TokenService.ValidateToken(token))
         {
             _isAuthorized = false;
@@ -51,6 +62,7 @@ else
         }
 
         var sc = ServicioSeguridad.GetDataFromToken(token);
+
         _isAuthorized = string.IsNullOrEmpty(RequiredRole)
             || string.Equals(sc.Roles, RequiredRole, StringComparison.OrdinalIgnoreCase);
     }

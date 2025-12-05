@@ -116,7 +116,7 @@
             await ContextProvider.ReadContext();
             seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
             await CargarAsync();
-            StateHasChanged();
+            
         }
     }
     private async Task HandleValidSubmit(EditContext context)
@@ -158,7 +158,7 @@
             {
 
             }
-
+            StateHasChanged();
         }
         catch (Exception ex)
         {

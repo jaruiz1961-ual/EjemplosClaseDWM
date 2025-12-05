@@ -15,15 +15,15 @@ namespace DataBase.Genericos
 
 
         public  Task SaveContextAsync(IContextProvider? cp);
-        public void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
+        public Task SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
 
 
-        public Task ReadContext();
+        public  Task ReadContext();
 
 
 
 
-        public event Func<Task>? OnContextChanged;
+        public event Action? OnContextChanged;
 
         public string[] GetContextKeyDbs();
 
@@ -32,7 +32,7 @@ namespace DataBase.Genericos
         public int[] GetTenantIds();
         public string[] GetConnectionModes();
 
-        void SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
+        Task SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
         public ContextProvider Copia();
 
     }

@@ -104,11 +104,11 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 });
 
 
-
+builder.Services.AddScoped<IContextProvider, ContextProvider>();
 // Tenant Provider y Context Provider
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<IContextProvider, ContextProvider>();
+
     
 //(sp =>
 //{

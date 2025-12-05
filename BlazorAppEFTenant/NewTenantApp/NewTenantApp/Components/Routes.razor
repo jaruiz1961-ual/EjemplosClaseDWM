@@ -1,5 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using BlazorAppEFTenant.Client
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <CascadingAuthenticationState>
     <Router AppAssembly="@typeof(Program).Assembly"

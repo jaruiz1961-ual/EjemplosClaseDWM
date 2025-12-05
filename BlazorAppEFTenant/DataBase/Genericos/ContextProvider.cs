@@ -1,51 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components;
+﻿using Blazored.LocalStorage;
 
 namespace DataBase.Genericos
 {
-
     public class ContextProvider : AppState, IContextProvider
     {
-        Blazored.LocalStorage.ILocalStorageService _localStorage { get; set; } = default!;
-  
-        public event Func<Task>? OnContextChanged;
+        private readonly ILocalStorageService _localStorage;
 
-        public string[] GetContextKeyDbs() => new[]
-        {
-            "SqlServer","SqLite","InMemory"
-        };
-
-        public string[] GetApiNames() => new[]
-        {
-            "ApiRest",""
-        };      
-
-        public int[] GetTenantIds() => new[]
-        {
-            0,1,2
-        };
-        public string[] GetConnectionModes() => new[]
-    {
-            "Ef","Api"
-        };
+        public event Action? OnContextChanged;
 
         private bool _initialized;
-        public ContextProvider()
-        {
-        }
-        public ContextProvider(Blazored.LocalStorage.ILocalStorageService localStorage)
+
+        public ContextProvider(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;
         }
+
+        public string[] GetContextKeyDbs() => new[] { "SqlServer", "SqLite", "InMemory" };
+        public string[] GetApiNames() => new[] { "ApiRest", "" };
+        public int[] GetTenantIds() => new[] { 0, 1, 2 };
+        public string[] GetConnectionModes() => new[] { "Ef", "Api" };
+
         public ContextProvider Copia()
-            {
-            return new ContextProvider(_localStorage)
+            => new ContextProvider(_localStorage)
             {
                 TenantId = this.TenantId,
                 DbKey = this.DbKey,
@@ -54,10 +30,15 @@ namespace DataBase.Genericos
                 DirBase = this.DirBase,
                 Token = this.Token
             };
-        }
 
-
-        public async void SetContext(int? tenantId,string contextDbKey, string apiName, Uri dirBase, string conectionMode, string token)
+        // Login / cambio de contexto principal
+        public async Task SetContext(
+            int? tenantId,
+            string? contextDbKey,
+            string? apiName,
+            Uri? dirBase,
+            string? conectionMode,
+            string? token)
         {
             TenantId = tenantId;
             DbKey = contextDbKey;
@@ -65,48 +46,52 @@ namespace DataBase.Genericos
             ApiName = apiName;
             DirBase = dirBase;
             Token = token;
-            AppState appState = this;
+
             await _localStorage.SetItemAsync("appstate", (AppState)this);
             OnContextChanged?.Invoke();
         }
-        public async Task SaveContextAsync(IContextProvider? cp )
+
+        // Guardar el estado actual (sin cambiar nada)
+        public async Task SaveContextAsync(IContextProvider? cp = null)
         {
-            var appState = cp ?? this;
-            await _localStorage.SetItemAsync("appstate", (AppState)appState);
-            OnContextChanged?.Invoke();
-        }
-
-
-        public async void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string token=null)
-        {
-            AppState appState = new AppState
-            {
-                TenantId = tenantId,
-                DbKey = contextDbKey,
-                ConnectionMode = conectionMode,
-                ApiName = apiName,
-                DirBase = dirBase,
-                Token = token
-            };
-
+            var appState = (AppState)(cp ?? this);
             await _localStorage.SetItemAsync("appstate", appState);
             OnContextChanged?.Invoke();
         }
+
+        // Otra forma de cambiar contexto
+        public async Task SaveContext(
+            int? tenantId,
+            string contextDbKey,
+            string apiName,
+            Uri dirBase,
+            string conectionMode,
+            string? token = null)
+        {
+            TenantId = tenantId;
+            DbKey = contextDbKey;
+            ConnectionMode = conectionMode;
+            ApiName = apiName;
+            DirBase = dirBase;
+            Token = token;
+
+            await _localStorage.SetItemAsync("appstate", (AppState)this);
+            OnContextChanged?.Invoke();
+        }
+
+        // Carga inicial desde LocalStorage (llamar solo después del primer render)
         public async Task ReadContext()
         {
             if (_initialized) return;
-          
-            var appState= await _localStorage.GetItemAsync<AppState>("appstate") ?? this;
+
+            var appState = await _localStorage.GetItemAsync<AppState>("appstate") ?? this;
             TenantId = appState.TenantId;
             DbKey = appState.DbKey;
             ConnectionMode = appState.ConnectionMode;
             ApiName = appState.ApiName;
             DirBase = appState.DirBase;
             Token = appState.Token;
-            _initialized = true;        
+            _initialized = true;
         }
-
-  
     }
-
 }

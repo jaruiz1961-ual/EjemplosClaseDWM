@@ -79,14 +79,14 @@ else
     Seguridad seguridad = new Seguridad();
 
 
-    private Func<Task>? _onContextChangedHandler;
+    private Action? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
     {
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
-            StateHasChanged();
+            
         };
 
 
@@ -109,6 +109,7 @@ else
             var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();
+            StateHasChanged();
 
 
         }

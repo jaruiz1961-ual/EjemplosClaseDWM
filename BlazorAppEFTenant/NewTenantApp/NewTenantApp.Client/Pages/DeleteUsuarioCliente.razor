@@ -113,7 +113,7 @@
             await ContextProvider.ReadContext();
             seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
             await CargarAsync();
-            StateHasChanged();
+            
         }
     }
 
@@ -156,7 +156,7 @@
                 NewUser = new Usuario();
                 NewUser.TenantId = ContextProvider.TenantId;
             }
-
+            StateHasChanged();
         }
         catch (Exception ex)
         {

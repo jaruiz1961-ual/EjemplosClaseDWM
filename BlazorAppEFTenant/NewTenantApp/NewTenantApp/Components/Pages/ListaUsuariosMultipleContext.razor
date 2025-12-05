@@ -69,7 +69,7 @@ else
 
 
  
-    private Func<Task>? _onContextChangedHandler;
+    private Action? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
     {
@@ -108,7 +108,7 @@ else
                 usuarios.AddRange(list);
 
             }
-
+            StateHasChanged();
         }
         
         catch (Exception ex)

@@ -84,7 +84,7 @@ else
     string ContextoKey ="";
 
 
-    private Func<Task>? _onContextChangedHandler;
+    private Action? _onContextChangedHandler;
     ServicioUsuariosCliente scUsuario;
 
 
@@ -94,7 +94,7 @@ else
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
-            StateHasChanged();
+            
         };
 
         ContextProvider.OnContextChanged += _onContextChangedHandler;
@@ -111,14 +111,14 @@ else
     {
         try
         {
-            // ContextProvider = await ContextProvider.ReadContext();
+             await ContextProvider.ReadContext();
             // ContextProvider.ConnectionMode = "Api";
             scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
 
             
            var list = await scUsuario.GetAllAsync();
             usuarios = list.ToList();
-
+            StateHasChanged();
         }
         catch (Exception ex)
         {

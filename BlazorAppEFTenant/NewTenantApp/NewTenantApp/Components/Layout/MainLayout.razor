@@ -5,6 +5,7 @@
 @inherits LayoutComponentBase
 @inject IContextProvider ContextProvider
 @inject ITokenService TokenService
+@inject NavigationManager Nav
 
 <div class="page">
     <div class="sidebar">
@@ -14,15 +15,14 @@
     <main>
         <div class="top-row px-4">
             <MyAuthorizeView>
-    <Authorized>
-           <button class="btn btn-link" @onclick="Logout">Logout</button>
-    </Authorized>
+                <Authorized>
+                    <button class="btn btn-link" @onclick="Logout">Logout</button>
+                </Authorized>
 
-    <NotAuthorized>
-        <!-- Usuario NO logeado: mostrar Login/Register -->
-        <a href=Login>Login</a>        
-    </NotAuthorized>
-</MyAuthorizeView>
+                <NotAuthorized>
+                    <a href="Login">Login</a>
+                </NotAuthorized>
+            </MyAuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -36,12 +36,12 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
-@code {
-    [Inject] NavigationManager Nav { get; set; } = default!;
 
-    private void Logout()
+@code {
+    private async Task Logout()
     {
-        ContextProvider.SaveContext(null, null, null, null, null, null);
+        // Limpia el contexto (token = null, etc.) y notifica a todos los MyAuthorizeView
+        await ContextProvider.SetContext(null, null, null, null, null, null);
         Nav.NavigateTo("/Home", forceLoad: true);
     }
 }

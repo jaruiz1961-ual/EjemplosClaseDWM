@@ -85,7 +85,7 @@ else
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     private GenericDataService<Usuario> usuarioService;
 
-    private Func<Task>? _onContextChangedHandler;
+    private Action? _onContextChangedHandler;
     void IrALogin()
        => nav.NavigateTo("/login");
 
@@ -94,7 +94,7 @@ else
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
-            StateHasChanged();
+            
         };
 
 
@@ -120,6 +120,7 @@ else
             usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
+            StateHasChanged();
 
         }
         catch (Exception ex)
