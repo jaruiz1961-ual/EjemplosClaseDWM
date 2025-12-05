@@ -1,8 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using BlazorAppEFTenant.Client
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@* @rendermode InteractiveAuto *@
 
-<CascadingAuthenticationState>
+
     <Router AppAssembly="@typeof(Program).Assembly"
             AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
 
@@ -19,5 +19,5 @@
         </NotFound>
 
     </Router>
-</CascadingAuthenticationState>
+
 

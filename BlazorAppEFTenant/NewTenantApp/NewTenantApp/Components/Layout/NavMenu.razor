@@ -1,6 +1,7 @@
-﻿@rendermode InteractiveServer
+﻿
 @using DataBase.Genericos
 @inject IContextProvider ContextProvider
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 <div class="top-row navbar navbar-dark w-25">
 

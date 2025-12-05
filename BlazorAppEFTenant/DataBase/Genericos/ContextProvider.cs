@@ -1,4 +1,5 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.IdentityModel.Tokens;
 
 namespace DataBase.Genericos
 {
@@ -20,6 +21,16 @@ namespace DataBase.Genericos
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
 
+        public bool IsValid()
+        {
+            if (string.IsNullOrEmpty(TenantId.ToString())) return false;
+            if (string.IsNullOrEmpty(DbKey)) return false;
+            if (string.IsNullOrEmpty(ConnectionMode)) return false;
+            if (ConnectionMode.ToLower()=="api" && string.IsNullOrEmpty(Token)) return false;
+            if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(ApiName)) return false;
+            if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(DirBase.ToString())) return false;
+            return true;
+        }
         public ContextProvider Copia()
             => new ContextProvider(_localStorage)
             {

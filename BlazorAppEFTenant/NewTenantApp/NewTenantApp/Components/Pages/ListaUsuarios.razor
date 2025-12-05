@@ -14,24 +14,10 @@
 <h3>Listado de usuarios  (Genérico)</h3>
 
 
-<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-<p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
 
-<p>Nombre: @seguridad.UserName</p>
-<p>Password: @seguridad.Password</p>
-<p>TenantId: @seguridad.TenantId</p>
-<p>Email: @seguridad.Email</p>
-<p>Roles:  @seguridad.Roles</p>
-@if (@ContextProvider.ConnectionMode != "Ef")
+@if (_isValidContext == false)
 {
-    <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
-}
-
-
-@if (usuarios is null)
-{
-    <p><em>Cargando...</em></p>
+    <p><em>Debe seleccionar un conrtexto de ejecución para ver los usuarios...</em></p>
 }
 else if (!usuarios.Any())
 {
@@ -67,8 +53,7 @@ else
                 </tr>
             }
         </tbody>
-    </table>
-
+    </table>    
 }
 
 
@@ -77,7 +62,7 @@ else
     int TenantId;
     string ContextoKey ="";
     Seguridad seguridad = new Seguridad();
-
+    bool _isValidContext;
 
     private Action? _onContextChangedHandler;
 
@@ -86,7 +71,7 @@ else
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
-            
+
         };
 
 
@@ -96,7 +81,7 @@ else
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        await CargarAsync();
+            await CargarAsync();
 
     }
 
@@ -104,14 +89,17 @@ else
     {
         try
         {
-            await ContextProvider.ReadContext();
-            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
-            var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
-            var list = await user.GetAllAsync();
-            usuarios = list.ToList();
+            if (ContextProvider.IsValid())
+            {  
+                await ContextProvider.ReadContext();
+                seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+                var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                var list = await user.GetAllAsync();
+                usuarios = list.ToList();
+                _isValidContext = true;                
+            }
+            else _isValidContext = false;
             StateHasChanged();
-
-
         }
         catch (Exception ex)
         {

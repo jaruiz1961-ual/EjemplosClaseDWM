@@ -34,6 +34,7 @@ namespace DataBase.Genericos
 
         Task SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
         public ContextProvider Copia();
+        public bool IsValid();
 
     }
 }

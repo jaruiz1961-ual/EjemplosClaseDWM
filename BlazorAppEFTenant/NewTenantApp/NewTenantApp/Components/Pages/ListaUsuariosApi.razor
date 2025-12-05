@@ -18,23 +18,17 @@
 <MyAuthorizeView RequiredRole="Admin">
     <Authorized>
         <h3>Zona Admin</h3>
-<h3>Listado de usuarios Api (Genérico)</h3>
 
 
-<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-<p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
-<p>Token <strong>@ContextProvider.Token</strong>:</p>
-@if (@ContextProvider.ConnectionMode != "Ef")
+@if (_isValidContext == false)
 {
-    <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+    <p><em>Debe seleccionar un conrtexto de ejecución para ver los usuarios...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No hay usuarios registrados .....</p>
 }
 
-
-@if (usuarios is null)
-{
-    <p><em>Cargando...</em></p>
-}
 else if (!usuarios.Any())
 {
     <p>No hay usuarios registrados .....</p>
@@ -84,6 +78,7 @@ else
 @code {
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     private GenericDataService<Usuario> usuarioService;
+    bool _isValidContext;
 
     private Action? _onContextChangedHandler;
     void IrALogin()
@@ -94,17 +89,17 @@ else
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
-            
+
         };
 
 
         ContextProvider.OnContextChanged += _onContextChangedHandler;
-    
+
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-        await CargarAsync();
+            await CargarAsync();
 
     }
 
@@ -113,14 +108,18 @@ else
 
         try
         {
-            await ContextProvider.ReadContext();
-            IContextProvider cp = ContextProvider.Copia();
-            cp.ConnectionMode = "Api";
+            if (ContextProvider.IsValid())
+            {
+                await ContextProvider.ReadContext();
+                IContextProvider cp = ContextProvider.Copia();
+                cp.ConnectionMode = "Api";
 
-            usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);
-            var list = await usuarioService.GetAllAsync();
-            usuarios = list.ToList();
-            StateHasChanged();
+                usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);
+                var list = await usuarioService.GetAllAsync();
+                usuarios = list.ToList();
+                StateHasChanged();
+                _isValidContext = true;
+            }
 
         }
         catch (Exception ex)
