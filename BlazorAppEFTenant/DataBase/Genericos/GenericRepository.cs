@@ -29,11 +29,23 @@ namespace DataBase.Genericos
         
         public async Task<TEntity?> GetByIdAsync(object id) => await Set.FindAsync(id);
 
-        public async Task AddAsync(TEntity entity) => await Set.AddAsync(entity);
+        public async Task<TEntity?> Add(TEntity entity)
+        {
+            await Set.AddAsync(entity);
+            return entity;
+        }
 
-        public void Update(TEntity entity) => Set.Update(entity);
+        public async  Task<TEntity?> Update(TEntity entity)
+        {
+            Set.Update(entity);
+           return entity;
+        }
 
-        public void Remove(TEntity entity) => Set.Remove(entity);
+        public async Task<TEntity?> Remove(TEntity entity)
+        {
+            Set.Remove(entity);
+            return entity;
+        }
     }
 
 

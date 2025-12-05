@@ -1,7 +1,9 @@
-﻿using DataBase.Genericos;
+﻿//#define UPDATE_DATABASE
+using DataBase.Genericos;
 using DataBase.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,28 +13,34 @@ using System.Threading.Tasks;
 
 namespace DataBase.Contextos
 {
-    //PM> dotnet-ef migrations add Final --context SqlServerDbContext
-    //PM> dotnet-ef database update --context SqlServerDbContext
-    //public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>
-    //{
-    //    public SqlServerDbContext CreateDbContext(string[] args)
-    //    {
-    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-    //        optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva3; AttachDbFilename=c:\temp\Nueva3.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
-    //        return new SqlServerDbContext(optionsBuilder.Options);
-    //    }
-    //}
+    //PM> dotnet ef  migrations add --context SqlServerDbContext roles  --project DataBase
+    //PM> dotnet ef database update --context SqlServerDbContext --project Database
+
+#if UPDATE_DATABASE
+    public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>
+    {
+        public SqlServerDbContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
+            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva3; AttachDbFilename=c:\temp\Nueva3.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
+            return new SqlServerDbContext(optionsBuilder.Options);
+        }
+    }
+#endif
 
     public class SqlServerDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
 
-        //public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
-        //    : base(options)
-        //{
+#if UPDATE_DATABASE
 
-        //}
+        public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
+            : base(options)
+        {
+
+        }
+#else
 
         public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
             : base(options) 
@@ -41,6 +49,7 @@ namespace DataBase.Contextos
             TenantId = _tenantInterceptor.ContextProvider.TenantId;
           
         }
+#endif
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -88,15 +97,15 @@ namespace DataBase.Contextos
        new Usuario { Id = 3, UserName = "Usuario3", Contexto = "SqlServer", Codigo = "0003", Password = "abc 33", TenantId = 2 });
 
             modelBuilder.Entity<Seguridad>().HasData
-(new Seguridad { Id = 1, UserName = "admin1",  Password = "abc1", TenantId = 0 },
-new Seguridad { Id = 2, UserName = "admin2",  Password = "abc2", TenantId = 0 },
-new Seguridad { Id = 3, UserName = "admin3",  Password = "abc3", TenantId = 0 },
-new Seguridad { Id = 4, UserName = "admin4", Password = "abc4", TenantId = 1 },
-new Seguridad { Id = 5, UserName = "admin5", Password = "abc5", TenantId = 1 },
-new Seguridad { Id = 6, UserName = "admin6", Password = "abc6", TenantId = 1 },
-new Seguridad { Id = 7, UserName = "admin7", Password = "abc7", TenantId = 2 },
-new Seguridad { Id = 8, UserName = "admin8", Password = "abc8", TenantId = 2 },
-new Seguridad { Id = 9, UserName = "admin9", Password = "abc9", TenantId = 2 }
+(new Seguridad { Id = 1, UserName = "admin1",  Password = "abc1", TenantId = 0,Roles="User" },
+new Seguridad { Id = 2, UserName = "admin2",  Password = "abc2", TenantId = 0, Roles = "User" },
+new Seguridad { Id = 3, UserName = "admin3",  Password = "abc3", TenantId = 0,Roles ="User" },
+new Seguridad { Id = 4, UserName = "admin4", Password = "abc4", TenantId = 1, Roles = "User" },
+new Seguridad { Id = 5, UserName = "admin5", Password = "abc5", TenantId = 1 ,Roles = "User" },
+new Seguridad { Id = 6, UserName = "admin6", Password = "abc6", TenantId = 1 , Roles = "User" },
+new Seguridad { Id = 7, UserName = "admin7", Password = "abc7", TenantId = 2 , Roles = "User" },
+new Seguridad { Id = 8, UserName = "admin8", Password = "abc8", TenantId = 2 , Roles = "User" },
+new Seguridad { Id = 9, UserName = "admin9", Password = "abc9", TenantId = 2 , Roles = "User" }
 );
 
 

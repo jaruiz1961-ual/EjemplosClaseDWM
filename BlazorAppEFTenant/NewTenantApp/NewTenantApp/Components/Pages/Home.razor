@@ -2,28 +2,38 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 
+@using BlazorAppEFTenant.Components.Layout
 @using DataBase
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
+@using System.Security.Claims
 @inject IUnitOfWorkFactory UowFactory
 @inject IContextProvider ContextProvider
 @inject ITokenService TokenService
 
 @inject NavigationManager nav
 
+<MyAuthorizeView>
+    <NotAuthorized>
+        <h3>Login para obtener token JWT </h3>
+
+        </NotAuthorized>
+    <Authorized>    
+        @if (seguridad != null)
+        {
+            <p>Toquen:@ContextProvider?.Token </p>
+            <p>Nombre: @seguridad.UserName</p>
+            <p>Password: @seguridad.Password</p>
+            <p>TenantId: @seguridad.TenantId</p>
+            <p>Email: @seguridad.Email</p>
+            <p>Roles:  @seguridad.Roles</p>
+        }
+        </Authorized>
+
+</MyAuthorizeView>
 
 
-
-
-<h3>Login para obtener token JWT  desde el cliente</h3>
-
-<div>
-    <input @bind="username" placeholder="Usuario" />
-    <input @bind="password" placeholder="Password" />
-</div>
-
-<button @onclick="LoginAsync">Acceder</button>
 
 
 
@@ -36,33 +46,22 @@
     string protectedApiResponse = "";
     string protectedApiResponseCookie = "";
 
-    ServicioSeguridad scUsuario;
+    Seguridad seguridad = null;
+    bool _initialized = false;
 
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await ContextProvider.ReadContext();
-
-    }
-
-
-    async Task LoginAsync()
-    {
-        scUsuario = new ServicioSeguridad(ContextProvider, UowFactory,TokenService);
-
-         string filtro = $"UserName == \"{username}\" && Password == \"{password}\"";
-
-
-         var list = await scUsuario.GetFilterAsync(filtro );
-        if (list !=null && list.Count()>0)
+        if (firstRender && !_initialized)
         {
-            var user = list.First();
-            token =  scUsuario.LoginAndGetTokenAsync(user);
-            ContextProvider.Token = token;
-            ContextProvider.SaveContext();
+            await ContextProvider.ReadContext();
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+            _initialized = true;
+            StateHasChanged();
         }
     }
 
-   
+
+
 }
 

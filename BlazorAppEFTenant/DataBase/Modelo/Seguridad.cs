@@ -12,13 +12,16 @@ namespace DataBase.Modelo
     {
         public string UserName { get; set; }
         public string Password { get; set; }
-        public string? email { get; set; }
+        public string? Email { get; set; }
+        public string Roles { get; set; }
         public void UpdateFrom(Seguridad source)
         {
             // Copias solo los campos actualizables
             UserName = source.UserName;
             Password = source.Password;
-            email = source.email;
+            Email = source.Email;
+            Roles = source.Roles;
+            //TenantId = source.TenantId;
             // No tocas Id ni TenantId aquí
         }
     }

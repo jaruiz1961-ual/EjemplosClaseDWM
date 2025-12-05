@@ -63,8 +63,7 @@ namespace DataBase.Genericos
         }
         public async Task<IEnumerable<TEntity>> GetAllAsync()
         {
-            if (!string.IsNullOrEmpty(_token))
-            {
+            if (!string.IsNullOrEmpty(_token))            {
                 _httpClient.DefaultRequestHeaders.Authorization =
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
@@ -99,36 +98,80 @@ namespace DataBase.Genericos
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
             var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&predicate={predicate}";
+            var response = await _httpClient.GetAsync(url);
+             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                return Enumerable.Empty<TEntity>();
+            }
+
+            // Opcional: controlar otros errores
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar otros códigos (404, 500, etc.)
+                return Enumerable.Empty<TEntity>();
+            }
             var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
             return resultado ?? Enumerable.Empty<TEntity>();
         }
-        public async Task AddAsync(TEntity entity)
+        public async Task<TEntity?> Add(TEntity entity)
         {
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
-            var resp = await _httpClient.PostAsJsonAsync($"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}", entity);
+            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}";
+            var response = await _httpClient.GetAsync(url);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                return null;
+            }
+
+            // Opcional: controlar otros errores
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar otros códigos (404, 500, etc.)
+                return null;
+            }
+            var resp = await _httpClient.PostAsJsonAsync(url, entity);
             resp.EnsureSuccessStatusCode();
+            return entity;
         }
 
-        public void Update(TEntity entity)
+        public async Task<TEntity?> Update(TEntity entity)
         {
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
+            
             // En acceso API, lo típico es usar PUT por id:
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var resp = _httpClient.PutAsJsonAsync($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}", entity).Result;
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}";
+            var response = await _httpClient.GetAsync(url);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                return null;
+            }
+
+            // Opcional: controlar otros errores
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar otros códigos (404, 500, etc.)
+                return null;
+            }
+            var resp = _httpClient.PutAsJsonAsync(url, entity).Result;
             resp.EnsureSuccessStatusCode();
+            return entity;
         }
 
-        public void Remove(TEntity entity)
+        public async Task<TEntity?> Remove(TEntity entity)
         {
             if (!string.IsNullOrEmpty(_token))
             {
@@ -138,8 +181,23 @@ namespace DataBase.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var resp = _httpClient.DeleteAsync($"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}").Result;
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}";
+            var response = await _httpClient.GetAsync(url);
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                return null;
+            }
+
+            // Opcional: controlar otros errores
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejar otros códigos (404, 500, etc.)
+                return null;
+            }
+            var resp = _httpClient.DeleteAsync(url).Result;
             resp.EnsureSuccessStatusCode();
+            return entity;
         }
     }
 

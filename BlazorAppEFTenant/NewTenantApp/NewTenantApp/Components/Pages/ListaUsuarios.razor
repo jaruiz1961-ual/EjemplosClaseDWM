@@ -17,7 +17,12 @@
 <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
 <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
 <p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
-<p>Token <strong>@ContextProvider.Token</strong>:</p>
+
+<p>Nombre: @seguridad.UserName</p>
+<p>Password: @seguridad.Password</p>
+<p>TenantId: @seguridad.TenantId</p>
+<p>Email: @seguridad.Email</p>
+<p>Roles:  @seguridad.Roles</p>
 @if (@ContextProvider.ConnectionMode != "Ef")
 {
     <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
@@ -71,8 +76,9 @@ else
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="";
+    Seguridad seguridad = new Seguridad();
 
-   
+
     private Func<Task>? _onContextChangedHandler;
 
     protected override async Task OnInitializedAsync()
@@ -83,9 +89,15 @@ else
             StateHasChanged();
         };
 
-    
+
         ContextProvider.OnContextChanged += _onContextChangedHandler;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         await CargarAsync();
+
     }
 
     private async Task CargarAsync()
@@ -93,6 +105,7 @@ else
         try
         {
             await ContextProvider.ReadContext();
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
             var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
             var list = await user.GetAllAsync();
             usuarios = list.ToList();

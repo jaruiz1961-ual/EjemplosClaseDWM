@@ -13,8 +13,9 @@ namespace DataBase.Genericos
         public Uri DirBase { get; set; }
         public string Token { get; set; }
 
-        public  void SaveContext(IContextProvider cp = null);
-        public void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token=null);
+
+        public  Task SaveContextAsync(IContextProvider? cp);
+        public void SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
 
 
         public Task ReadContext();
@@ -31,7 +32,7 @@ namespace DataBase.Genericos
         public int[] GetTenantIds();
         public string[] GetConnectionModes();
 
-        void SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token = null);
+        void SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
         public ContextProvider Copia();
 
     }

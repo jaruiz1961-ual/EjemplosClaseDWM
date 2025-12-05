@@ -107,16 +107,18 @@
     bool displayValidationErrorMessages = false;
     bool displayUserAddedToDB = false;
 
+    Seguridad seguridad;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await ContextProvider.ReadContext();
-        suCliente = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
-        await CargarAsync();           
-        StateHasChanged();
+        if (firstRender)
+        {
+            await ContextProvider.ReadContext();
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+            await CargarAsync();
+            StateHasChanged();
+        }
     }
-
-
     private async Task HandleValidSubmit(EditContext context)
     {
 

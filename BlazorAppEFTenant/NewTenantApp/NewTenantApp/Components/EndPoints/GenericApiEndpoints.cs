@@ -11,11 +11,10 @@ using System.Linq.Expressions;
 namespace BlazorAppEFTenant.Components.EndPoints
 {
 
-    public static class ApiEndpoints
+    public static class GenericApiEndPoints
     {
-        public static void MapApisBase<T> (this WebApplication app) where T: class,ITenantEntity,IEntity, IUpdatableFrom<T>
-        {
-    
+        public static void GenericApis<T> (this WebApplication app) where T: class,ITenantEntity,IEntity, IUpdatableFrom<T>
+        {   
 
             // GET: listar todos
             app.MapGet("/api/{contexto}/{nombreEntidad}", async (
@@ -45,7 +44,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     {
                         return Results.Unauthorized();
                     }
-                }).RequireAuthorization(); ;
+                }); 
 
             // GET: listar filtro 
             app.MapGet("/api/{contexto}/{nombreEntidad}/filtrar", async (
@@ -70,7 +69,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 var usuarios = await service.GetFilterAsync(filtro);
                 return Results.Ok(usuarios);
-            }).RequireAuthorization();
+            });
 
             // GET: obtener por id
             app.MapGet("/api/{contexto}/{nombreEntidad}/{id:int}", async (
@@ -132,7 +131,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-        }).RequireAuthorization(); 
+        }); 
 
             // PUT: actualizar usuario
             app.MapPut("/api/{contexto}/{nombreEntidad}/{id:int}", async (
@@ -172,7 +171,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     return Results.Unauthorized();
                 }
 
-            }).RequireAuthorization(); 
+            }); 
 
             // DELETE: eliminar usuario
             app.MapDelete("/api/{contexto}/{nombreEntidad}/{id:int}", async (
@@ -205,7 +204,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-        }).RequireAuthorization(); 
+        }); 
         }
     }
 

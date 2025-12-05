@@ -92,6 +92,7 @@
     public int Id { get; set; }
 
     private Usuario NewUser = new Usuario();
+    Seguridad seguridad;
 
 
     bool displayValidationErrorMessages = false;
@@ -100,8 +101,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-            await CargarAsync();           
-           StateHasChanged();
+
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ContextProvider.ReadContext();
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+            await CargarAsync();
+            StateHasChanged();
+        }
     }
 
 

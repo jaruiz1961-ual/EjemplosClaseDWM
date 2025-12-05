@@ -16,9 +16,9 @@ namespace DataBase.Genericos
         Task<IEnumerable<T>> GetFilterAsync(Expression<Func<T, bool>> predicate);
 
 
-        Task AddAsync(T data);
-        Task UpdateAsync(T data);
-        Task DeleteAsync(int id);
+        Task<T?> AddAsync(T data);
+        Task<T?> UpdateAsync(T data);
+        Task<T?> DeleteAsync(int id);
     }
 
 }

@@ -1,15 +1,23 @@
 ﻿@page "/ListaUsuariosApi"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
+@using BlazorAppEFTenant.Components.Layout
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
-@inject IUnitOfWorkFactory UowFactory 
 
+@inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject IContextProvider ContextProvider
 @inject NavigationManager nav
 @implements IDisposable
 
+
+
+<MyAuthorizeView RequiredRole="Admin">
+    <Authorized>
+        <h3>Zona Admin</h3>
 <h3>Listado de usuarios Api (Genérico)</h3>
 
 
@@ -64,6 +72,13 @@ else
     </table>
 
 }
+    </Authorized>
+    <NotAuthorized>
+        <h3>No tienes permisos para ver esta página.</h3>
+        <p>Puedes ir a la página principal o iniciar sesión con otra cuenta.</p>
+        <button class="btn btn-primary" @onclick="IrALogin">Ir a Login</button>
+    </NotAuthorized>
+</MyAuthorizeView>
 
 
 @code {
@@ -71,6 +86,8 @@ else
     private GenericDataService<Usuario> usuarioService;
 
     private Func<Task>? _onContextChangedHandler;
+    void IrALogin()
+       => nav.NavigateTo("/login");
 
     protected override async Task OnInitializedAsync()
     {
@@ -82,7 +99,13 @@ else
 
 
         ContextProvider.OnContextChanged += _onContextChangedHandler;
+    
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         await CargarAsync();
+
     }
 
     private async Task CargarAsync()
@@ -94,7 +117,7 @@ else
             IContextProvider cp = ContextProvider.Copia();
             cp.ConnectionMode = "Api";
 
-            usuarioService = new ServicioUsuarios(cp, UowFactory);
+            usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);
             var list = await usuarioService.GetAllAsync();
             usuarios = list.ToList();
 

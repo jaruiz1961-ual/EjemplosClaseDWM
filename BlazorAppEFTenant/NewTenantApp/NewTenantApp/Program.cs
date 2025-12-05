@@ -60,23 +60,32 @@ builder.Services.AddSwaggerGen(c =>
 // Registrar TokenService en DI
 builder.Services.AddSingleton<ITokenService,TokenService>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
-        options.Authority = null;
-        options.TokenValidationParameters = new()
+        options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = false,
+            ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]))
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
         };
-
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
 
 
 
@@ -99,12 +108,14 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
 // Tenant Provider y Context Provider
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<IContextProvider>(sp =>
-{
-    var provider = ActivatorUtilities.CreateInstance<ContextProvider>(sp);
-    provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7013/"), "Ef",null); // Asigna aquí el valor inicial por defecto
-    return provider;
-});
+builder.Services.AddScoped<IContextProvider, ContextProvider>();
+    
+//(sp =>
+//{
+//    var provider = ActivatorUtilities.CreateInstance<ContextProvider>(sp);
+//   // provider.SetContext(1, "InMemory", "ApiRest", new Uri(@"https://localhost:7013/"), "Ef",null); // Asigna aquí el valor inicial por defecto
+//    return provider;
+//});
 
 // Interceptor para multitenant (opcional)
 builder.Services.AddTransient<TenantSaveChangesInterceptor>();
@@ -171,6 +182,7 @@ app.UseRouting();              // <- IMPORTANTE: routing antes de auth
 app.UseAuthentication();
 app.UseAuthorization();
 
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -193,6 +205,7 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorAppEFTenant.Client._Imports).Assembly);
-app.MapApisBase<Usuario>();
+
+app.GenericApis<Usuario>();//mapeo a APIS
 
 app.Run();

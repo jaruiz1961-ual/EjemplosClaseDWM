@@ -1,0 +1,96 @@
+﻿@page "/Login"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+@using BlazorAppEFTenant.Components.Layout
+@using DataBase
+@using DataBase.Genericos
+@using DataBase.Modelo
+@using DataBase.Servicios
+@inject IUnitOfWorkFactory UowFactory
+@inject IContextProvider ContextProvider
+@inject ITokenService TokenService
+
+@inject NavigationManager nav
+
+
+
+
+<h3>Login para obtener token JWT  desde el cliente</h3>
+
+<div>
+    <input @bind="username" placeholder="Usuario" />
+    <input @bind="password" placeholder="Password" />
+</div>
+
+
+<button @onclick="LoginAsync">Acceder</button>
+@if (seguridad != null)
+{
+    <p>Toquen:@ContextProvider?.Token </p>
+    <p>Nombre: @seguridad.UserName</p>
+    <p>Password: @seguridad.Password</p>
+    <p>TenantId: @seguridad.TenantId</p>
+    <p>Email: @seguridad.Email</p>
+    <p>Roles:  @seguridad.Roles</p>
+}
+else
+{
+
+    <p> Hay Login para empezar !!!</p>
+}
+
+
+@code {
+    string username = "";
+    string password = "";
+    string token = null;
+    string tokenCookie = "";
+    string mensaje;
+
+    string protectedApiResponse = "";
+    string protectedApiResponseCookie = "";
+    Seguridad seguridad = new Seguridad();
+
+    ServicioSeguridad scUsuario;
+
+
+
+    bool _initialized = false;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            await ContextProvider.ReadContext();
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+            _initialized = true;
+            StateHasChanged();
+        }
+    }
+
+
+    async Task LoginAsync()
+    {
+        ContextProvider.ConnectionMode = "Ef";
+        scUsuario = new ServicioSeguridad(ContextProvider, UowFactory, TokenService);
+        mensaje = "";
+        var token = await scUsuario.LoginAndGetToken(username, password);
+        if (!string.IsNullOrEmpty(token))
+        {
+            seguridad = scUsuario.GetDataFromToken();
+            ContextProvider.Token = token;
+            await ContextProvider.SaveContextAsync(null);
+            mensaje = "Biendvenido: "+seguridad.UserName+":"+seguridad.Roles;
+        }
+        else
+        {
+            mensaje = "Error en Login";
+        }
+
+    }
+
+
+}
+

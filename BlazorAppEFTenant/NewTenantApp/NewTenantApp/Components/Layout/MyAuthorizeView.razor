@@ -1,0 +1,62 @@
+﻿@using DataBase
+@using DataBase.Genericos
+@using DataBase.Servicios
+@inject IContextProvider ContextProvider
+@inject ITokenService TokenService
+
+@if (_isAuthorized)
+{
+    @Authorized
+}
+else
+{
+    @NotAuthorized
+}
+
+@code {
+    [Parameter] public RenderFragment? Authorized { get; set; }
+    [Parameter] public RenderFragment? NotAuthorized { get; set; }
+
+    // Opcional: rol/categoría propia
+    [Parameter] public string? RequiredRole { get; set; }
+
+
+    private bool _isAuthorized;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        ContextProvider.OnContextChanged += ContextChanged;
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await ContextProvider.ReadContext();
+        EvaluateAuthorization();
+
+    }
+
+    private async Task ContextChanged()
+    {
+        EvaluateAuthorization();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void EvaluateAuthorization()
+    {
+        var token = ContextProvider.Token;
+        if (string.IsNullOrEmpty(token) || !TokenService.ValidateToken(token))
+        {
+            _isAuthorized = false;
+            return;
+        }
+
+        var sc = ServicioSeguridad.GetDataFromToken(token);
+        _isAuthorized = string.IsNullOrEmpty(RequiredRole)
+            || string.Equals(sc.Roles, RequiredRole, StringComparison.OrdinalIgnoreCase);
+    }
+
+    public void Dispose()
+    {
+        ContextProvider.OnContextChanged -= ContextChanged;
+    }
+}

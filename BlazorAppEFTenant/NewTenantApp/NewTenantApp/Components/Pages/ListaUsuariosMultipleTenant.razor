@@ -79,7 +79,13 @@ else
            StateHasChanged();
        };
         ContextProvider.OnContextChanged +=  _onContextChangedHandler;
+        
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
         await CargarAsync();
+
     }
 
     private async Task CargarAsync()

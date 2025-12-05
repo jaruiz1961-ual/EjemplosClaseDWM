@@ -21,9 +21,9 @@ namespace DataBase.Genericos
         Task<TEntity?> GetByIdAsync(object id);
         Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate);
         Task<IEnumerable<TEntity>> GetAllAsync();
-        Task AddAsync(TEntity entity);
-        void Update(TEntity entity);
-        void Remove(TEntity entity);
+        Task<TEntity?> Add(TEntity entity);
+        Task<TEntity?> Update(TEntity entity);
+        Task<TEntity?> Remove(TEntity entity);
     }
 
 

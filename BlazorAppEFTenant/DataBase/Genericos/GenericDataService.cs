@@ -62,38 +62,38 @@ namespace DataBase.Servicios
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
             return entity;
+        }
+        public async Task<T?> AddAsync(T data)
+        {
 
-            //if (entity != null && entity.TenantId == _tenantProvider.TenantId)
-            //    return entity;
-            //return null;
-        }
-        public async Task AddAsync(T data)
-        {
-            //data.TenantId = _tenantProvider.TenantId;
              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
-            await repo.AddAsync(data);
-            await uow.SaveChangesAsync();
+            var addedData = await repo.Add(data);
+            var num = await uow.SaveChangesAsync();
+            if (num>0)  return addedData;
+            else return null;
         }
-        public async Task UpdateAsync(T data)
+        public async Task<T?> UpdateAsync(T data)
         {
-            //if (data.TenantId != _tenantProvider.TenantId)
-            //    throw new UnauthorizedAccessException("No se puede editar una entidad de otro tenant.");
-             var uow = _unitOfWorkFactory.Create(_contextProvider);
+              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
-            repo.Update(data);
-            await uow.SaveChangesAsync();
+            var updatedData= await repo.Update(data);
+            var num = await uow.SaveChangesAsync();
+            if (num > 0) return updatedData;
+            else return null;
         }
-        public async Task DeleteAsync(int id)
+        public async Task<T?> DeleteAsync(int id)
         {
              var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>();
             var entity = await repo.GetByIdAsync(id);
-            if (entity != null)// && entity.TenantId == _tenantProvider.TenantId)
+            if (entity != null)
             {
-                repo.Remove(entity);
-                await uow.SaveChangesAsync();
+                var deletedData = await repo.Remove(entity);
+                var num= await uow.SaveChangesAsync();
+                if (num > 0) return deletedData;
             }
+            return null;
         }
     }
     

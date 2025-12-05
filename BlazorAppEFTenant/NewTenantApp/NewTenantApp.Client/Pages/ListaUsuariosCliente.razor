@@ -6,12 +6,15 @@
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
-@inject IUnitOfWorkFactory UowFactory
-@inject IContextProvider ContextProvider
+@using Microsoft.AspNetCore.Authorization
 
+
+@inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject IContextProvider ContextProvider
 @inject NavigationManager nav
 @implements IDisposable
-@layout MainClientLayout
+
+
 
 <h3>Listado de usuarios CLIENTE</h3>
 
@@ -87,7 +90,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await ContextProvider.ReadContext();
+  
         _onContextChangedHandler += async () =>
         {
             await CargarAsync();
@@ -95,8 +98,13 @@ else
         };
 
         ContextProvider.OnContextChanged += _onContextChangedHandler;
+    }
 
-        await CargarAsync();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await CargarAsync();
+
     }
 
     private async Task CargarAsync()
@@ -105,10 +113,10 @@ else
         {
             // ContextProvider = await ContextProvider.ReadContext();
             // ContextProvider.ConnectionMode = "Api";
-            scUsuario = new ServicioUsuariosCliente(ContextProvider, UowFactory);
+            scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
 
             
-            var list = await scUsuario.GetAllAsync();
+           var list = await scUsuario.GetAllAsync();
             usuarios = list.ToList();
 
         }
