@@ -1,8 +1,11 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@using BlazorAppEFTenant.Client
-@* @rendermode InteractiveAuto *@
+﻿@using DataBase.Genericos
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAppState AppState
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-
+<CascadingAuthenticationState>
+    <CascadingValue Value="AppState">
     <Router AppAssembly="@typeof(Program).Assembly"
             AdditionalAssemblies="new[] { typeof(Client._Imports).Assembly }">
 
@@ -19,5 +22,6 @@
         </NotFound>
 
     </Router>
-
+    </CascadingValue>
+</CascadingAuthenticationState>
 

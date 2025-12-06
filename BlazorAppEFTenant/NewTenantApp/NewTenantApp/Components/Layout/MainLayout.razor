@@ -2,10 +2,12 @@
 @using DataBase.Genericos
 @using DataBase.Servicios
 @using Microsoft.AspNetCore.Components.Authorization
+
 @inherits LayoutComponentBase
-@inject IContextProvider ContextProvider
-@inject ITokenService TokenService
 @inject NavigationManager Nav
+@inject IConfiguration Configuration
+@inject IContextProvider ContextProvider
+
 
 
 <div class="page">
@@ -15,15 +17,15 @@
 
     <main>
         <div class="top-row px-4">
-            <MyAuthorizeView>
-                <Authorized>
-                    <button class="btn btn-link" @onclick="Logout">Logout</button>
-                </Authorized>
+            @if ( AppState.IsAutenticated)
+            {      
+                <button class="btn btn-link" @onclick="Logout">Logout</button>
+            }
+            else 
+            {
+                 <a href="Login">Login</a>
+            }
 
-                <NotAuthorized>
-                    <a href="Login">Login</a>
-                </NotAuthorized>
-            </MyAuthorizeView>
         </div>
 
         <article class="content px-4">
@@ -39,10 +41,21 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    public IAppState AppState { get; set; } = default!;
+    
+    [Parameter] public RenderFragment? Authorized { get; set; }
+    [Parameter] public RenderFragment? NotAuthorized { get; set; }
+    [Parameter] public string? RequiredRole { get; set; }
+
+   
+
+
     private async Task Logout()
     {
         // Limpia el contexto (token = null, etc.) y notifica a todos los MyAuthorizeView
         await ContextProvider.SetContext(null, null, null, null, null, null);
+        AppState.IsAutenticated = false;
         Nav.NavigateTo("/Home", forceLoad: true);
     }
 }

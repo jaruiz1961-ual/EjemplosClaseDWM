@@ -56,6 +56,13 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+builder.Services.AddScoped<IAppState,AppState>();
+
+
+//builder.Services.AddScoped<IAppState>(sp =>
+//{
+//    return new AppState();
+//});
 
 // Registrar TokenService en DI
 builder.Services.AddSingleton<ITokenService,TokenService>();

@@ -7,7 +7,7 @@ using System.Text.Json;
 namespace DataBase.Genericos
 {
     [TypeConverter(typeof(AppState))]
-    public class AppState 
+    public class AppState : IAppState
     {
         public int? TenantId { get; set; } = 0;
         public string DbKey { get; set; }
@@ -17,9 +17,20 @@ namespace DataBase.Genericos
         public Uri DirBase { get; set; }
 
         public string Token { get; set; }
+        public bool isValid { get
+            {
+                if (string.IsNullOrEmpty(TenantId.ToString())) return false;
+                if (string.IsNullOrEmpty(DbKey)) return false;
+                if (string.IsNullOrEmpty(ConnectionMode)) return false;
+                if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(Token)) return false;
+                if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(ApiName)) return false;
+                if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(DirBase.ToString())) return false;
+                return true;
+            } }
+        public bool IsAutenticated {get; set;}
 
     }
-    
+
     public class AppStateConverter : TypeConverter
     {
         // Permite convertir desde string (JSON)

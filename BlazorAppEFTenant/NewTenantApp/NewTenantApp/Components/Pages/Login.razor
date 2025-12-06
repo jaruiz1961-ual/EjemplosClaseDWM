@@ -3,15 +3,18 @@
 
 
 @using BlazorAppEFTenant.Components.Layout
+@using Blazored.LocalStorage
 @using DataBase
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UowFactory
-@inject IContextProvider ContextProvider
+
 @inject ITokenService TokenService
+@inject IContextProvider ContextProvider
 
 @inject NavigationManager nav
+@inject ILocalStorageService _localStorage
 
 
 
@@ -42,6 +45,8 @@ else
 
 
 @code {
+    [CascadingParameter]
+    public IAppState AppState { get; set; } = default!;
     string username = "";
     string password = "";
     string token = null;
@@ -59,16 +64,7 @@ else
     bool _initialized = false;
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && !_initialized)
-        {
-            await ContextProvider.ReadContext();
-            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
-            _initialized = true;
-            StateHasChanged();
-        }
-    }
+
 
 
     async Task LoginAsync()
@@ -76,6 +72,7 @@ else
         ContextProvider.ConnectionMode = "Ef";
         scUsuario = new ServicioSeguridad(ContextProvider, UowFactory, TokenService);
         mensaje = "";
+
         var token = await scUsuario.LoginAndGetToken(username, password);
         if (!string.IsNullOrEmpty(token))
         {
@@ -83,6 +80,9 @@ else
             ContextProvider.Token = token;
             await ContextProvider.SaveContextAsync(null);
             mensaje = "Biendvenido: "+seguridad.UserName+":"+seguridad.Roles;
+            if (AppState == null) AppState = new AppState();
+            AppState.Token = token;
+            AppState.IsAutenticated = true;
         }
         else
         {

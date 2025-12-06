@@ -49,7 +49,8 @@ namespace DataBase
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public bool ValidateToken(string tokenString)
+
+        public static bool ValidateToken(string tokenString, IConfiguration _config)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);

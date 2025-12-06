@@ -5,10 +5,11 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject IContextProvider ContextProvider 
 
-@inject IContextProvider ContextProvider
 @inject NavigationManager nav
 @implements IDisposable
+
 
 
 <h3>Listado de usuarios  (Genérico)</h3>
@@ -58,6 +59,9 @@ else
 
 
 @code {
+    [CascadingParameter]
+    public IAppState AppState { get; set; } = default!;
+
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="";
