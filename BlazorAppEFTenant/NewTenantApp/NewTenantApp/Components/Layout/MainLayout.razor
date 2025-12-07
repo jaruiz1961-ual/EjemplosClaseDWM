@@ -60,7 +60,10 @@
         if (!_initialized)
         {
             // Aquí ya hay JS disponible: podemos cargar appstate desde LocalStorage
-            await ContextProvider.ReadContext();
+            await ContextProvider.ReadContext();      // carga token desde LocalStorage
+            // forzar que todo (incluido AuthorizeView) vea el nuevo AuthenticationState
+            await ContextProvider.RefreshAuthenticationState();
+
             await LoadAuthStateAsync();
             _initialized = true;
             await InvokeAsync(StateHasChanged);

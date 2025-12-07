@@ -12,6 +12,7 @@ namespace DataBase.Genericos
         public  Task SaveContextAsync(IContextProvider cp);
         public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
 
+        public Task RefreshAuthenticationState();
         public Task MarkUserAsLoggedOut();
 
         public Task<AuthenticationState> GetAuthenticationStateAsync();

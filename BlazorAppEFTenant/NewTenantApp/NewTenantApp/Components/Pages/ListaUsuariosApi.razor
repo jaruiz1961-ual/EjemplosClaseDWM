@@ -10,7 +10,108 @@
 @inject NavigationManager Nav
 @implements IDisposable
 
-<AuthorizeView>
+
+        <h3>Zona NOrmal</h3>
+
+        @if (!_isValidContext)
+        {
+            <p><em>Debe seleccionar un contexto de ejecución para ver los usuarios...</em></p>
+        }
+        else if (usuarios is null || !usuarios.Any())
+        {
+            <p>No hay usuarios registrados .....</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>UserName</th>
+                        <th>Codigo</th>
+                        <th>Nivel</th>
+                        <th>Password</th>
+                        <th>Email</th>
+                        <th>Tenant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in usuarios)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>@user.Codigo</td>
+                            <td>@user.Contexto</td>
+                            <td>@user.Password</td>
+                            <td>@user.email</td>
+                            <td>@user.TenantId</td>
+                            <td><a href="DetalleUsuario/@user.Id"><i>Edit</i></a></td>
+                            <td><a href="DeleteUsuario/@user.Id"><i>Del</i></a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    
+
+
+
+
+<AuthorizeView Roles="User">
+    <Authorized>
+        <h3>Zona Userrrr</h3>
+
+        @if (!_isValidContext)
+        {
+            <p><em>Debe seleccionar un contexto de ejecución para ver los usuarios...</em></p>
+        }
+        else if (usuarios is null || !usuarios.Any())
+        {
+            <p>No hay usuarios registrados .....</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>UserName</th>
+                        <th>Codigo</th>
+                        <th>Nivel</th>
+                        <th>Password</th>
+                        <th>Email</th>
+                        <th>Tenant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in usuarios)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>@user.Codigo</td>
+                            <td>@user.Contexto</td>
+                            <td>@user.Password</td>
+                            <td>@user.email</td>
+                            <td>@user.TenantId</td>
+                            <td><a href="DetalleUsuario/@user.Id"><i>Edit</i></a></td>
+                            <td><a href="DeleteUsuario/@user.Id"><i>Del</i></a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+
+    <NotAuthorized>
+        <h3>No tienes permisos para ver esta página.</h3>
+        <p>Puedes ir a la página principal o iniciar sesión con otra cuenta.</p>
+        <button class="btn btn-primary" @onclick="IrALogin">Ir a Login</button>
+    </NotAuthorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Admin">
     <Authorized>
         <h3>Zona Admin</h3>
 
@@ -98,7 +199,7 @@
             }
 
             // Copia del contexto para modo API
-            IContextProvider cp = ContextProvider.Copia();
+            var cp = ContextProvider.Copia();
             cp._AppState.ConnectionMode = "Api";
 
             usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);

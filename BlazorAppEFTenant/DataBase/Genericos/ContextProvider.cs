@@ -134,6 +134,11 @@ namespace DataBase.Genericos
             OnContextChanged?.Invoke();
         }
 
+        public async Task RefreshAuthenticationState()
+        {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        }
+
         public async Task MarkUserAsLoggedOut()
         {
             await SetContext(
