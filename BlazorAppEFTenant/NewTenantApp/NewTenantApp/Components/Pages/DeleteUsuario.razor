@@ -10,9 +10,9 @@
 @implements IDisposable
 
 
-<p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
 
 @if (NewUser != null)
 {
@@ -106,8 +106,9 @@
     {
         if (firstRender)
         {
-            await ContextProvider.ReadContext();
-            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+                AuthenticationState AppState = await ContextProvider.GetAuthenticationStateAsync();
+        
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider._AppState.Token);
             await CargarAsync();
             StateHasChanged();
         }
@@ -149,7 +150,7 @@
             else 
             {
                 NewUser = new Usuario();
-                NewUser.TenantId = ContextProvider.TenantId;
+                NewUser.TenantId = ContextProvider._AppState.TenantId;
             }
 
         }

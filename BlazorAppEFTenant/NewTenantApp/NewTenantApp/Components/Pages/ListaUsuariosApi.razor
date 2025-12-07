@@ -1,147 +1,124 @@
 ﻿@page "/ListaUsuariosApi"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-@using BlazorAppEFTenant.Components.Layout
-@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
 
-@inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject IUnitOfWorkFactory UnitOfWorkFactory
 @inject IContextProvider ContextProvider
-@inject NavigationManager nav
+@inject NavigationManager Nav
 @implements IDisposable
 
-
-
-<MyAuthorizeView RequiredRole="Admin">
+<AuthorizeView>
     <Authorized>
         <h3>Zona Admin</h3>
 
-
-@if (_isValidContext == false)
-{
-    <p><em>Debe seleccionar un conrtexto de ejecución para ver los usuarios...</em></p>
-}
-else if (!usuarios.Any())
-{
-    <p>No hay usuarios registrados .....</p>
-}
-
-else if (!usuarios.Any())
-{
-    <p>No hay usuarios registrados .....</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>UserName</th>
-                <th>Codigo</th>
-                <th>Nivel</th>
-                <th>Password</th>
-                <th>Email</th>
-                <th>Tenant</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var user in usuarios)
-            {
-                <tr>
-                    <td>@user.Id</td>
-                    <td>@user.UserName</td>
-                    <td>@user.Codigo</td>
-                    <td>@user.Contexto</td>
-                    <td>@user.Password</td>
-                    <td>@user.email</td>
-                    <td>@user.TenantId</td>
-                    <td><a href="DetalleUsuario/@user.Id"><i>Edit</i></a></td>
-                    <td><a href="DeteteUsuario/@user.Id"><i>Del</i></a></td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-}
+        @if (!_isValidContext)
+        {
+            <p><em>Debe seleccionar un contexto de ejecución para ver los usuarios...</em></p>
+        }
+        else if (usuarios is null || !usuarios.Any())
+        {
+            <p>No hay usuarios registrados .....</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>UserName</th>
+                        <th>Codigo</th>
+                        <th>Nivel</th>
+                        <th>Password</th>
+                        <th>Email</th>
+                        <th>Tenant</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in usuarios)
+                    {
+                        <tr>
+                            <td>@user.Id</td>
+                            <td>@user.UserName</td>
+                            <td>@user.Codigo</td>
+                            <td>@user.Contexto</td>
+                            <td>@user.Password</td>
+                            <td>@user.email</td>
+                            <td>@user.TenantId</td>
+                            <td><a href="DetalleUsuario/@user.Id"><i>Edit</i></a></td>
+                            <td><a href="DeleteUsuario/@user.Id"><i>Del</i></a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     </Authorized>
+
     <NotAuthorized>
         <h3>No tienes permisos para ver esta página.</h3>
         <p>Puedes ir a la página principal o iniciar sesión con otra cuenta.</p>
         <button class="btn btn-primary" @onclick="IrALogin">Ir a Login</button>
     </NotAuthorized>
-</MyAuthorizeView>
-
+</AuthorizeView>
 
 @code {
-    public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
-    private GenericDataService<Usuario> usuarioService;
-    bool _isValidContext;
-
+    public List<Usuario> usuarios { get; set; } = new();
+    private GenericDataService<Usuario>? usuarioService;
+    private bool _isValidContext;
     private Action? _onContextChangedHandler;
-    void IrALogin()
-       => nav.NavigateTo("/login");
+
+    void IrALogin() => Nav.NavigateTo("/login");
 
     protected override async Task OnInitializedAsync()
     {
-        _onContextChangedHandler += async () =>
-        {
-            await CargarAsync();
-
-        };
-
-
+        _onContextChangedHandler = async () => await CargarAsync();
         ContextProvider.OnContextChanged += _onContextChangedHandler;
-
     }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
+        {
             await CargarAsync();
-
+        }
     }
 
     private async Task CargarAsync()
     {
-
         try
         {
-            if (ContextProvider.IsValid())
+            if (!ContextProvider.IsValid())
             {
-                await ContextProvider.ReadContext();
-                IContextProvider cp = ContextProvider.Copia();
-                cp.ConnectionMode = "Api";
-
-                usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);
-                var list = await usuarioService.GetAllAsync();
-                usuarios = list.ToList();
+                _isValidContext = false;
+                usuarios.Clear();
                 StateHasChanged();
-                _isValidContext = true;
+                return;
             }
 
+            // Copia del contexto para modo API
+            IContextProvider cp = ContextProvider.Copia();
+            cp._AppState.ConnectionMode = "Api";
+
+            usuarioService = new ServicioUsuarios(cp, UnitOfWorkFactory);
+            var list = await usuarioService.GetAllAsync();
+            usuarios = list.ToList();
+            _isValidContext = true;
+            StateHasChanged();
         }
         catch (Exception ex)
         {
-            Console.WriteLine("EX: " + ex.GetType().FullName);
-            Console.WriteLine(ex.ToString());
-            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
-            Console.WriteLine(ex.InnerException?.ToString());
+            Console.WriteLine("EX: " + ex);
             throw;
         }
     }
 
-    void IDisposable.Dispose()
-    {
-        Dispose();
-    }
+    void IDisposable.Dispose() => Dispose();
 
     private void Dispose()
     {
-
-        ContextProvider.OnContextChanged -= _onContextChangedHandler;
-
+        if (_onContextChangedHandler is not null)
+            ContextProvider.OnContextChanged -= _onContextChangedHandler;
     }
 }
-

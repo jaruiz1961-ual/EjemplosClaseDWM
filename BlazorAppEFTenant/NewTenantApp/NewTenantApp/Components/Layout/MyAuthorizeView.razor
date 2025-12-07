@@ -1,10 +1,10 @@
 ﻿@using DataBase
 @using DataBase.Genericos
 @using DataBase.Servicios
+@using Microsoft.AspNetCore.Components.Authorization
+
+@inject AuthenticationStateProvider AuthStateProvider
 @inject IContextProvider ContextProvider
-
-@inject IConfiguration Configuration
-
 
 @if (_initialized && _isAuthorized)
 {
@@ -27,50 +27,60 @@ else
     private bool _isAuthorized;
     private bool _initialized;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        ContextProvider.OnContextChanged += ContextChanged;
+        // Estado inicial
+        await LoadAuthStateAsync();
+
+        // Si el AuthenticationStateProvider es tu ContextProvider, te suscribes a OnContextChanged
+        if (AuthStateProvider is ContextProvider cp)
+        {
+            cp.OnContextChanged += ContextChanged;
+        }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task LoadAuthStateAsync()
     {
-        if (firstRender)
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = state.User;
+
+        if (user.Identity?.IsAuthenticated != true)
         {
-            // Aquí ya hay JS disponible para Blazored.LocalStorage
-            await ContextProvider.ReadContext();
-            EvaluateAuthorization();
+            _isAuthorized = false;
             _initialized = true;
-            await InvokeAsync(StateHasChanged);
+            return;
         }
+
+        // Si no hay rol requerido, basta con estar autenticado
+        if (string.IsNullOrEmpty(RequiredRole))
+        {
+            _isAuthorized = true;
+            _initialized = true;
+            return;
+        }
+
+        // Si hay rol requerido, miramos sus claims
+        _isAuthorized = user.IsInRole(RequiredRole);
+        _initialized = true;
     }
 
     private void ContextChanged()
     {
-        if (_initialized)
-        {
-            EvaluateAuthorization();
-            InvokeAsync(StateHasChanged);
-        }
-    }
-
-    private void EvaluateAuthorization()
-    {
-        var token = ContextProvider.Token;
-
-        if (string.IsNullOrEmpty(token) || !TokenService.ValidateToken(token,Configuration))
-        {
-            _isAuthorized = false;
+        if (!_initialized)
             return;
-        }
 
-        var sc = ServicioSeguridad.GetDataFromToken(token);
-
-        _isAuthorized = string.IsNullOrEmpty(RequiredRole)
-            || string.Equals(sc.Roles, RequiredRole, StringComparison.OrdinalIgnoreCase);
+        InvokeAsync(async () =>
+        {
+            await LoadAuthStateAsync();
+            StateHasChanged();
+        });
     }
 
     public void Dispose()
     {
-        ContextProvider.OnContextChanged -= ContextChanged;
+        if (AuthStateProvider is ContextProvider cp)
+        {
+            cp.OnContextChanged -= ContextChanged;
+        }
     }
 }

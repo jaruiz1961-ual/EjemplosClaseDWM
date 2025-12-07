@@ -1,46 +1,85 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
-    public class ContextProvider : AppState, IContextProvider
+    public class ContextProvider : AuthenticationStateProvider, IContextProvider
     {
+        public AppState _AppState { get; set; } = new AppState();
         private readonly ILocalStorageService _localStorage;
+        private readonly ITokenService _tokenService;
 
         public event Action? OnContextChanged;
 
         private bool _initialized;
-
-        public ContextProvider(ILocalStorageService localStorage)
-        {
-            _localStorage = localStorage;
-        }
 
         public string[] GetContextKeyDbs() => new[] { "SqlServer", "SqLite", "InMemory" };
         public string[] GetApiNames() => new[] { "ApiRest", "" };
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
 
+        public ContextProvider(ILocalStorageService localStorage, ITokenService tokenService)
+        {
+            _localStorage = localStorage;
+            _tokenService = tokenService;
+        }
+
+        public async Task ReadContext()
+        {
+            
+            if (_initialized) return;
+
+            var appState = await _localStorage.GetItemAsync<AppState>("appstate");
+
+            if (appState is not null)
+            {
+                _AppState.TenantId = appState.TenantId;
+                _AppState.DbKey = appState.DbKey;
+                _AppState.ConnectionMode = appState.ConnectionMode;
+                _AppState.ApiName = appState.ApiName;
+                _AppState.DirBase = appState.DirBase;
+                _AppState.Token = appState.Token;
+            }
+
+            _initialized = true;
+        }
+
         public bool IsValid()
         {
-            if (string.IsNullOrEmpty(TenantId.ToString())) return false;
-            if (string.IsNullOrEmpty(DbKey)) return false;
-            if (string.IsNullOrEmpty(ConnectionMode)) return false;
-            if (ConnectionMode.ToLower()=="api" && string.IsNullOrEmpty(Token)) return false;
-            if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(ApiName)) return false;
-            if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(DirBase.ToString())) return false;
+            if (!_AppState.TenantId.HasValue) return false;
+            if (string.IsNullOrEmpty(_AppState.DbKey)) return false;
+            if (string.IsNullOrEmpty(_AppState.ConnectionMode)) return false;
+
+            if (_AppState.ConnectionMode.Equals("api", StringComparison.OrdinalIgnoreCase))
+            {
+                if (string.IsNullOrEmpty(_AppState.Token)) return false;
+                if (string.IsNullOrEmpty(_AppState.ApiName)) return false;
+                if (_AppState.DirBase is null) return false;
+            }
+
             return true;
         }
+
         public ContextProvider Copia()
-            => new ContextProvider(_localStorage)
+        {
+            var cp = new ContextProvider(_localStorage, _tokenService)
             {
-                TenantId = this.TenantId,
-                DbKey = this.DbKey,
-                ConnectionMode = this.ConnectionMode,
-                ApiName = this.ApiName,
-                DirBase = this.DirBase,
-                Token = this.Token
+                _AppState = new AppState
+                {
+                    TenantId = _AppState.TenantId,
+                    DbKey = _AppState.DbKey,
+                    ConnectionMode = _AppState.ConnectionMode,
+                    ApiName = _AppState.ApiName,
+                    DirBase = _AppState.DirBase,
+                    Token = _AppState.Token
+                }
             };
+
+            return cp;
+        }
 
         // Login / cambio de contexto principal
         public async Task SetContext(
@@ -51,22 +90,24 @@ namespace DataBase.Genericos
             string? conectionMode,
             string? token)
         {
-            TenantId = tenantId;
-            DbKey = contextDbKey;
-            ConnectionMode = conectionMode;
-            ApiName = apiName;
-            DirBase = dirBase;
-            Token = token;
+            _AppState.TenantId = tenantId;
+            _AppState.DbKey = contextDbKey;
+            _AppState.ConnectionMode = conectionMode;
+            _AppState.ApiName = apiName;
+            _AppState.DirBase = dirBase;
+            _AppState.Token = token;
 
-            await _localStorage.SetItemAsync("appstate", (AppState)this);
+            await _localStorage.SetItemAsync("appstate", _AppState);
+
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             OnContextChanged?.Invoke();
         }
 
         // Guardar el estado actual (sin cambiar nada)
-        public async Task SaveContextAsync(IContextProvider? cp = null)
+        public async Task SaveContextAsync(IContextProvider? cp)
         {
-            var appState = (AppState)(cp ?? this);
-            await _localStorage.SetItemAsync("appstate", appState);
+            var state = cp?._AppState ?? _AppState;
+            await _localStorage.SetItemAsync("appstate", state);
             OnContextChanged?.Invoke();
         }
 
@@ -79,30 +120,67 @@ namespace DataBase.Genericos
             string conectionMode,
             string? token = null)
         {
-            TenantId = tenantId;
-            DbKey = contextDbKey;
-            ConnectionMode = conectionMode;
-            ApiName = apiName;
-            DirBase = dirBase;
-            Token = token;
+            _AppState = new AppState
+            {
+                TenantId = tenantId,
+                DbKey = contextDbKey,
+                ConnectionMode = conectionMode,
+                ApiName = apiName,
+                DirBase = dirBase,
+                Token = token ?? string.Empty
+            };
 
-            await _localStorage.SetItemAsync("appstate", (AppState)this);
+            await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
         }
 
-        // Carga inicial desde LocalStorage (llamar solo después del primer render)
-        public async Task ReadContext()
+        public async Task MarkUserAsLoggedOut()
         {
-            if (_initialized) return;
+            await SetContext(
+                _AppState.TenantId,
+                _AppState.DbKey,
+                _AppState.ApiName,
+                _AppState.DirBase,
+                _AppState.ConnectionMode,
+                null);
 
-            var appState = await _localStorage.GetItemAsync<AppState>("appstate") ?? this;
-            TenantId = appState.TenantId;
-            DbKey = appState.DbKey;
-            ConnectionMode = appState.ConnectionMode;
-            ApiName = appState.ApiName;
-            DirBase = appState.DirBase;
-            Token = appState.Token;
-            _initialized = true;
+            var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(anonymous)));
+        }
+
+        private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var token = handler.ReadJwtToken(jwt);
+            return token.Claims;
+        }
+
+        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            var token = _AppState.Token;
+
+            if (string.IsNullOrWhiteSpace(token))
+                return Task.FromResult(
+                    new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
+
+            var principal = _tokenService.GetPrincipal(token)
+                            ?? new ClaimsPrincipal(new ClaimsIdentity());
+
+            return Task.FromResult(new AuthenticationState(principal));
+        }
+
+
+        private ClaimsPrincipal ValidateAndCreatePrincipal(string jwt)
+        {
+            try
+            {
+                var principal = _tokenService.GetPrincipal(jwt);
+                return principal ?? new ClaimsPrincipal(new ClaimsIdentity());
+            }
+            catch
+            {
+                return new ClaimsPrincipal(new ClaimsIdentity());
+            }
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿@page "/ListaUsuariosCliente"
-@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
 
 
 @using BlazorAppEFTenant.Client.Layout
@@ -7,6 +7,8 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security;
 
 
 @inject IUnitOfWorkFactory UnitOfWorkFactory
@@ -18,19 +20,19 @@
 
 <h3>Listado de usuarios CLIENTE</h3>
 
-@if (ContextProvider.TenantId == null)
+@if (ContextProvider._AppState.TenantId == null)
 {
     <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
 }
 else
 {
-    <p>TenantId <strong>@ContextProvider.TenantId</strong>:</p>
-    <p>ContextKeDb <strong>@ContextProvider.DbKey</strong>:</p>
-    <p>Mode <strong>@ContextProvider.ConnectionMode</strong>:</p>
-    <p>Token <strong>@ContextProvider.Token</strong>:</p>
-    @if (@ContextProvider.ConnectionMode != "Ef")
+    <p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
+    <p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
+    <p>Mode <strong>@ContextProvider._AppState.ConnectionMode</strong>:</p>
+    <p>Token <strong>@ContextProvider._AppState.Token</strong>:</p>
+    @if (@ContextProvider._AppState.ConnectionMode != "Ef")
     {
-        <p>ApiName <strong>@ContextProvider.ApiName</strong>:</p>
+        <p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
     }
 }
 
@@ -111,7 +113,8 @@ else
     {
         try
         {
-             await ContextProvider.ReadContext();
+       
+             AuthenticationState AppState = await ContextProvider.GetAuthenticationStateAsync();
             // ContextProvider.ConnectionMode = "Api";
             scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
 

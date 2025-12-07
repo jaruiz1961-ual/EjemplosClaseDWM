@@ -5,9 +5,8 @@ namespace DataBase
 {
     public interface ITokenService
     {
-        string GenerateToken(Claim[] claims);
-        //bool  ValidateToken(string tokenString);
-
-
+        string GenerateToken(IEnumerable<Claim> claims);
+        bool ValidateToken(string? token);
+        ClaimsPrincipal? GetPrincipal(string token);
     }
 }

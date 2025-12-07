@@ -20,7 +20,7 @@ namespace DataBase2
         {
             // 1. Obtener el token de la cookie
             // Llama al servicio que utiliza JS Interop para leer 'document.cookie'
-            var token = _cookieService.Token;
+            var token = _cookieService._AppState.Token;
 
             if (!string.IsNullOrEmpty(token))
             {

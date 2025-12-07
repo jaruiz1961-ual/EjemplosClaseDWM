@@ -27,11 +27,11 @@ namespace DataBase.Genericos
         {
             _httpClient = httpClient;
             _resourceName = resourceName.ToLower();
-            _contexto = cp.DbKey;
-            _tenantId = cp.TenantId ?? 0;
-            _token = cp.Token;
+            _contexto = cp._AppState.DbKey;
+            _tenantId = cp._AppState.TenantId ?? 0;
+            _token = cp._AppState.Token;
             if (httpClient.BaseAddress == null)
-                _httpClient.BaseAddress = cp.DirBase;
+                _httpClient.BaseAddress = cp._AppState.DirBase;
         }
 
         // Métodos de la interfaz base

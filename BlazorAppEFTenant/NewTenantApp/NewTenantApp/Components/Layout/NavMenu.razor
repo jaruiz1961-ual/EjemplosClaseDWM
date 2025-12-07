@@ -87,11 +87,12 @@
     {
         try
         {
-            await ContextProvider.ReadContext();
-            TenantId = ContextProvider?.TenantId ?? 0;
-            ContextKey = ContextProvider?.DbKey ?? "SqLite";
-            ApiName = ContextProvider?.ApiName ?? "ApiRest";
-            Mode = ContextProvider?.ConnectionMode ?? "Ef";
+           AuthenticationState AppState = await ContextProvider.GetAuthenticationStateAsync();
+        
+            TenantId = ContextProvider?._AppState.TenantId ?? 0;
+            ContextKey = ContextProvider?._AppState.DbKey ?? "SqLite";
+            ApiName = ContextProvider?._AppState.ApiName ?? "ApiRest";
+            Mode = ContextProvider?._AppState.ConnectionMode ?? "Ef";
 
         }
         catch (Exception ex)
@@ -106,34 +107,12 @@
 
     private async Task Actualizar()
     {
-        var Token = ContextProvider.Token;
-        ContextProvider.SetContext(TenantId,ContextKey,ApiName,ContextProvider.DirBase,Mode,Token);
-        ContextProvider.SaveContext(TenantId, ContextKey, ApiName, ContextProvider.DirBase, Mode, Token);
-
+        var Token = ContextProvider._AppState.Token;
+        ContextProvider.SetContext(TenantId,ContextKey,ApiName,ContextProvider._AppState.DirBase,Mode,Token);
+        ContextProvider.SaveContext(TenantId, ContextKey, ApiName, ContextProvider._AppState.DirBase, Mode, Token);
     }
 
-    public enum MenuTarget
-    {
-        Server,
-        Client,
-        Both
-    }
-    public record MenuItem(string Text, string Url, MenuTarget Target);
-    private static readonly List<MenuItem> Items =
-    [
-  
-        new("Lista  Context/Tenant (server)", "/ListaUsuarios", MenuTarget.Both),
-        new("Lista  Fijo-Api (server)", "/ListaUsuariosApi", MenuTarget.Server),
-        new("Lista  Multiple Context (server)", "/ListaUsuariosMultipleContext", MenuTarget.Server),
-         new("Lista Multiple Tenant (server)", "/ListaUsuariosMultipleTenant", MenuTarget.Server),
-         new("Detalle (server)", "/DetalleUsuario", MenuTarget.Server),
-         new("Delete (server)", "/DeleteUsuario", MenuTarget.Server),
-         new("Weather (server)", "/Weather", MenuTarget.Server),
-        new("Lista  Fijos WASM", "/ListaUsuariosCliente", MenuTarget.Both),
-        new("Delete WASM", "/DeleteUsuarioCliente", MenuTarget.Server),
-        new("Detalle WASM", "/DetalleUsuarioCliente", MenuTarget.Server),
-        new("Counter WASM", "/Counter", MenuTarget.Server)
-    ];
+    
 
     private IEnumerable<MenuItem> GetVisibleItems()
     {
@@ -143,5 +122,31 @@
         return Items.Where(i => i.Target is MenuTarget.Server or MenuTarget.Both);
     }
 
+    public enum MenuTarget
+    {
+        Server,
+        Client,
+        Both
     }
+    public record MenuItem(string Text, string Url, MenuTarget Target);
+
+    private static readonly List<MenuItem> Items =
+    [
+    new("Lista  Context/Tenant (server)", "/ListaUsuarios", MenuTarget.Both),
+    new("Lista  Fijo-Api (server)", "/ListaUsuariosApi", MenuTarget.Server),
+    new("Lista  Multiple Context (server)", "/ListaUsuariosMultipleContext", MenuTarget.Server),
+    new("Lista Multiple Tenant (server)", "/ListaUsuariosMultipleTenant", MenuTarget.Server),
+    new("Detalle (server)", "/DetalleUsuario", MenuTarget.Server),
+    new("Delete (server)", "/DeleteUsuario", MenuTarget.Server),
+    new("Weather (server)", "/Weather", MenuTarget.Server),
+    new("Lista  Fijos WASM", "/ListaUsuariosCliente", MenuTarget.Both),
+    new("Delete WASM", "/DeleteUsuarioCliente", MenuTarget.Server),
+    new("Detalle WASM", "/DetalleUsuarioCliente", MenuTarget.Server),
+    new("Counter WASM", "/Counter", MenuTarget.Server)
+    ];
+
+    
+    }
+    
+    
     

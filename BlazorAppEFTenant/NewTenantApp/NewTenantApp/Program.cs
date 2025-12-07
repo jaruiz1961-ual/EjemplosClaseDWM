@@ -7,6 +7,8 @@ using DataBase.Genericos;
 using DataBase.Modelo;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -110,13 +112,41 @@ builder.Services.AddHttpClient("ApiRest", (sp, client) =>
     client.BaseAddress = DirBase;
 });
 
-
-builder.Services.AddScoped<IContextProvider, ContextProvider>();
-// Tenant Provider y Context Provider
 builder.Services.AddBlazoredLocalStorage();
 
+builder.Services.AddScoped<ContextProvider>(sp =>
+{
+    var localStorage = sp.GetRequiredService<ILocalStorageService>();
+    var token = sp.GetRequiredService<ITokenService>();
 
-    
+    var cp = new ContextProvider(localStorage, token)
+    {
+        _AppState = new AppState
+        {
+            TenantId = 0,
+            DbKey = "SqlServer",
+            ConnectionMode = "Ef",
+            ApiName = "ApiRest",
+            DirBase = new Uri("https://localhost:7013/"),
+            Token = null
+        }
+    };
+
+    return cp;
+});
+
+// Ambas interfaces apuntan a la MISMA instancia
+builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
+builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<ContextProvider>());
+
+builder.Services.AddAuthorizationCore();
+
+
+// Tenant Provider y Context Provider
+
+
+
+
 //(sp =>
 //{
 //    var provider = ActivatorUtilities.CreateInstance<ContextProvider>(sp);

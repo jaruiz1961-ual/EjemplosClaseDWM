@@ -3,6 +3,8 @@
 @inherits LayoutComponentBase
 @inject IContextProvider ContextProvider
 @using BlazorAppEFTenant.Client.Layout
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security;
 
 
 <div class="page">
@@ -36,7 +38,7 @@
     {
         if (firstRender && !_initialized)
         {
-            await ContextProvider.ReadContext();
+          //  AutentificationState AppState=await ContextProvider.GetAuthenticationStateAsync();
             _initialized = true;
             StateHasChanged();
         }

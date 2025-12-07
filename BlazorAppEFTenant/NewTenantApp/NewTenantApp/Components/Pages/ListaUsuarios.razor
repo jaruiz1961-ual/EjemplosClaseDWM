@@ -95,8 +95,9 @@ else
         {
             if (ContextProvider.IsValid())
             {  
-                await ContextProvider.ReadContext();
-                seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+                   AuthenticationState AppState = await ContextProvider.GetAuthenticationStateAsync();
+        
+                seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider._AppState.Token);
                 var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 usuarios = list.ToList();

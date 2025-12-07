@@ -46,7 +46,7 @@ namespace DataBase.Contextos
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider.TenantId;
+            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
           
         }
 #endif

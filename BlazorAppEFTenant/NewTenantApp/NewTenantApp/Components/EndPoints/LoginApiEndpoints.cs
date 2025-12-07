@@ -52,7 +52,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
                };
    
-               var tokenString = sc.GenerateToken(claims);
+               var tokenString = sc.GenerateTokenAsync(claims);
 
                return Results.Ok(new { token = tokenString });
            })

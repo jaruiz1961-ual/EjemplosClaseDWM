@@ -1,96 +1,95 @@
 ﻿@page "/Login"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@* SIN @rendermode aquí; que el Router decida el modo *@
 
-
-@using BlazorAppEFTenant.Components.Layout
 @using Blazored.LocalStorage
 @using DataBase
 @using DataBase.Genericos
 @using DataBase.Modelo
 @using DataBase.Servicios
 @inject IUnitOfWorkFactory UowFactory
-
 @inject ITokenService TokenService
 @inject IContextProvider ContextProvider
+@inject NavigationManager Nav
+@inject ILocalStorageService LocalStorage
+@* @inject IServiceProvider Services   para resolver ServicioSeguridad si quieres DI *@ 
 
-@inject NavigationManager nav
-@inject ILocalStorageService _localStorage
-
-
-
-
-<h3>Login para obtener token JWT  desde el cliente</h3>
+<h3>Login para obtener token JWT desde el cliente</h3>
 
 <div>
     <input @bind="username" placeholder="Usuario" />
-    <input @bind="password" placeholder="Password" />
+    <input @bind="password" placeholder="Password" type="password" />
 </div>
 
-
 <button @onclick="LoginAsync">Acceder</button>
-@if (seguridad != null)
+
+<p>@mensaje</p>
+
+@if (seguridad is not null && !string.IsNullOrEmpty(seguridad.UserName))
 {
-    <p>Toquen:@ContextProvider?.Token </p>
+    <p>Token: @ContextProvider._AppState.Token</p>
     <p>Nombre: @seguridad.UserName</p>
     <p>Password: @seguridad.Password</p>
     <p>TenantId: @seguridad.TenantId</p>
     <p>Email: @seguridad.Email</p>
-    <p>Roles:  @seguridad.Roles</p>
+    <p>Roles: @seguridad.Roles</p>
 }
 else
 {
-
-    <p> Hay Login para empezar !!!</p>
+    <p>¡Haz login para empezar!</p>
 }
-
 
 @code {
     [CascadingParameter]
     public IAppState AppState { get; set; } = default!;
-    string username = "";
-    string password = "";
-    string token = null;
-    string tokenCookie = "";
-    string mensaje;
 
-    string protectedApiResponse = "";
-    string protectedApiResponseCookie = "";
-    Seguridad seguridad = new Seguridad();
+    private string username = string.Empty;
+    private string password = string.Empty;
+    private string mensaje  = string.Empty;
 
-    ServicioSeguridad scUsuario;
+    private Seguridad seguridad = new();
 
-
-
-    bool _initialized = false;
-
-
-
-
-
-    async Task LoginAsync()
+    private async Task LoginAsync()
     {
-        ContextProvider.ConnectionMode = "Ef";
-        scUsuario = new ServicioSeguridad(ContextProvider, UowFactory, TokenService);
-        mensaje = "";
+        mensaje = string.Empty;
+
+        // Contexto de conexión que quieres para este login
+        ContextProvider._AppState.ConnectionMode = "Ef";
+
+        // Mejor: resolver ServicioSeguridad vía DI; aquí lo instancio a mano por simplicidad
+        var scUsuario = new ServicioSeguridad(ContextProvider, UowFactory, TokenService);
 
         var token = await scUsuario.LoginAndGetToken(username, password);
+
         if (!string.IsNullOrEmpty(token))
         {
-            seguridad = scUsuario.GetDataFromToken();
-            ContextProvider.Token = token;
-            await ContextProvider.SaveContextAsync(null);
-            mensaje = "Biendvenido: "+seguridad.UserName+":"+seguridad.Roles;
-            if (AppState == null) AppState = new AppState();
-            AppState.Token = token;
+            seguridad = scUsuario.GetDataFromToken() ?? new Seguridad();
+
+            // Actualizar TODO el contexto a través de SetContext para que Blazor se entere
+            await ContextProvider.SetContext(
+                tenantId:       seguridad.TenantId,
+                dbKey:   ContextProvider._AppState.DbKey,
+                apiName:        ContextProvider._AppState.ApiName,
+                dirBase:        ContextProvider._AppState.DirBase,
+                connectionMode:  ContextProvider._AppState.ConnectionMode,
+                token:          token
+            );
+
+            // Reflejar también en AppState de cascada si lo usas en otras partes
+            AppState.Token          = token;
             AppState.IsAutenticated = true;
+
+            mensaje = $"Bienvenido: {seguridad.UserName} ({seguridad.Roles})";
+
+            // Redirigir donde quieras, por ejemplo a Home
+            // Nav.NavigateTo("/Home");
         }
         else
         {
+            seguridad = new Seguridad();
+            AppState.IsAutenticated = false;
             mensaje = "Error en Login";
         }
+
         StateHasChanged();
     }
-
-
 }
-

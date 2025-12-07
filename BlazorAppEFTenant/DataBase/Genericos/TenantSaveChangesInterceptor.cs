@@ -36,7 +36,7 @@ namespace DataBase.Genericos
         private void AssignTenantId(DbContext? context)
         {
             if (context == null) return;
-            var tenantId = ContextProvider.TenantId;
+            var tenantId = ContextProvider._AppState.TenantId;
 
             foreach (var entry in context.ChangeTracker.Entries<ITenantEntity>())
             {

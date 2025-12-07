@@ -21,7 +21,7 @@ namespace DataBase.Servicios
     {
         public ServicioUsuariosCliente(IContextProvider cp, IUnitOfWorkFactory uowFactory) : base(cp, uowFactory)
         {
-            cp.ConnectionMode = "Api";
+            cp._AppState.ConnectionMode = "Api";
         }
     }
 

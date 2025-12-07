@@ -1,27 +1,20 @@
 ﻿
+using Microsoft.AspNetCore.Components.Authorization;
 using System.Security;
 
 namespace DataBase.Genericos
 {
     public interface IContextProvider
     {
-        public int? TenantId { get; set; } 
-        public string DbKey { get; set; }
+        public AppState _AppState { get; set; }
 
-        public string ConnectionMode { get; set; }
-        public string ApiName { get; set; }
-        public Uri DirBase { get; set; }
-        public string Token { get; set; }
+        public Task ReadContext();
+        public  Task SaveContextAsync(IContextProvider cp);
+        public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
 
+        public Task MarkUserAsLoggedOut();
 
-        public  Task SaveContextAsync(IContextProvider? cp);
-        public Task SaveContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
-
-
-        public  Task ReadContext();
-
-
-
+        public Task<AuthenticationState> GetAuthenticationStateAsync();
 
         public event Action? OnContextChanged;
 
@@ -32,7 +25,7 @@ namespace DataBase.Genericos
         public int[] GetTenantIds();
         public string[] GetConnectionModes();
 
-        Task SetContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string connectionMode, string token);
+        Task SetContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
         public ContextProvider Copia();
         public bool IsValid();
 

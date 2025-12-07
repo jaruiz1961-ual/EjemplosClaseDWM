@@ -18,14 +18,14 @@ namespace DataBase.Genericos
 
         public IGenericRepository<TEntity> Create(IContextProvider cp, DbContext? context = null)
         {
-            var mode = cp.ConnectionMode?.ToLowerInvariant();
+            var mode = cp._AppState.ConnectionMode?.ToLowerInvariant();
 
 
 
             if (mode == "api")
             {
                 var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
-                var httpClient = httpClientFactory.CreateClient(cp.ApiName);
+                var httpClient = httpClientFactory.CreateClient(cp._AppState.ApiName);
 
                 var resource = typeof(TEntity).Name.ToLower() + "s";
                 return new GenericRepositoryApi<TEntity>(httpClient, cp, resource);
@@ -36,7 +36,7 @@ namespace DataBase.Genericos
                 if (context is null)
                     throw new ArgumentNullException(nameof(context), "Para EF se requiere un DbContext.");
 
-                switch (cp.DbKey?.ToLowerInvariant())
+                switch (cp._AppState.DbKey?.ToLowerInvariant())
                 {
                     case "sqlserver":
                         {
@@ -57,11 +57,11 @@ namespace DataBase.Genericos
                         }
 
                     default:
-                        throw new NotSupportedException($"Contexto '{cp.DbKey}' no soportado.");
+                        throw new NotSupportedException($"Contexto '{cp._AppState.DbKey}' no soportado.");
                 }
             }
 
-            throw new NotSupportedException($"Tipo de acceso '{cp.ConnectionMode}' no soportado.");
+            throw new NotSupportedException($"Tipo de acceso '{cp._AppState.ConnectionMode}' no soportado.");
         }
     }
 

@@ -24,32 +24,32 @@ namespace DataBase.Genericos
         public IUnitOfWork Create(IContextProvider cp)
         {
             
-            if (cp.ConnectionMode.ToLower() == "api")
+            if (cp._AppState.ConnectionMode.ToLower() == "api")
             {
                 return new UnitOfWorkApi(cp, _provider);
             }
-            else if (cp.ConnectionMode.ToLower() == "ef")
-                switch (cp.DbKey.ToLower())
+            else if (cp._AppState.ConnectionMode.ToLower() == "ef")
+                switch (cp._AppState.DbKey.ToLower())
                 {
                     case "sqlserver":
                         var dbFactorySqlServer = _provider.GetRequiredService<IDbContextFactory<SqlServerDbContext>>();
                         SqlServerDbContext dbSqlServer = dbFactorySqlServer.CreateDbContext(); // nuevo contexto por llamada
-                        dbSqlServer.TenantId = cp.TenantId;
+                        dbSqlServer.TenantId = cp._AppState.TenantId;
                         return new UnitOfWorkEf<SqlServerDbContext>(dbSqlServer,_provider, cp );
                   
                     case "sqlite":
                         var dbFactorySqLite = _provider.GetRequiredService<IDbContextFactory<SqLiteDbContext>>();
                         SqLiteDbContext dbSqLite = dbFactorySqLite.CreateDbContext(); // nuevo contexto por llamada
-                        dbSqLite.TenantId = cp.TenantId;
+                        dbSqLite.TenantId = cp._AppState.TenantId;
                         return new UnitOfWorkEf<SqLiteDbContext>(dbSqLite, _provider, cp);
                     case "inmemory":
                         var dbFactoryInMemory = _provider.GetRequiredService<IDbContextFactory<InMemoryDbContext>>();
                         InMemoryDbContext dbInMemory = dbFactoryInMemory.CreateDbContext(); // nuevo contexto por llamada
-                        dbInMemory.TenantId = cp.TenantId;
+                        dbInMemory.TenantId = cp._AppState.TenantId;
                         return new UnitOfWorkEf<InMemoryDbContext>(dbInMemory, _provider, cp);
-                    default: throw new NotSupportedException($"Contexto '{cp.DbKey}' no soportado.");
+                    default: throw new NotSupportedException($"Contexto '{cp._AppState.DbKey}' no soportado.");
                 }
-            throw new NotSupportedException($"Tipo de acceso '{cp.ConnectionMode}' no soportado.");
+            throw new NotSupportedException($"Tipo de acceso '{cp._AppState.ConnectionMode}' no soportado.");
         }
     }
 

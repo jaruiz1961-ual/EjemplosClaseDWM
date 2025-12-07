@@ -1,5 +1,7 @@
 ﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @using DataBase.Genericos
+@using Microsoft.AspNetCore.Components.Authorization;
+@using System.Security;
 @inject IContextProvider ContextProvider
 
 <div class="top-row navbar navbar-dark w-25">
@@ -85,11 +87,11 @@
     {
         try
         {
-            await ContextProvider.ReadContext();
-            TenantId = ContextProvider?.TenantId ?? 0;
-            ContextKey = ContextProvider?.DbKey ?? "SqLite";
-            ApiName = ContextProvider?.ApiName ?? "ApiRest";
-            Mode = ContextProvider?.ConnectionMode ?? "Ef";
+            AuthenticationState AppState = await ContextProvider.GetAuthenticationStateAsync();
+            TenantId = ContextProvider?._AppState.TenantId ?? 0;
+            ContextKey = ContextProvider?._AppState.DbKey ?? "SqLite";
+            ApiName = ContextProvider?._AppState.ApiName ?? "ApiRest";
+            Mode = ContextProvider?._AppState.ConnectionMode ?? "Ef";
 
         }
         catch (Exception ex)
@@ -104,9 +106,9 @@
 
     private async Task Actualizar()
     {
-        var Token = ContextProvider.Token;
-        ContextProvider.SetContext(TenantId, ContextKey, ApiName, ContextProvider.DirBase, Mode, Token);
-        ContextProvider.SaveContext(TenantId, ContextKey, ApiName, ContextProvider.DirBase, Mode, Token);
+        var Token = ContextProvider._AppState.Token;
+        ContextProvider.SetContext(TenantId, ContextKey, ApiName, ContextProvider._AppState.DirBase, Mode, Token);
+        ContextProvider.SaveContext(TenantId, ContextKey, ApiName, ContextProvider._AppState.DirBase, Mode, Token);
 
     }
 

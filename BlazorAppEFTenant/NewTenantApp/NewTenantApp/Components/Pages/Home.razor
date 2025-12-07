@@ -8,6 +8,7 @@
 @using DataBase.Modelo
 @using DataBase.Servicios
 @using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization;
 @inject IUnitOfWorkFactory UowFactory
 @inject IContextProvider ContextProvider
 @inject ITokenService TokenService
@@ -22,7 +23,7 @@
     <Authorized>    
         @if (seguridad != null)
         {
-            <p>Toquen:@ContextProvider?.Token </p>
+            <p>Toquen:@ContextProvider?._AppState.Token </p>
             <p>Nombre: @seguridad.UserName</p>
             <p>Password: @seguridad.Password</p>
             <p>TenantId: @seguridad.TenantId</p>
@@ -54,8 +55,9 @@
     {
         if (firstRender && !_initialized)
         {
-            await ContextProvider.ReadContext();
-            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider.Token);
+                AuthenticationState AppState = await ContextProvider.GetAuthenticationStateAsync();
+        
+            seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider._AppState.Token);
             _initialized = true;
             StateHasChanged();
         }

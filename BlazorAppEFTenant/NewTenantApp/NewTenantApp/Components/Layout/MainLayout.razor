@@ -1,14 +1,11 @@
 ﻿@using DataBase
 @using DataBase.Genericos
-@using DataBase.Servicios
 @using Microsoft.AspNetCore.Components.Authorization
 
 @inherits LayoutComponentBase
 @inject NavigationManager Nav
-@inject IConfiguration Configuration
 @inject IContextProvider ContextProvider
-
-
+@inject AuthenticationStateProvider AuthStateProvider
 
 <div class="page">
     <div class="sidebar">
@@ -17,15 +14,18 @@
 
     <main>
         <div class="top-row px-4">
-            @if ( AppState.IsAutenticated)
-            {      
+            @if (_initialized && _isAuthenticated)
+            {
                 <button class="btn btn-link" @onclick="Logout">Logout</button>
             }
-            else 
+            else if (_initialized && !_isAuthenticated)
             {
-                 <a href="Login">Login</a>
+                <a href="Login">Login</a>
             }
-
+            else
+            {
+                <span>Cargando...</span>
+            }
         </div>
 
         <article class="content px-4">
@@ -41,21 +41,67 @@
 </div>
 
 @code {
-    [CascadingParameter]
-    public IAppState AppState { get; set; } = default!;
-    
-    [Parameter] public RenderFragment? Authorized { get; set; }
-    [Parameter] public RenderFragment? NotAuthorized { get; set; }
-    [Parameter] public string? RequiredRole { get; set; }
+    private bool _initialized;
+    private bool _isAuthenticated;
 
-   
+    protected override async Task OnInitializedAsync()
+    {
+        // Estado inicial (antes de leer LocalStorage)
+        await LoadAuthStateAsync();
 
+        if (AuthStateProvider is ContextProvider cp)
+        {
+            cp.OnContextChanged += OnContextChanged;
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_initialized)
+        {
+            // Aquí ya hay JS disponible: podemos cargar appstate desde LocalStorage
+            await ContextProvider.ReadContext();
+            await LoadAuthStateAsync();
+            _initialized = true;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task LoadAuthStateAsync()
+    {
+        var state = await AuthStateProvider.GetAuthenticationStateAsync();
+        _isAuthenticated = state.User.Identity?.IsAuthenticated == true;
+    }
+
+    private void OnContextChanged()
+    {
+        InvokeAsync(async () =>
+        {
+            await LoadAuthStateAsync();
+            StateHasChanged();
+        });
+    }
 
     private async Task Logout()
     {
-        // Limpia el contexto (token = null, etc.) y notifica a todos los MyAuthorizeView
-        await ContextProvider.SetContext(null, null, null, null, null, null);
-        AppState.IsAutenticated = false;
+        await ContextProvider.SetContext(
+            tenantId: ContextProvider._AppState.TenantId,
+            dbKey: ContextProvider._AppState.DbKey,
+            apiName: ContextProvider._AppState.ApiName,
+            dirBase: ContextProvider._AppState.DirBase,
+            connectionMode: ContextProvider._AppState.ConnectionMode,
+            token: null
+        );
+
+        await LoadAuthStateAsync();
         Nav.NavigateTo("/Home", forceLoad: true);
+    }
+
+    public void Dispose()
+    {
+        if (AuthStateProvider is ContextProvider cp)
+        {
+            cp.OnContextChanged -= OnContextChanged;
+        }
     }
 }

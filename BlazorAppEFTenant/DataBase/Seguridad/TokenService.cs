@@ -8,76 +8,96 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DataBase
 {
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.IdentityModel.Tokens;
+    using System;
+    using System.IdentityModel.Tokens.Jwt;
+    using System.Security.Claims;
+    using System.Text;
+
+
     public class TokenService : ITokenService
     {
-        private readonly IConfiguration _config;
-        private readonly byte[] _keyBytes;
+        private readonly JwtSecurityTokenHandler _handler = new();
+        private readonly TokenValidationParameters _validation;
+        private readonly string _issuer;
+        private readonly string _audience;
+        private readonly int _expiresMinutes;
+        private readonly SymmetricSecurityKey _signingKey;
 
-        public TokenService(IConfiguration config)
+        public TokenService(IConfiguration configuration)
         {
-            _config = config ?? throw new ArgumentNullException(nameof(config));
-            var secret = _config["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key no configurado.");
+            var key = configuration["Jwt:Key"]
+                      ?? throw new InvalidOperationException("Jwt:Key no configurada");
 
-            // Si la clave está en Base64, descodifícala; si no, toma los bytes UTF8
+            _issuer = configuration["Jwt:Issuer"] ?? string.Empty;
+            _audience = configuration["Jwt:Audience"] ?? string.Empty;
+            _expiresMinutes = int.TryParse(configuration["Jwt:ExpiresMinutes"], out var m) ? m : 60;
+
+            _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+
+            _validation = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = _signingKey,
+
+                ValidateIssuer = !string.IsNullOrEmpty(_issuer),
+                ValidIssuer = _issuer,
+
+                ValidateAudience = !string.IsNullOrEmpty(_audience),
+                ValidAudience = _audience,
+
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        }
+
+        public string GenerateToken(IEnumerable<Claim> claims)
+        {
+            var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken(
+                issuer: _issuer,
+                audience: _audience,
+                claims: claims,
+                notBefore: DateTime.UtcNow,
+                expires: DateTime.UtcNow.AddMinutes(_expiresMinutes),
+                signingCredentials: creds
+            );
+
+            return _handler.WriteToken(token);
+        }
+
+        public bool ValidateToken(string? token)
+        {
+            if (string.IsNullOrWhiteSpace(token))
+                return false;
+
             try
             {
-                _keyBytes = Convert.FromBase64String(secret);
+                _ = _handler.ValidateToken(token, _validation, out _);
+                return true;
             }
             catch
             {
-                _keyBytes = Encoding.UTF8.GetBytes(secret);
+                return false;
             }
-
-            if (_keyBytes.Length * 8 < 256)
-                throw new InvalidOperationException("La clave JWT es demasiado corta. Necesitas al menos 256 bits (32 bytes).");
         }
 
-        public string GenerateToken(Claim[] claims)
+        public ClaimsPrincipal? GetPrincipal(string token)
         {
-
-
-            var key = new SymmetricSecurityKey(_keyBytes);
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
-                claims: claims,
-                expires: DateTime.UtcNow.AddHours(1),
-                signingCredentials: creds);
-
-            return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-
-        public static bool ValidateToken(string tokenString, IConfiguration _config)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]);
-
-            var parameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(key),
-                ValidateIssuer = true,
-                ValidIssuer = _config["Jwt:Issuer"],
-                ValidateAudience = true,
-                ValidAudience = _config["Jwt:Audience"],
-                ValidateLifetime = true,              // comprueba exp/nbf
-                ClockSkew = TimeSpan.Zero            // opcional: sin margen
-            };
+            if (string.IsNullOrWhiteSpace(token))
+                return null;
 
             try
             {
-                var principal = tokenHandler.ValidateToken(tokenString, parameters, out var validatedToken);
-                // si llegas aquí, el token es válido
-                return true;
+                return _handler.ValidateToken(token, _validation, out _);
             }
-            catch (SecurityTokenException)
+            catch
             {
-                return false;
+                return null;
             }
-
         }
     }
+
 }
