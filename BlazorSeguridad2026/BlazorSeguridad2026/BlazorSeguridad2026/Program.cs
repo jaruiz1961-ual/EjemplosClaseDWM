@@ -18,6 +18,19 @@ builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
+builder.Services.AddScoped<
+    IUserClaimsPrincipalFactory<ApplicationUser>,
+    AppUserClaimsPrincipalFactory>();
+
+builder.Services.AddAuthorizationCore(options =>
+{
+    options.AddPolicy("SoloAdminTenant1", policy =>
+        policy.RequireClaim("tenant", "1")
+              .RequireRole("Administrador"));
+});
+
+
+
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultScheme = IdentityConstants.ApplicationScheme;
@@ -35,6 +48,7 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
+     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();

@@ -101,7 +101,8 @@ builder.Services.AddCascadingAuthenticationState();
 // Configuración de Razor y componentes Blazor (igual que en tu código original)
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
-    .AddInteractiveWebAssemblyComponents();
+    .AddInteractiveWebAssemblyComponents()
+    .AddAuthenticationStateSerialization();
 
 
 
@@ -136,6 +137,7 @@ builder.Services.AddScoped<ContextProvider>(sp =>
 });
 
 // Ambas interfaces apuntan a la MISMA instancia
+builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 builder.Services.AddScoped<AuthenticationStateProvider>(sp => sp.GetRequiredService<ContextProvider>());
 
