@@ -11,30 +11,22 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
+var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
+
+
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+});
+
+
+builder.Services.AddHttpClient("ApiRest", client =>
+{
+    client.BaseAddress = new Uri(apiUrl);
+});
 
 
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<DataBase.Genericos.ContextProvider>(sp =>
-{
-    var localStorage = sp.GetRequiredService<ILocalStorageService>();
-
-
-    var cp = new ContextProvider(localStorage)
-    {
-        _AppState = new AppState
-        {
-            TenantId = 0,
-            DbKey = "SqlServer",
-            ConnectionMode = "Ef",
-            ApiName = "ApiRest",
-            DirBase = new Uri("https://localhost:7013/"),
-            Token = null
-        }
-    };
-
-    return cp;
-});
-builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
-
+builder.Services.AddScoped<IContextProvider, ContextProvider>();
 await builder.Build().RunAsync();

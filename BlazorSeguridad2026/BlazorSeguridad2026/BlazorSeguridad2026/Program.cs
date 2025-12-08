@@ -58,9 +58,9 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
-    var token = sp.GetRequiredService<ITokenService>();
 
-    var cp = new ContextProvider(localStorage, token)
+
+    var cp = new ContextProvider(localStorage)
     {
         _AppState = new AppState
         {
