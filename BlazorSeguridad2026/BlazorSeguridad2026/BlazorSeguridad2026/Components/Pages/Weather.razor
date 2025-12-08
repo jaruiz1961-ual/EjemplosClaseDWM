@@ -1,6 +1,8 @@
 ﻿@page "/weather"
+@using DataBase.Genericos
 @attribute [StreamRendering]
 @rendermode InteractiveServer
+@inject IContextProvider ContextProvider
 
 <PageTitle>Weather</PageTitle>
 
@@ -39,6 +41,8 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
+    //Seguridad seguridad = null;
+    bool _initialized = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -55,6 +59,17 @@ else
         }).ToArray();
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            await ContextProvider.ReadContext();
+
+          //  seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider._AppState.Token);
+            _initialized = true;
+            StateHasChanged();
+        }
+    }
     private class WeatherForecast
     {
         public DateOnly Date { get; set; }

@@ -6,10 +6,12 @@ using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
+    public record LoginData(string email, string password);
     public interface IContextProvider
     {
         public AppState _AppState { get; set; }
 
+        public Task UpdateTokenContext(string token);
         public Task ReadContext();
         public Task SaveContextAsync(IContextProvider cp);
         public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
@@ -126,6 +128,14 @@ namespace DataBase.Genericos
 
             await _localStorage.SetItemAsync("appstate", _AppState);
 
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            OnContextChanged?.Invoke();
+        }
+
+        public async Task UpdateTokenContext(string token)    
+        {
+            _AppState.Token = token;
+            await _localStorage.SetItemAsync("appstate", _AppState);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             OnContextChanged?.Invoke();
         }

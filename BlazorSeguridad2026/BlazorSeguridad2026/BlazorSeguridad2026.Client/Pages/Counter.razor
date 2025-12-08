@@ -1,8 +1,10 @@
 ﻿@page "/counter"
 @rendermode InteractiveWebAssembly
+@using DataBase.Genericos
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
+@inject IContextProvider ContextProvider
 
 <PageTitle>Counter</PageTitle>
 
@@ -26,6 +28,7 @@
     private string? DbKey;
     protected override async Task OnInitializedAsync()
     {
+        await ContextProvider.ReadContext();
         var state = await AuthStateProvider.GetAuthenticationStateAsync();
         user = state.User;
 

@@ -1,23 +1,22 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
-using System.IdentityModel.Tokens.Jwt;
+
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace DataBase.Genericos
 {
+    public record LoginData(string email, string password);
     public interface IContextProvider
     {
         public AppState _AppState { get; set; }
 
+        public Task UpdateTokenContext(string token);
         public Task ReadContext();
         public Task SaveContextAsync(IContextProvider cp);
         public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
 
-        public Task RefreshAuthenticationState();
-        public Task MarkUserAsLoggedOut();
 
-        public Task<AuthenticationState> GetAuthenticationStateAsync();
 
         public event Action? OnContextChanged;
 
@@ -33,11 +32,11 @@ namespace DataBase.Genericos
         public bool IsValid();
 
     }
-    public class ContextProvider : AuthenticationStateProvider, IContextProvider
+    public class ContextProvider : IContextProvider
     {
         public AppState _AppState { get; set; } = new AppState();
         private readonly ILocalStorageService _localStorage;
-        private readonly ITokenService _tokenService;
+
 
         public event Action? OnContextChanged;
 
@@ -48,10 +47,10 @@ namespace DataBase.Genericos
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
 
-        public ContextProvider(ILocalStorageService localStorage, ITokenService tokenService)
+        public ContextProvider(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;
-            _tokenService = tokenService;
+
         }
 
         public async Task ReadContext()
@@ -92,7 +91,7 @@ namespace DataBase.Genericos
 
         public ContextProvider Copia()
         {
-            var cp = new ContextProvider(_localStorage, _tokenService)
+            var cp = new ContextProvider(_localStorage)
             {
                 _AppState = new AppState
                 {
@@ -125,8 +124,13 @@ namespace DataBase.Genericos
             _AppState.Token = token;
 
             await _localStorage.SetItemAsync("appstate", _AppState);
+            OnContextChanged?.Invoke();
+        }
 
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        public async Task UpdateTokenContext(string token)    
+        {
+            _AppState.Token = token;
+            await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
         }
 
@@ -161,10 +165,6 @@ namespace DataBase.Genericos
             OnContextChanged?.Invoke();
         }
 
-        public async Task RefreshAuthenticationState()
-        {
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        }
 
         public async Task MarkUserAsLoggedOut()
         {
@@ -175,44 +175,9 @@ namespace DataBase.Genericos
                 _AppState.DirBase,
                 _AppState.ConnectionMode,
                 null);
-
-            var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(anonymous)));
-        }
-
-        private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwt);
-            return token.Claims;
-        }
-
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
-        {
-            var token = _AppState.Token;
-
-            if (string.IsNullOrWhiteSpace(token))
-                return Task.FromResult(
-                    new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
-
-            var principal = _tokenService.GetPrincipal(token)
-                            ?? new ClaimsPrincipal(new ClaimsIdentity());
-
-            return Task.FromResult(new AuthenticationState(principal));
         }
 
 
-        private ClaimsPrincipal ValidateAndCreatePrincipal(string jwt)
-        {
-            try
-            {
-                var principal = _tokenService.GetPrincipal(jwt);
-                return principal ?? new ClaimsPrincipal(new ClaimsIdentity());
-            }
-            catch
-            {
-                return new ClaimsPrincipal(new ClaimsIdentity());
-            }
-        }
+        
     }
 }

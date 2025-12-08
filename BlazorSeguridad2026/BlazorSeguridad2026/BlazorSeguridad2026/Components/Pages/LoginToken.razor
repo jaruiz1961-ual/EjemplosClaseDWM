@@ -1,0 +1,53 @@
+﻿@page "/LoginToken"
+@rendermode InteractiveServer
+@using DataBase.Genericos
+
+@inject IHttpClientFactory HttpFactory
+@inject IContextProvider ContextProvider
+@inject NavigationManager Nav
+
+<h3>Cargando sesión...</h3>
+
+@code {
+    private bool _initialized;
+    private HttpClient Http => HttpFactory.CreateClient("UrlApi");
+    string email = string.Empty;
+    string password = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var uri = new Uri(Nav.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        email = query["email"] ?? string.Empty;
+        password = query["password"] ?? string.Empty;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!_initialized)
+        {
+            // Usa la cookie de Identity para pedir el JWT
+            var loginData = new LoginData ( email, password);
+
+
+                // Usa PostAsJsonAsync, no GetStringAsync
+                var response = await Http.PostAsJsonAsync("https://localhost:7013/api/auth/token", loginData);
+
+            // Aquí ya estás en cliente, puedes usar SetContext (LocalStorage, etc.)
+            await ContextProvider.SetContext(
+                tenantId: null,
+                dbKey: "SqlServer",
+                apiName: "ApiRest",
+                dirBase: new Uri("https://localhost:7013/"),
+                connectionMode: "Api",
+                token: response.Content.ReadAsStringAsync().Result
+            );
+
+            _initialized = true;
+
+            // Redirige a donde quieras (home, lista, etc.)
+            Nav.NavigateTo("/");
+        }
+    }
+}

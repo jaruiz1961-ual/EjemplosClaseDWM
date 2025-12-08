@@ -5,7 +5,7 @@
 namespace BlazorSeguridad2026.Migrations
 {
     /// <inheritdoc />
-    public partial class AppState : Migration
+    public partial class AddRoles : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
