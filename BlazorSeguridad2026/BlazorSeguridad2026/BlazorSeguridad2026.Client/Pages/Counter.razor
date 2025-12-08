@@ -1,10 +1,13 @@
 ﻿@page "/counter"
-@rendermode InteractiveWebAssembly
-@using DataBase.Genericos
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: true))
+
+@using Cliente
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
-@inject IContextProvider ContextProvider
+@inject Cliente.IContextProvider ContextProvider
+@using Microsoft.AspNetCore.Components
+
 
 <PageTitle>Counter</PageTitle>
 
@@ -28,6 +31,7 @@
     private string? DbKey;
     protected override async Task OnInitializedAsync()
     {
+        if (!OperatingSystem.IsBrowser()) return;
         await ContextProvider.ReadContext();
         var state = await AuthStateProvider.GetAuthenticationStateAsync();
         user = state.User;
@@ -35,5 +39,16 @@
         AppState = user.FindFirst("AppState")?.Value;
         TenantId = user.FindFirst("TenantId")?.Value;
         DbKey = user.FindFirst("DbKey")?.Value;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+    
+        if (firstRender)
+        {
+            // For demonstration purposes, re-read the context after first render
+            await ContextProvider.ReadContext();
+            StateHasChanged();
+        }
     }
 }

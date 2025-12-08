@@ -1,6 +1,6 @@
+
 using Blazored.LocalStorage;
-using DataBase;
-using DataBase.Genericos;
+using Cliente;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using System.Net.NetworkInformation;
 

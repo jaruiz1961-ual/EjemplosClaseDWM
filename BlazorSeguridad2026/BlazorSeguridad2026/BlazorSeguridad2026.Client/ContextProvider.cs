@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace Cliente
 {
     public record LoginData(string email, string password);
     public interface IContextProvider

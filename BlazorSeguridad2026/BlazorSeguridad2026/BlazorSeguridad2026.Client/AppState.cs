@@ -1,10 +1,10 @@
-﻿using DataBase.Genericos;
+﻿
 using System.ComponentModel;
 using System.Globalization;
 using System.Security;
 using System.Text.Json;
 
-namespace DataBase.Genericos
+namespace Cliente
 {
 
     public interface IAppState
