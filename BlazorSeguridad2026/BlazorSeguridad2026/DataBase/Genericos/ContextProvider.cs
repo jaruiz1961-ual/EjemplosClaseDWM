@@ -1,65 +1,80 @@
 ﻿using Blazored.LocalStorage;
-using Microsoft.AspNetCore.Components.Authorization;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
+    public enum ClavesEstado
+    {
+        UltimaPagina,
+        Tema,
+        Otro
+    }
+    public record LoginData(string email, string password);
+
     public interface IContextProvider
     {
-        public AppState _AppState { get; set; }
+        AppState _AppState { get; set; }
+        Dictionary<ClavesEstado, string> dict { get; }
 
-        public Task ReadContext();
-        public Task SaveContextAsync(IContextProvider cp);
-        public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
+        event Action? OnContextChanged;
 
-        public Task RefreshAuthenticationState();
-        public Task MarkUserAsLoggedOut();
-
-        public Task<AuthenticationState> GetAuthenticationStateAsync();
-
-        public event Action? OnContextChanged;
-
-        public string[] GetContextKeyDbs();
-
-        public string[] GetApiNames();
-
-        public int[] GetTenantIds();
-        public string[] GetConnectionModes();
-
-        Task SetContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
-        public ContextProvider Copia();
-        public bool IsValid();
-
+        ContextProvider Copia();
+        string[] GetApiNames();
+        string[] GetConnectionModes();
+        string[] GetContextKeyDbs();
+        int[] GetTenantIds();
+        string? GetValor(ClavesEstado clave);
+        bool IsValid();
+        Task LogOut();
+        Task ReadAllContext();
+        Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
+        Task SaveAllContextAsync(IContextProvider? cp);
+        Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, string? token, string? estado);
+        void SetClaveValor(ClavesEstado clave, string valor);
+        Task UpdateEstadoContext();
+        Task UpdateTokenContext(string token);
     }
-    public class ContextProvider : AuthenticationStateProvider, IContextProvider
+
+    public class ContextProvider : IContextProvider
     {
         public AppState _AppState { get; set; } = new AppState();
+
         private readonly ILocalStorageService _localStorage;
-        private readonly ITokenService _tokenService;
 
         public event Action? OnContextChanged;
 
         private bool _initialized;
+
+        // Siempre inicializado
+        public Dictionary<ClavesEstado, string> dict { get; private set; } = new();
 
         public string[] GetContextKeyDbs() => new[] { "SqlServer", "SqLite", "InMemory" };
         public string[] GetApiNames() => new[] { "ApiRest", "" };
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
 
-        public ContextProvider(ILocalStorageService localStorage, ITokenService tokenService)
+        public ContextProvider(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;
-            _tokenService = tokenService;
         }
 
-        public async Task ReadContext()
+        /// <summary>
+        /// Lee todo el contexto desde localStorage, incluida la cadena Estado y la reconstrucción del diccionario.
+        /// Se ejecuta solo una vez.
+        /// </summary>
+        public async Task ReadAllContext()
         {
-            
-            if (_initialized) return;
+            if (_initialized)
+                return;
 
             var appState = await _localStorage.GetItemAsync<AppState>("appstate");
+
+            // Siempre tener dict inicializado
+            dict ??= new Dictionary<ClavesEstado, string>();
 
             if (appState is not null)
             {
@@ -69,6 +84,27 @@ namespace DataBase.Genericos
                 _AppState.ApiName = appState.ApiName;
                 _AppState.DirBase = appState.DirBase;
                 _AppState.Token = appState.Token;
+                _AppState.Estado = appState.Estado ?? string.Empty;
+
+                // Reconstruir dict desde Estado
+                dict.Clear();
+
+                var parejas = _AppState.Estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var se in parejas)
+                {
+                    var kv = se.Split('=', 2);
+                    if (kv.Length == 2 &&
+                        Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
+                    {
+                        dict[clave] = kv[1];
+                    }
+                }
+            }
+            else
+            {
+                // No había estado previo: asegurar valores iniciales coherentes
+                _AppState.Estado = string.Empty;
+                dict.Clear();
             }
 
             _initialized = true;
@@ -92,7 +128,7 @@ namespace DataBase.Genericos
 
         public ContextProvider Copia()
         {
-            var cp = new ContextProvider(_localStorage, _tokenService)
+            var cp = new ContextProvider(_localStorage)
             {
                 _AppState = new AppState
                 {
@@ -101,21 +137,28 @@ namespace DataBase.Genericos
                     ConnectionMode = _AppState.ConnectionMode,
                     ApiName = _AppState.ApiName,
                     DirBase = _AppState.DirBase,
-                    Token = _AppState.Token
+                    Token = _AppState.Token,
+                    Estado = _AppState.Estado
                 }
             };
+
+            // Copia profunda del diccionario
+            cp.dict = new Dictionary<ClavesEstado, string>(dict);
 
             return cp;
         }
 
-        // Login / cambio de contexto principal
-        public async Task SetContext(
+        /// <summary>
+        /// Login / cambio de contexto principal y persistencia completa.
+        /// </summary>
+        public async Task SetAllContext(
             int? tenantId,
             string? contextDbKey,
             string? apiName,
             Uri? dirBase,
             string? conectionMode,
-            string? token)
+            string? token,
+            string? estado)
         {
             _AppState.TenantId = tenantId;
             _AppState.DbKey = contextDbKey;
@@ -123,29 +166,92 @@ namespace DataBase.Genericos
             _AppState.ApiName = apiName;
             _AppState.DirBase = dirBase;
             _AppState.Token = token;
+            _AppState.Estado = estado ?? string.Empty;
+
+            // Reconstruir dict a partir del nuevo Estado
+            dict.Clear();
+            var parejas = _AppState.Estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var se in parejas)
+            {
+                var kv = se.Split('=', 2);
+                if (kv.Length == 2 &&
+                    Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
+                {
+                    dict[clave] = kv[1];
+                }
+            }
 
             await _localStorage.SetItemAsync("appstate", _AppState);
-
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
             OnContextChanged?.Invoke();
         }
 
-        // Guardar el estado actual (sin cambiar nada)
-        public async Task SaveContextAsync(IContextProvider? cp)
+        /// <summary>
+        /// Actualiza solo el token, manteniendo el resto del Estado/dict.
+        /// </summary>
+        public async Task UpdateTokenContext(string token)
+        {
+            _AppState.Token = token;
+
+            // Sin tocar Estado ni dict, se mantiene lo que hubiera
+            await _localStorage.SetItemAsync("appstate", _AppState);
+            OnContextChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Establece o actualiza una clave en el diccionario en memoria.
+        /// No persiste todavía: llama después a UpdateEstadoContext().
+        /// </summary>
+        public void SetClaveValor(ClavesEstado clave, string valor)
+        {
+            dict ??= new Dictionary<ClavesEstado, string>();
+
+            if (dict.ContainsKey(clave))
+                dict[clave] = valor;
+            else
+                dict.Add(clave, valor);
+        }
+
+        public string? GetValor(ClavesEstado clave)
+        {
+            dict ??= new Dictionary<ClavesEstado, string>();
+
+            return dict.TryGetValue(clave, out var valor) ? valor : null;
+        }
+
+        /// <summary>
+        /// Reconstruye Estado desde dict y persiste en localStorage.
+        /// </summary>
+        public async Task UpdateEstadoContext()
+        {
+            dict ??= new Dictionary<ClavesEstado, string>();
+
+            _AppState.Estado = string.Join(";", dict.Select(kv => $"{kv.Key}={kv.Value}"));
+
+            await _localStorage.SetItemAsync("appstate", _AppState);
+            OnContextChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Guardar el estado actual (sin cambiar nada), opcionalmente tomando otro IContextProvider.
+        /// </summary>
+        public async Task SaveAllContextAsync(IContextProvider? cp)
         {
             var state = cp?._AppState ?? _AppState;
             await _localStorage.SetItemAsync("appstate", state);
             OnContextChanged?.Invoke();
         }
 
-        // Otra forma de cambiar contexto
-        public async Task SaveContext(
+        /// <summary>
+        /// Otra forma de cambiar contexto y persistir.
+        /// </summary>
+        public async Task SaveAllContext(
             int? tenantId,
             string contextDbKey,
             string apiName,
             Uri dirBase,
             string conectionMode,
-            string? token = null)
+            string? token = null,
+            string? estado = null)
         {
             _AppState = new AppState
             {
@@ -154,65 +260,38 @@ namespace DataBase.Genericos
                 ConnectionMode = conectionMode,
                 ApiName = apiName,
                 DirBase = dirBase,
-                Token = token ?? string.Empty
+                Token = token ?? string.Empty,
+                Estado = estado ?? string.Empty
             };
+
+            // Reconstruir dict desde el nuevo Estado
+            dict.Clear();
+            var parejas = _AppState.Estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var se in parejas)
+            {
+                var kv = se.Split('=', 2);
+                if (kv.Length == 2 &&
+                    Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
+                {
+                    dict[clave] = kv[1];
+                }
+            }
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
         }
 
-        public async Task RefreshAuthenticationState()
+        public async Task LogOut()
         {
-            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
-        }
-
-        public async Task MarkUserAsLoggedOut()
-        {
-            await SetContext(
+            await SetAllContext(
                 _AppState.TenantId,
                 _AppState.DbKey,
                 _AppState.ApiName,
                 _AppState.DirBase,
                 _AppState.ConnectionMode,
+                null,
                 null);
-
-            var anonymous = new ClaimsPrincipal(new ClaimsIdentity());
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(anonymous)));
-        }
-
-        private IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var token = handler.ReadJwtToken(jwt);
-            return token.Claims;
-        }
-
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
-        {
-            var token = _AppState.Token;
-
-            if (string.IsNullOrWhiteSpace(token))
-                return Task.FromResult(
-                    new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
-
-            var principal = _tokenService.GetPrincipal(token)
-                            ?? new ClaimsPrincipal(new ClaimsIdentity());
-
-            return Task.FromResult(new AuthenticationState(principal));
-        }
-
-
-        private ClaimsPrincipal ValidateAndCreatePrincipal(string jwt)
-        {
-            try
-            {
-                var principal = _tokenService.GetPrincipal(jwt);
-                return principal ?? new ClaimsPrincipal(new ClaimsIdentity());
-            }
-            catch
-            {
-                return new ClaimsPrincipal(new ClaimsIdentity());
-            }
         }
     }
+
 }

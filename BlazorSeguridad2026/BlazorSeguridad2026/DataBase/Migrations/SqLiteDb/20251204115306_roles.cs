@@ -4,7 +4,7 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace DataBase.Migrations.SqLiteDb
+namespace Shares.Migrations.SqLiteDb
 {
     /// <inheritdoc />
     public partial class roles : Migration

@@ -1,6 +1,6 @@
 ﻿//#define UPDATE_DATABASE
-using DataBase.Genericos;
-using DataBase.Modelo;
+using Shares.Genericos;
+using Shares.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Identity.Client;
@@ -11,7 +11,8 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Contextos
+
+namespace Shares.Contextos
 {
     //PM> dotnet ef  migrations add --context SqlServerDbContext roles  --project DataBase
     //PM> dotnet ef database update --context SqlServerDbContext --project Database

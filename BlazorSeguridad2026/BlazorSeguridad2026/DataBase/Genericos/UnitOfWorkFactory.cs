@@ -1,4 +1,4 @@
-﻿using DataBase.Contextos;
+﻿using Shares.Contextos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
     public class UnitOfWorkFactory : IUnitOfWorkFactory
     {

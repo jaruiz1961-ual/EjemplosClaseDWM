@@ -1,4 +1,4 @@
-﻿using DataBase.Modelo;
+﻿using Shares.Modelo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
     public interface IGenericDataService<T> where T : class, ITenantEntity, IEntity
     {

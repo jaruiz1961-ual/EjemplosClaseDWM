@@ -1,4 +1,4 @@
-﻿using DataBase.Genericos;
+﻿using Shares.Genericos;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Modelo
+namespace Shares.Modelo
 {
     public class Seguridad: Entidad, IUpdatableFrom<Seguridad>
     {

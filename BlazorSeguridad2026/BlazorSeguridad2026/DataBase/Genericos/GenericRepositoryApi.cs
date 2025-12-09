@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static System.Net.WebRequestMethods;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
     public class GenericRepositoryApi<TEntity> : IGenericRepository<TEntity>
      where TEntity : class

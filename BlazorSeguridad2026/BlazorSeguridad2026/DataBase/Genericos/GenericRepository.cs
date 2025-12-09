@@ -7,7 +7,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
     public class GenericRepositoryEF<TEntity, TContext> : IGenericRepositoryEF<TEntity, TContext>, IGenericRepository<TEntity>
     where TEntity : class

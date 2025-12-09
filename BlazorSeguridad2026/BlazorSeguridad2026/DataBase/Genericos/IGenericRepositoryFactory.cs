@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
     public interface IGenericRepositoryFactory<TEntity> where TEntity : class,IEntity
     {

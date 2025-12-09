@@ -1,9 +1,9 @@
-﻿using DataBase.Contextos;
+﻿using Shares.Contextos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
 
     public class GenericRepositoryFactory<TEntity> : IGenericRepositoryFactory<TEntity>

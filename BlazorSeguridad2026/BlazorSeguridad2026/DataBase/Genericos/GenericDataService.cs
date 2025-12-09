@@ -1,5 +1,5 @@
-﻿using DataBase.Genericos;
-using DataBase.Modelo;
+﻿using Shares.Genericos;
+using Shares.Modelo;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DataBase.Servicios
+namespace Shares.Servicios
 {
     public class GenericDataService<T> : IGenericDataService<T> where T : class, ITenantEntity, IEntity
     {

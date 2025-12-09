@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
     public class UnitOfWorkEf<TContext> : IUnitOfWork
     where TContext : DbContext

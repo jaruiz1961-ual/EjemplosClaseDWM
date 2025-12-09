@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Text;
 
 
-namespace DataBase
+namespace Shares.SeguridadToken
 {
 
 

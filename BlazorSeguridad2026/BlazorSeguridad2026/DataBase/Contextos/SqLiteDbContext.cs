@@ -1,5 +1,5 @@
 ﻿//#define UPDATE_DATABASE 
-using DataBase.Modelo;
+using Shares.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace DataBase.Genericos
+namespace Shares.Genericos
 {
 
     //PM> dotnet ef  migrations add --context SqLiteDbContext roles  --project DataBase

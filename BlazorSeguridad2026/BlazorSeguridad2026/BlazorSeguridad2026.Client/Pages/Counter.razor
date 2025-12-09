@@ -1,12 +1,12 @@
 ﻿@page "/counter"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
-@using Cliente
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @inject AuthenticationStateProvider AuthStateProvider
-@inject Cliente.IContextProvider ContextProvider
+@inject IContextProvider ContextProvider
 @using Microsoft.AspNetCore.Components
+@using Shares.Genericos
 
 
 <PageTitle>Counter</PageTitle>

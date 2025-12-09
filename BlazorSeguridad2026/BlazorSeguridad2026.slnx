@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="BlazorSeguridad2026/BlazorSeguridad2026.Client/BlazorSeguridad2026.Client.csproj" />
   <Project Path="BlazorSeguridad2026/BlazorSeguridad2026/BlazorSeguridad2026.csproj" />
-  <Project Path="BlazorSeguridad2026/DataBase/DataBase.csproj" />
+  <Project Path="BlazorSeguridad2026/DataBase/Shares.csproj" />
 </Solution>
