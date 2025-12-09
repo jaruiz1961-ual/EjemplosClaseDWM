@@ -12,11 +12,12 @@ namespace Cliente
         public AppState _AppState { get; set; }
 
         public Task UpdateTokenContext(string token);
+        public Task UpdateEstadoContext(string token);
         public Task ReadContext();
         public Task SaveContextAsync(IContextProvider cp);
-        public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
+        public Task SaveContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token, string estado);
 
-
+        public Task LogOut();
 
         public event Action? OnContextChanged;
 
@@ -27,9 +28,11 @@ namespace Cliente
         public int[] GetTenantIds();
         public string[] GetConnectionModes();
 
-        Task SetContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token);
+        Task SetContext(int? tenantId, string dbKey, string apiName, Uri dirBase, string connectionMode, string token, string estado);
         public ContextProvider Copia();
         public bool IsValid();
+
+        
 
     }
     public class ContextProvider : IContextProvider
@@ -68,6 +71,7 @@ namespace Cliente
                 _AppState.ApiName = appState.ApiName;
                 _AppState.DirBase = appState.DirBase;
                 _AppState.Token = appState.Token;
+                _AppState.Estado = appState.Estado;
             }
 
             _initialized = true;
@@ -100,7 +104,8 @@ namespace Cliente
                     ConnectionMode = _AppState.ConnectionMode,
                     ApiName = _AppState.ApiName,
                     DirBase = _AppState.DirBase,
-                    Token = _AppState.Token
+                    Token = _AppState.Token,
+                    Estado = _AppState.Estado
                 }
             };
 
@@ -114,7 +119,7 @@ namespace Cliente
             string? apiName,
             Uri? dirBase,
             string? conectionMode,
-            string? token)
+            string? token, string? estado)
         {
             _AppState.TenantId = tenantId;
             _AppState.DbKey = contextDbKey;
@@ -122,6 +127,7 @@ namespace Cliente
             _AppState.ApiName = apiName;
             _AppState.DirBase = dirBase;
             _AppState.Token = token;
+            _AppState.Estado = estado;
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
@@ -130,6 +136,14 @@ namespace Cliente
         public async Task UpdateTokenContext(string token)    
         {
             _AppState.Token = token;
+            _AppState.Estado = "";
+            await _localStorage.SetItemAsync("appstate", _AppState);
+            OnContextChanged?.Invoke();
+        }
+
+        public async Task UpdateEstadoContext(string estado)
+        {
+            _AppState.Estado = estado;
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
         }
@@ -149,7 +163,8 @@ namespace Cliente
             string apiName,
             Uri dirBase,
             string conectionMode,
-            string? token = null)
+            string? token = null,
+            string? estado = null)
         {
             _AppState = new AppState
             {
@@ -158,15 +173,15 @@ namespace Cliente
                 ConnectionMode = conectionMode,
                 ApiName = apiName,
                 DirBase = dirBase,
-                Token = token ?? string.Empty
+                Token = token ?? string.Empty,
+                Estado = estado ?? string.Empty
             };
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
         }
 
-
-        public async Task MarkUserAsLoggedOut()
+            public async Task LogOut()
         {
             await SetContext(
                 _AppState.TenantId,
@@ -174,7 +189,7 @@ namespace Cliente
                 _AppState.ApiName,
                 _AppState.DirBase,
                 _AppState.ConnectionMode,
-                null);
+                null,null);
         }
 
 

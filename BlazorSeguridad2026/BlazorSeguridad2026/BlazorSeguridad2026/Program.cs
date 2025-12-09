@@ -3,8 +3,9 @@ using BlazorSeguridad2026.Client.Pages;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
 using BlazorSeguridad2026.Data;
+using Cliente;
 using DataBase;
-
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -12,7 +13,6 @@ using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Configuration;
 using System.Security.Claims;
-using Cliente;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -106,6 +106,13 @@ var app = builder.Build();
 
 
 // Minimal API para autenticación en APIs y generación de token JWT
+
+app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
+{
+    ContextProvider.LogOut();
+    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+    context.Response.Redirect(returnUrl ?? "/");
+}).RequireAuthorization();
 
 app.MapPost("/api/auth/token", async (
  LoginData request,

@@ -16,7 +16,8 @@ namespace Cliente
         int? TenantId { get; set; }
         string Token { get; set; }
         bool isValid { get; }
-        bool IsAutenticated { get; set; }
+        bool IsAutenticated { get; }
+        string Estado { get; set; }
     }
     [TypeConverter(typeof(AppState))]
     public class AppState : IAppState
@@ -29,17 +30,17 @@ namespace Cliente
         public Uri DirBase { get; set; }
 
         public string Token { get; set; }
+        public string Estado { get; set; }
         public bool isValid { get
             {
                 if (string.IsNullOrEmpty(TenantId.ToString())) return false;
                 if (string.IsNullOrEmpty(DbKey)) return false;
-                if (string.IsNullOrEmpty(ConnectionMode)) return false;
-                if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(Token)) return false;
+                if (string.IsNullOrEmpty(ConnectionMode)) return true;
                 if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(ApiName)) return false;
                 if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(DirBase.ToString())) return false;
                 return true;
             } }
-        public bool IsAutenticated {get; set;}
+        public bool IsAutenticated {get { return !string.IsNullOrEmpty(Token); } }
 
     }
 

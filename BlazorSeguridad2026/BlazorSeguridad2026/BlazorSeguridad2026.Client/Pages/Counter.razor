@@ -1,5 +1,5 @@
 ﻿@page "/counter"
-@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: true))
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
 @using Cliente
 @using Microsoft.AspNetCore.Components.Authorization
@@ -14,11 +14,13 @@
 <h1>Counter</h1>
 
 <p role="status">Current count: @currentCount</p>
+@estado
 
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
     private int currentCount = 0;
+
 
     private void IncrementCount()
     {
@@ -29,10 +31,11 @@
     private string? AppState;
     private string? TenantId;
     private string? DbKey;
+
+
     protected override async Task OnInitializedAsync()
     {
-        if (!OperatingSystem.IsBrowser()) return;
-        await ContextProvider.ReadContext();
+
         var state = await AuthStateProvider.GetAuthenticationStateAsync();
         user = state.User;
 
@@ -41,14 +44,33 @@
         DbKey = user.FindFirst("DbKey")?.Value;
     }
 
+    private bool _initialized;
+    private bool _isInitializing;
+    private string estado = "";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-    
-        if (firstRender)
-        {
-            // For demonstration purposes, re-read the context after first render
-            await ContextProvider.ReadContext();
-            StateHasChanged();
-        }
+        // Solo queremos ejecutar la inicialización una vez y evitar reentradas
+        if (!firstRender || _isInitializing || _initialized)
+            return;
+
+        _isInitializing = true;
+
+        // 1. Leer el contexto (localStorage dentro de ContextProvider)
+        await ContextProvider.ReadContext();
+
+        // 2. Actualizar el estado local
+        estado = ContextProvider._AppState.Estado;
+        estado += " - count";
+
+        // 3. Persistir el nuevo estado en el contexto
+        await ContextProvider.UpdateEstadoContext(estado);
+
+        _initialized = true;
+        _isInitializing = false;
+
+        // 4. Renderizar de nuevo con el estado definitivo
+        StateHasChanged();
     }
+
 }

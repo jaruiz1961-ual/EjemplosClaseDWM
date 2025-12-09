@@ -188,8 +188,9 @@
         // generar JWT
         var token = TokenService.GenerateToken(userClaims);
 
-        // guardar token en tu ContextProvider para toda la app
+        // guardar token y limpiar estado en tu ContextProvider para toda la app
         await ContextProvider.UpdateTokenContext(token);
+        
 
         Logger.LogInformation("User logged in.");
         RedirectManager.RedirectTo(ReturnUrl);

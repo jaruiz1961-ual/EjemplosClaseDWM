@@ -1,13 +1,15 @@
 ﻿@page "/weather"
 @using DataBase
 @using Cliente
-@attribute [StreamRendering]
-@rendermode InteractiveServer
+@* @attribute [StreamRendering] *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IContextProvider ContextProvider
 
 <PageTitle>Weather</PageTitle>
 
 <h1>Weather</h1>
+
+@estado
 
 <p>This component demonstrates showing data.</p>
 
@@ -43,10 +45,16 @@ else
 @code {
     private WeatherForecast[]? forecasts;
     //Seguridad seguridad = null;
-    bool _initialized = false;
+
+
 
     protected override async Task OnInitializedAsync()
     {
+        // if (OperatingSystem.IsBrowser())
+        // {
+        //     _initialized = true;
+        //     await ContextProvider.ReadContext();
+        // }
         // Simulate asynchronous loading to demonstrate streaming rendering
         await Task.Delay(500);
 
@@ -60,17 +68,40 @@ else
         }).ToArray();
     }
 
+    private bool _initialized;
+    private bool _isInitializing;
+    private string estado = "";
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && !_initialized)
-        {
-            await ContextProvider.ReadContext();
+        // Evita reentradas si ReadContext/UpdateEstadoContext disparan renders internos
+        if (_isInitializing || _initialized)
+            return;
 
-          //  seguridad = ServicioSeguridad.GetDataFromToken(ContextProvider._AppState.Token);
-            _initialized = true;
-            StateHasChanged();
-        }
+        _isInitializing = true;
+
+        // 1. Leer del contexto (localStorage dentro de ContextProvider)
+        await ContextProvider.ReadContext();
+
+        // 2. Actualizar estado en memoria
+        estado = ContextProvider._AppState.Estado;
+        estado += " - weather";
+
+        // 3. Persistir de nuevo en el contexto
+        await ContextProvider.UpdateEstadoContext(estado);
+
+        _initialized = true;
+        _isInitializing = false;
+
+        // 4. Forzar un render final con el estado ya consistente
+        StateHasChanged();
     }
+
+
+
+
+       
+    
     private class WeatherForecast
     {
         public DateOnly Date { get; set; }
