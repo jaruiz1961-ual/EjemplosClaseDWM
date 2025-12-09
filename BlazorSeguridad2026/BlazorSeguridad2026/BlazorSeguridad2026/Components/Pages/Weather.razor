@@ -74,27 +74,44 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Evita reentradas si ReadContext/UpdateEstadoContext disparan renders internos
-        if (_isInitializing || _initialized)
+        // Solo queremos ejecutar la inicialización una vez y evitar reentradas
+        if (!firstRender || _isInitializing || _initialized)
             return;
 
         _isInitializing = true;
 
-        // 1. Leer del contexto (localStorage dentro de ContextProvider)
-        await ContextProvider.ReadContext();
+        // 1. Suscribirse a eventos del contexto
+        ContextProvider.OnContextChanged += HandleContextChanged;
 
-        // 2. Actualizar estado en memoria
-        estado = ContextProvider._AppState.Estado;
-        estado += " - weather";
+        // 2. Inicializar desde localStorage (JS interop seguro aquí)
+        await ContextProvider.ReadAllContext();
 
-        // 3. Persistir de nuevo en el contexto
-        await ContextProvider.UpdateEstadoContext(estado);
+        // 3. Leer estado actual
+        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina) ?? "Ninguno";
+
+
+        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.UltimaPagina, "WEATHER");
+        await ContextProvider.UpdateEstadoContext();
 
         _initialized = true;
         _isInitializing = false;
 
-        // 4. Forzar un render final con el estado ya consistente
+        // 5. Renderizar de nuevo con el estado definitivo
         StateHasChanged();
+    }
+
+    private void HandleContextChanged()
+    {
+        // 6. Reaccionar a cambios posteriores de contexto
+        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // 7. Desuscribirse para evitar fugas de memoria
+        ContextProvider.OnContextChanged -= HandleContextChanged;
     }
 
 

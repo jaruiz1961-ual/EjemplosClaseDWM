@@ -55,22 +55,39 @@
             return;
 
         _isInitializing = true;
+        
+        // 1. Suscribirse a eventos del contexto
+        ContextProvider.OnContextChanged += HandleContextChanged;
 
-        // 1. Leer el contexto (localStorage dentro de ContextProvider)
-        await ContextProvider.ReadContext();
+        // 2. Inicializar desde localStorage (JS interop seguro aquí)
+        await ContextProvider.ReadAllContext();
 
-        // 2. Actualizar el estado local
-        estado = ContextProvider._AppState.Estado;
-        estado += " - count";
+        // 3. Leer estado actual
+        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina) ?? "Ninguno";
 
-        // 3. Persistir el nuevo estado en el contexto
-        await ContextProvider.UpdateEstadoContext(estado);
+
+        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.UltimaPagina, "COUNTER");
+        await ContextProvider.UpdateEstadoContext();
 
         _initialized = true;
         _isInitializing = false;
 
-        // 4. Renderizar de nuevo con el estado definitivo
+        // 5. Renderizar de nuevo con el estado definitivo
         StateHasChanged();
+    }
+
+    private void HandleContextChanged()
+    {
+        // 6. Reaccionar a cambios posteriores de contexto
+        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina);
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // 7. Desuscribirse para evitar fugas de memoria
+        ContextProvider.OnContextChanged -= HandleContextChanged;
     }
 
 }
