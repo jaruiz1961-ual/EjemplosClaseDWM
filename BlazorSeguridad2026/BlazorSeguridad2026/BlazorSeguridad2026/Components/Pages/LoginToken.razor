@@ -6,14 +6,27 @@
 @inject IHttpClientFactory HttpFactory
 @inject IContextProvider ContextProvider
 @inject NavigationManager Nav
+@inject IConfiguration Configuration
 
-<h3>Cargando sesión...</h3>
+@if (isLoading)
+{
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <p>Cargando sesión...</p>
+    </div>
+}
+else
+{
+    <h3>Cargando sesión...</h3>
+}
 
 @code {
     private bool _initialized;
-    private HttpClient Http => HttpFactory.CreateClient("UrlApi");
+    private HttpClient Http = default!;
     string email = string.Empty;
     string password = string.Empty;
+    string UrlApi = string.Empty;
+    bool isLoading = true;
 
     protected override void OnInitialized()
     {
@@ -22,33 +35,49 @@
 
         email = query["email"] ?? string.Empty;
         password = query["password"] ?? string.Empty;
+        UrlApi = Configuration["ConnectionStrings:UrlApi"] ?? string.Empty;
+
+        Http = HttpFactory.CreateClient();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!_initialized)
+        if (!firstRender || _initialized)
+            return;
+
+        // Si faltan datos, redirige directamente
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(UrlApi))
         {
-            // Usa la cookie de Identity para pedir el JWT
-            var loginData = new LoginData ( email, password);
+            isLoading = false;
+            Nav.NavigateTo("/Account/Login?error=missing_credentials", forceLoad: true);
+            return;
+        }
 
+        var loginData = new LoginData(email, password);
 
-                // Usa PostAsJsonAsync, no GetStringAsync
-                var response = await Http.PostAsJsonAsync("https://localhost:7013/api/auth/token", loginData);
+        try
+        {
+            var response = await Http.PostAsJsonAsync($"{UrlApi}api/auth/token", loginData);
 
-            // Aquí ya estás en cliente, puedes usar SetContext (LocalStorage, etc.)
-            await ContextProvider.SetContext(
-                tenantId: null,
-                dbKey: "SqlServer",
-                apiName: "ApiRest",
-                dirBase: new Uri("https://localhost:7013/"),
-                connectionMode: "Api",
-                token: response.Content.ReadAsStringAsync().Result
-            );
+            if (response.IsSuccessStatusCode)
+            {
+                var token = await response.Content.ReadAsStringAsync();
+                await ContextProvider.UpdateTokenContext(token);
 
-            _initialized = true;
-
-            // Redirige a donde quieras (home, lista, etc.)
-            Nav.NavigateTo("/");
+                _initialized = true;
+                isLoading = false;
+                Nav.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                isLoading = false;
+                Nav.NavigateTo("/Account/Login?error=invalid_credentials", forceLoad: true);
+            }
+        }
+        catch (Exception ex)
+        {
+            isLoading = false;
+            Nav.NavigateTo($"/Error?error={Uri.EscapeDataString(ex.Message)}", forceLoad: true);
         }
     }
 }

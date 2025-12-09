@@ -15,7 +15,18 @@ using System.Security.Claims;
 using Cliente;
 
 var builder = WebApplication.CreateBuilder(args);
+
+//Acceso al archivo de configuracion appsetings.json
 IConfiguration configuration = builder.Configuration;
+var UrlApi = builder.Configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
+var ApiName = builder.Configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
+var ConnectionMode = builder.Configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
+var DataProvider = builder.Configuration["DataProvider"] ?? "SqlServer";
+var TenantId = builder.Configuration["TenantId"] ?? "0";
+
+//configuracion de la seguridad de Identidad de ASP.NET Core
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 
 
 
@@ -24,6 +35,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
+
+// Configuración de la autenticación y autorización (con roles)
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
@@ -36,7 +49,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddIdentityCookies();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -46,30 +59,32 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
     options.SignIn.RequireConfirmedAccount = true;
     options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
 })
-.AddRoles<IdentityRole>() // ← Añade esta línea
+.AddRoles<IdentityRole>() // si se quiere roles
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddSignInManager()
 .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
+// Generar toquen para acceso a las MInimal APIS del servidor desde el cliente Blazor
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
+// Configuración del Local Storage
 builder.Services.AddBlazoredLocalStorage();
 
+// Configuración del ContextProvider de la aplicación
 builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
-
-
     var cp = new ContextProvider(localStorage)
     {
         _AppState = new AppState
         {
-            TenantId = 0,
-            DbKey = "SqlServer",
-            ConnectionMode = "Ef",
-            ApiName = "ApiRest",
-            DirBase = new Uri("https://localhost:7013/"),
+            TenantId = int.Parse(TenantId),
+            DbKey = DataProvider,
+            ConnectionMode = ConnectionMode,
+            ApiName = ApiName,
+            DirBase = new Uri(UrlApi),
             Token = null
         }
     };
@@ -78,16 +93,19 @@ builder.Services.AddScoped<ContextProvider>(sp =>
 });
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 
-Uri DirBase = new Uri(configuration.GetConnectionString("UrlApi") ?? "https://localhost:7013/");
-builder.Services.AddHttpClient("ApiRest", (sp, client) =>
+// Configuración del HttpClient para llamadas a la API
+builder.Services.AddHttpClient(ApiName, (sp, client) =>
 {
-    client.BaseAddress = DirBase;
+    client.BaseAddress = new Uri(UrlApi);
 });
+
+
 
 
 var app = builder.Build();
 
 
+// Minimal API para autenticación en APIs y generación de token JWT
 
 app.MapPost("/api/auth/token", async (
  LoginData request,
