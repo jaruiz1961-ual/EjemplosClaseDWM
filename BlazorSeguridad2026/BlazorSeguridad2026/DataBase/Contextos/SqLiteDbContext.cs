@@ -1,33 +1,66 @@
 ﻿//#define UPDATE_DATABASE 
-using Shares.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
+using Shares.Genericos;
+using Shares.Modelo;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 
+
+
 namespace Shares.Genericos
 {
 
-    //PM> dotnet ef  migrations add --context SqLiteDbContext roles  --project DataBase
-    //PM> dotnet ef database update --context SqLiteDbContext --project Database
+    //PM> dotnet ef  migrations add --context SqLiteDbContext roles  --project Shares
+    //PM> dotnet ef database update --context SqLiteDbContext --project Shares
+
+
+    public class SqlLiteContextFactory
+        : IDesignTimeDbContextFactory<SqLiteDbContext>
+    {
+        private readonly TenantSaveChangesInterceptor _tenantInterceptor;
+        public SqLiteDbContext CreateDbContext(string[] args)
+        {
+                
+        // ruta al appsettings del proyecto host (ajusta según tu solución)
+        var config = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: false)
+                .Build();
+
+            var connectionString = config.GetConnectionString("DefaultConnection");
+
+            var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
+            optionsBuilder.UseSqlite(connectionString);
+
+            return new SqLiteDbContext(optionsBuilder.Options,_tenantInterceptor);
+        }
+    }
+
+
+
 
 #if (UPDATE_DATABASE)
     public class SqlLiteContextFactory : IDesignTimeDbContextFactory<SqLiteDbContext>
     {
-        public SqLiteDbContext CreateDbContext(string[] args)
+    private readonly TenantSaveChangesInterceptor _tenantInterceptor;
+    public int? TenantId { get; set; }
+    public SqLiteDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
             optionsBuilder.UseSqlite(@"data source = c:\\temp\\NuevaSqlite3.db");
-            return new SqLiteDbContext(optionsBuilder.Options);
+            return new SqLiteDbContext(optionsBuilder.Options, _tenantInterceptor);
         }
     }
 #endif
-    public class SqLiteDbContext : DbContext
+public class SqLiteDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }

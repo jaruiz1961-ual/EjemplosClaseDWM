@@ -1,0 +1,129 @@
+﻿@page "/ListaUsuarios"
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@using Shares.Genericos
+@using Shares.Modelo
+@using Shares.Servicios
+@inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject IContextProvider ContextProvider 
+
+@inject NavigationManager nav
+@implements IDisposable
+
+
+
+<h3>Listado de usuarios  (Genérico)</h3>
+
+
+
+@if (_isValidContext == false)
+{
+    <p><em>Debe seleccionar un conrtexto de ejecución para ver los usuarios...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No hay usuarios registrados .....</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>UserName</th>
+                <th>Codigo</th>
+                <th>Nivel</th>
+                <th>Password</th>
+                <th>Email</th>
+                <th>Tenant</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in usuarios)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Codigo</td>
+                    <td>@user.Contexto</td>
+                    <td>@user.Password</td>
+                    <td>@user.email</td>
+                    <td>@user.TenantId</td>
+                    <td><a href="DetalleUsuario/@user.Id"><i>Edit</i></a></td>
+                    <td><a href="DeteteUsuario/@user.Id"><i>Del</i></a></td>
+                </tr>
+            }
+        </tbody>
+    </table>    
+}
+
+
+@code {
+    [CascadingParameter]
+    public IAppState AppState { get; set; } = default!;
+
+    public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
+    int TenantId;
+    string ContextoKey ="";
+    Seguridad seguridad = new Seguridad();
+    bool _isValidContext;
+
+    private Action? _onContextChangedHandler;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _onContextChangedHandler += async () =>
+        {
+            await CargarAsync();
+
+        };
+
+
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await CargarAsync();
+
+    }
+
+    private async Task CargarAsync()
+    {
+        try
+        {
+            if (ContextProvider.IsValid())
+            {  
+
+                var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                var list = await user.GetAllAsync();
+                usuarios = list.ToList();
+                _isValidContext = true;                
+            }
+            else _isValidContext = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
+    }
+
+    void IDisposable.Dispose()
+    {
+        Dispose();
+    }
+
+    private void Dispose()
+    {
+  
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
+
+    }
+}
+

@@ -1,12 +1,11 @@
 ﻿@page "/counter"
+@using Shares.Genericos
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
-@inject AuthenticationStateProvider AuthStateProvider
+
+
 @inject IContextProvider ContextProvider
-@using Microsoft.AspNetCore.Components
-@using Shares.Genericos
+
 
 
 <PageTitle>Counter</PageTitle>
@@ -27,22 +26,11 @@
         currentCount++;
     }
 
-    private ClaimsPrincipal? user;
+
     private string? AppState;
     private string? TenantId;
     private string? DbKey;
 
-
-    protected override async Task OnInitializedAsync()
-    {
-
-        var state = await AuthStateProvider.GetAuthenticationStateAsync();
-        user = state.User;
-
-        AppState = user.FindFirst("AppState")?.Value;
-        TenantId = user.FindFirst("TenantId")?.Value;
-        DbKey = user.FindFirst("DbKey")?.Value;
-    }
 
     private bool _initialized;
     private bool _isInitializing;

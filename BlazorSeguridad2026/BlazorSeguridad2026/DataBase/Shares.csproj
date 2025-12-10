@@ -27,12 +27,10 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="10.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>

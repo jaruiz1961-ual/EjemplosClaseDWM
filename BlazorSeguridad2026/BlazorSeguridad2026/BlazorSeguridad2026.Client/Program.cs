@@ -6,13 +6,14 @@ using Shares.Genericos;
 using System.Net.NetworkInformation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
+var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
 
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();
 
-var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
+
 
 
 builder.Services.AddScoped(sp => new HttpClient
@@ -30,4 +31,10 @@ builder.Services.AddHttpClient("ApiRest", client =>
 builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IContextProvider, ContextProvider>();
+
+builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRepositoryFactory<>));
+
+// Factoría de UoW
+builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+
 await builder.Build().RunAsync();

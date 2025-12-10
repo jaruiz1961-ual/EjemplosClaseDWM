@@ -1,0 +1,158 @@
+﻿@page "/ListaUsuariosCliente"
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@using Shares.Genericos
+@using Shares.Modelo
+@using Shares.Servicios
+
+@inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject IContextProvider ContextProvider
+@inject NavigationManager nav
+@implements IDisposable
+
+<h3>Listado de usuarios CLIENTE</h3>
+
+@if (ContextProvider._AppState.TenantId == null)
+{
+    <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
+}
+else
+{
+    <p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
+    <p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
+    <p>Mode <strong>@ContextProvider._AppState.ConnectionMode</strong>:</p>
+    <p>Token <strong>@ContextProvider._AppState.Token</strong>:</p>
+    @if (ContextProvider._AppState.ConnectionMode != "Ef")
+    {
+        <p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+    }
+}
+
+@if (usuarios is null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!usuarios.Any())
+{
+    <p>No hay usuarios registrados .....</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>UserName</th>
+                <th>Codigo</th>
+                <th>Nivel</th>
+                <th>Password</th>
+                <th>Email</th>
+                <th>Tenant</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in usuarios)
+            {
+                <tr>
+                    <td>@user.Id</td>
+                    <td>@user.UserName</td>
+                    <td>@user.Codigo</td>
+                    <td>@user.Contexto</td>
+                    <td>@user.Password</td>
+                    <td>@user.email</td>
+                    <td>@user.TenantId</td>
+                    <td><a href="DetalleUsuarioCliente/@user.Id"><i>Edit</i></a></td>
+                    <td><a href="DeteteUsuarioCliente/@user.Id"><i>Del</i></a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+
+    private bool _initialized;
+    private bool _isInitializing;
+    private string estado = "";
+
+    public List<Usuario>? usuarios { get; set; } = new();
+    private ServicioUsuariosCliente? scUsuario;
+
+    // proxy síncrono para el evento
+    private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _isInitializing || _initialized)
+            return;
+
+        _isInitializing = true;
+
+        // 1. Suscribirse a eventos del contexto
+        ContextProvider.OnContextChanged += OnContextChangedProxy;
+
+        // 2. Inicializar desde localStorage (JS interop seguro aquí)
+        await ContextProvider.ReadAllContext();
+
+        // 3. Leer estado actual
+        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina) ?? "Ninguno";
+
+
+        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.UltimaPagina, "COUNTER");
+        await ContextProvider.UpdateEstadoContext();
+
+        _initialized = true;
+        _isInitializing = false;
+
+        await CargarAsync();
+    }
+
+
+    private async Task HandleContextChangedAsync()
+    {
+        // 6. Reaccionar a cambios posteriores de contexto
+        await CargarAsync();
+        InvokeAsync(StateHasChanged);
+    }
+
+
+    private async Task CargarAsync()
+    {
+        try
+        {
+            if (ContextProvider._AppState.ConnectionMode == null)
+            {
+                usuarios = null;
+                await InvokeAsync(StateHasChanged);
+                return;
+            }
+
+            scUsuario ??= new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+
+            var list = await scUsuario.GetAllAsync();
+            usuarios = list.ToList();
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
+    }
+
+  
+
+    public void Dispose()
+    {
+        // 7. Desuscribirse para evitar fugas de memoria
+        ContextProvider.OnContextChanged -= OnContextChangedProxy;
+    }
+}

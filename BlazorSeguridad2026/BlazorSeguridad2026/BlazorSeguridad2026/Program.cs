@@ -1,23 +1,60 @@
 ﻿using Blazored.LocalStorage;
-using BlazorSeguridad2026.Client.Pages;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
 using BlazorSeguridad2026.Data;
-
-
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using Shares.Contextos;
 using Shares.Genericos;
 using Shares.SeguridadToken;
-using System.Configuration;
-using System.Security.Claims;
+
 
 var builder = WebApplication.CreateBuilder(args);
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DefaultCorsPolicy", policy =>
+    {
+        policy
+            .AllowAnyOrigin()      // o .WithOrigins("https://tudominio.com")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "Ingresa el token JWT de la forma: Bearer {token}",
+        Name = "Authorization",
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id   = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
+
+builder.Services.AddScoped<IAppState, AppState>();
 //Acceso al archivo de configuracion appsetings.json
 IConfiguration configuration = builder.Configuration;
 var UrlApi = builder.Configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
@@ -102,6 +139,59 @@ builder.Services.AddHttpClient(ApiName, (sp, client) =>
 });
 
 
+// Interceptor para multitenant (opcional)
+builder.Services.AddTransient<TenantSaveChangesInterceptor>();
+
+// Factorías de DbContexts para todos los backends locales:
+builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var conn = config.GetConnectionString("SqlServerDbContext");
+    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+    options.UseSqlServer(conn);
+    options.AddInterceptors(interceptor);
+}, ServiceLifetime.Transient);
+builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var conn = config.GetConnectionString("SqLiteDbContext");
+    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+    options.UseSqlite(conn);
+    options.AddInterceptors(interceptor);
+}, ServiceLifetime.Transient);
+builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var conn = config.GetConnectionString("InMemoryDbContext");
+    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+    options.UseInMemoryDatabase(conn);
+    options.AddInterceptors(interceptor);
+}, ServiceLifetime.Transient);
+
+// Factoría genérica por entidad
+builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRepositoryFactory<>));
+
+// Factoría de UoW
+builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+
+using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+{
+    void InitDb<TDb>(string factoryTypeKey, Action<TDb> migrator)
+        where TDb : DbContext
+    {
+        var factory = scope.ServiceProvider.GetService<IDbContextFactory<TDb>>();
+        var db = factory?.CreateDbContext();
+        migrator(db);
+    }
+
+    InitDb<SqlServerDbContext>("SqlServer", db => db?.Database.Migrate());
+    InitDb<SqLiteDbContext>("SqLite", db => db?.Database.Migrate());
+    InitDb<InMemoryDbContext>("InMemory", db => db?.Database.EnsureCreated());
+}
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
+{
+    options.DetailedErrors = true;
+});
 
 
 var app = builder.Build();
@@ -109,46 +199,7 @@ var app = builder.Build();
 
 // Minimal API para autenticación en APIs y generación de token JWT
 
-app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
-{
-    ContextProvider.LogOut();
-    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
-    context.Response.Redirect(returnUrl ?? "/");
-}).RequireAuthorization();
 
-app.MapPost("/api/auth/token", async (
- LoginData request,
-    UserManager<ApplicationUser> userManager,
-    RoleManager<IdentityRole> roleManager, // opcional
-    ITokenService tokenService) =>
-{
-// Usa request.Email, no request.Username
-var user = await userManager.FindByEmailAsync(request.email);
-if (user == null || !await userManager.CheckPasswordAsync(user, request.password))
-{
-    return Results.Unauthorized();
-}
-
-var claims = new List<Claim>
-{
-    new Claim(ClaimTypes.NameIdentifier, user.Id), // o ClaimTypes.Sid
-    new Claim(ClaimTypes.Name, user.UserName ?? ""),
-    new Claim(ClaimTypes.Email, user.Email ?? ""),
-    new Claim("TenantId", (user.TenantId??0).ToString()),
-    new Claim("DbKey",user.DbKey??"SqlServer"),
-    new Claim("AppState",user.AppState??"")
-};
-
-    // Añadir roles
-    var roles = await userManager.GetRolesAsync(user);
-    foreach (var role in roles)
-    {
-        claims.Add(new Claim(ClaimTypes.Role, role));
-    }
-
-    var token = tokenService.GenerateToken(claims);
-    return Results.Ok(new { Token = token });
-});
 
 
 
@@ -168,6 +219,29 @@ else
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+
+app.UseCors(MyAllowSpecificOrigins);
+
+app.UseRouting();              // <- IMPORTANTE: routing antes de auth
+app.UseAuthentication();
+app.UseAuthorization();
+
+
+if (app.Environment.IsDevelopment())
+{
+    //app.UseSwagger();
+    //app.UseSwaggerUI();
+}
+
+if (app.Environment.IsDevelopment())
+    app.UseWebAssemblyDebugging();
+else
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();

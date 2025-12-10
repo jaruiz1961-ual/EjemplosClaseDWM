@@ -1,9 +1,10 @@
 ﻿//#define UPDATE_DATABASE
-using Shares.Genericos;
-using Shares.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
+using Shares.Genericos;
+using Shares.Modelo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,27 @@ namespace Shares.Contextos
         }
     }
 #endif
+    public class SqlServerContextFactory
+       : IDesignTimeDbContextFactory<SqlServerDbContext>
+    {
+        private readonly TenantSaveChangesInterceptor _tenantInterceptor;
+        public SqlServerDbContext CreateDbContext(string[] args)
+        {
+
+            // ruta al appsettings del proyecto host (ajusta según tu solución)
+            var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false)
+                    .Build();
+
+            var connectionString = config.GetConnectionString("DefaultConnection");
+
+            var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
+            optionsBuilder.UseSqlServer(connectionString);
+
+            return new SqlServerDbContext(optionsBuilder.Options, _tenantInterceptor);
+        }
+    }
 
     public class SqlServerDbContext : DbContext
     {
