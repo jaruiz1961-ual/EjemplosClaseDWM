@@ -1,4 +1,5 @@
-﻿using Blazored.LocalStorage;
+﻿using BlazorAppEFTenant.Components.EndPoints;
+using Blazored.LocalStorage;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
 using BlazorSeguridad2026.Data;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Shares.Contextos;
 using Shares.Genericos;
+using Shares.Modelo;
 using Shares.SeguridadToken;
 
 
@@ -252,5 +254,7 @@ app.MapRazorComponents<App>()
 
 // Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
+
+app.GenericApis<Usuario>();//mapeo a APIS
 
 app.Run();

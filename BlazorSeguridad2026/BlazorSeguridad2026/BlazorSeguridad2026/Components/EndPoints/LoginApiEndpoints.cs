@@ -23,11 +23,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
     public static class LoginApiEndpoints
     {
 
-        public static void LoginApis<T>(this WebApplication app) where T : class, ITenantEntity, IEntity, IUpdatableFrom<T>
+        public static void LoginApis(this WebApplication app) 
         {
             app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
             {
-                ContextProvider.LogOut();
+                await ContextProvider.LogOut();
                 await context.SignOutAsync(IdentityConstants.ApplicationScheme);
                 context.Response.Redirect(returnUrl ?? "/");
             }).RequireAuthorization();
