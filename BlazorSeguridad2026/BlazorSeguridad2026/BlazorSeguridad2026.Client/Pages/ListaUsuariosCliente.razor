@@ -1,6 +1,7 @@
 ﻿@page "/ListaUsuariosCliente"
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
+@using Microsoft.AspNetCore.Authorization
 @using Shares.Genericos
 @using Shares.Modelo
 @using Shares.Servicios
@@ -9,6 +10,8 @@
 @inject IContextProvider ContextProvider
 @inject NavigationManager nav
 @implements IDisposable
+
+@attribute [Authorize]
 
 <h3>Listado de usuarios CLIENTE</h3>
 
