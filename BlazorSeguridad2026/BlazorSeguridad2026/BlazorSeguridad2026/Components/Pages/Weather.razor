@@ -9,7 +9,8 @@
 
 <h1>Weather</h1>
 
-@estado
+cliente: @estadoCliente
+servidor:@estadoServidor
 
 <p>This component demonstrates showing data.</p>
 
@@ -70,7 +71,8 @@ else
 
     private bool _initialized;
     private bool _isInitializing;
-    private string estado = "";
+    private string estadoCliente = "";
+    private string estadoServidor = "";
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -87,12 +89,13 @@ else
         await ContextProvider.ReadAllContext();
 
         // 3. Leer estado actual
-        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina) ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.UltimaPagina, "WEATHER");
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, "WEATHER");
         await ContextProvider.UpdateEstadoContext();
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
 
         _initialized = true;
         _isInitializing = false;
@@ -104,7 +107,8 @@ else
     private void HandleContextChanged()
     {
         // 6. Reaccionar a cambios posteriores de contexto
-        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina);
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
         InvokeAsync(StateHasChanged);
     }
 

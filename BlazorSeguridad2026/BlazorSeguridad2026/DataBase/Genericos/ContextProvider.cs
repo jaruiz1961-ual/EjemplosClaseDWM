@@ -9,8 +9,8 @@ namespace Shares.Genericos
 {
     public enum ClavesEstado
     {
-        UltimaPagina,
-        Tema,
+        PaginaCliente,
+        PaginaServidor,
         Otro
     }
 

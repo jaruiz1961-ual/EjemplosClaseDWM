@@ -12,6 +12,9 @@
 
 <h3>Listado de usuarios CLIENTE</h3>
 
+cliente: @estadoCliente
+servidor:@estadoServidor
+
 @if (ContextProvider._AppState.TenantId == null)
 {
     <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
@@ -74,7 +77,8 @@ else
 
     private bool _initialized;
     private bool _isInitializing;
-    private string estado = "";
+    private string estadoCliente = "";
+    private string estadoServidor;
 
     public List<Usuario>? usuarios { get; set; } = new();
     private ServicioUsuariosCliente? scUsuario;
@@ -98,11 +102,12 @@ else
         await ContextProvider.ReadAllContext();
 
         // 3. Leer estado actual
-        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina) ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.UltimaPagina, "COUNTER");
+    
         await ContextProvider.UpdateEstadoContext();
 
         _initialized = true;

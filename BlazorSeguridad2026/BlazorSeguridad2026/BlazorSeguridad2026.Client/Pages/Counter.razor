@@ -13,17 +13,21 @@
 <h1>Counter</h1>
 
 <p role="status">Current count: @currentCount</p>
-@estado
-
+cliente: @estadoCliente
+servidor:@estadoServidor
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
 
 @code {
     private int currentCount = 0;
 
 
-    private void IncrementCount()
+    private async void IncrementCount()
     {
         currentCount++;
+
+        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER = " + currentCount.ToString());
+        await ContextProvider.UpdateEstadoContext();
     }
 
 
@@ -34,7 +38,8 @@
 
     private bool _initialized;
     private bool _isInitializing;
-    private string estado = "";
+    private string estadoCliente = "";
+    private string estadoServidor;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -51,12 +56,10 @@
         await ContextProvider.ReadAllContext();
 
         // 3. Leer estado actual
-        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
-        // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.UltimaPagina, "COUNTER");
-        await ContextProvider.UpdateEstadoContext();
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
 
         _initialized = true;
         _isInitializing = false;
@@ -68,7 +71,8 @@
     private void HandleContextChanged()
     {
         // 6. Reaccionar a cambios posteriores de contexto
-        estado = ContextProvider.GetValor(ClavesEstado.UltimaPagina);
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
         InvokeAsync(StateHasChanged);
     }
 
