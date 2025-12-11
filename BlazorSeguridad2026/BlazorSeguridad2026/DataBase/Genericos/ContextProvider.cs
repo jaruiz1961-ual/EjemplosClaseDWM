@@ -39,7 +39,6 @@ namespace Shares.Genericos
     public interface IContextProvider
     {
         AppState _AppState { get; set; }
-        Dictionary<ClavesEstado, string> dict { get; }
 
         event Action? OnContextChanged;
 
@@ -51,7 +50,7 @@ namespace Shares.Genericos
         string? GetValor(ClavesEstado clave);
         bool IsValid();
         Task LogOut();
-        Task ReadAllContext();
+        Task ReadAllContext(bool force = false);
         Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
         Task SaveAllContextAsync(IContextProvider? cp);
         Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, string? token, string? estado);
@@ -71,7 +70,7 @@ namespace Shares.Genericos
         private bool _initialized;
 
         // Siempre inicializado
-        public Dictionary<ClavesEstado, string> dict { get; private set; } = new();
+   
 
         public string[] GetContextKeyDbs() => new[] { "SqlServer", "SqLite", "InMemory" };
         public string[] GetApiNames() => new[] { "ApiRest", "" };
@@ -87,16 +86,15 @@ namespace Shares.Genericos
         /// Lee todo el contexto desde localStorage, incluida la cadena Estado y la reconstrucción del diccionario.
         /// Se ejecuta solo una vez.
         /// </summary>
-        public async Task ReadAllContext()
+        public async Task ReadAllContext(bool force = false)
         {
-            if (_initialized)
+            if (_initialized && !force)
                 return;
 
             var appState = await _localStorage.GetItemAsync<AppState>("appstate");
 
             // Siempre tener dict inicializado
-            dict ??= new Dictionary<ClavesEstado, string>();
-
+ 
             if (appState is not null)
             {
                 _AppState.TenantId = appState.TenantId;
@@ -107,25 +105,13 @@ namespace Shares.Genericos
                 _AppState.Token = appState.Token;
                 _AppState.Estado = appState.Estado ?? string.Empty;
 
-                // Reconstruir dict desde Estado
-                dict.Clear();
 
-                var parejas = _AppState.Estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                foreach (var se in parejas)
-                {
-                    var kv = se.Split('=', 2);
-                    if (kv.Length == 2 &&
-                        Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
-                    {
-                        dict[clave] = kv[1];
-                    }
-                }
             }
             else
             {
                 // No había estado previo: asegurar valores iniciales coherentes
                 _AppState.Estado = string.Empty;
-                dict.Clear();
+
             }
 
             _initialized = true;
@@ -162,13 +148,29 @@ namespace Shares.Genericos
                     Estado = _AppState.Estado
                 }
             };
-
-            // Copia profunda del diccionario
-            cp.dict = new Dictionary<ClavesEstado, string>(dict);
-
             return cp;
         }
 
+
+        private string DictionaryToString(Dictionary<ClavesEstado, string> diccionario)
+        {
+            return string.Join(";", diccionario.Select(kv => $"{kv.Key}:{kv.Value}"));
+        }
+        private Dictionary<ClavesEstado, string> StringToDictionary (string estado)
+        {
+            Dictionary<ClavesEstado,string> diccionario = new Dictionary<ClavesEstado, string>();
+            var parejas = estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
+            foreach (var se in parejas)
+            {
+                var kv = se.Split(':', 2);
+                if (kv.Length == 2 &&
+                    Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
+                {
+                    diccionario[clave] = kv[1];
+                }
+            }
+            return diccionario;
+        }
         /// <summary>
         /// Login / cambio de contexto principal y persistencia completa.
         /// </summary>
@@ -189,18 +191,8 @@ namespace Shares.Genericos
             _AppState.Token = token;
             _AppState.Estado = estado ?? string.Empty;
 
-            // Reconstruir dict a partir del nuevo Estado
-            dict.Clear();
-            var parejas = _AppState.Estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var se in parejas)
-            {
-                var kv = se.Split('=', 2);
-                if (kv.Length == 2 &&
-                    Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
-                {
-                    dict[clave] = kv[1];
-                }
-            }
+      
+            
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
@@ -224,19 +216,22 @@ namespace Shares.Genericos
         /// </summary>
         public void SetClaveValor(ClavesEstado clave, string valor)
         {
-            dict ??= new Dictionary<ClavesEstado, string>();
+            Dictionary<ClavesEstado, string> diccionario = 
+            diccionario = StringToDictionary(_AppState.Estado);
 
-            if (dict.ContainsKey(clave))
-                dict[clave] = valor;
+            if (diccionario.ContainsKey(clave))
+                diccionario[clave] = valor;
             else
-                dict.Add(clave, valor);
+                diccionario.Add(clave, valor);
+            _AppState.Estado = DictionaryToString(diccionario);
         }
 
         public string? GetValor(ClavesEstado clave)
         {
-            dict ??= new Dictionary<ClavesEstado, string>();
+            Dictionary<ClavesEstado, string> diccionario = 
+            diccionario = StringToDictionary(_AppState.Estado);
 
-            return dict.TryGetValue(clave, out var valor) ? valor : null;
+            return diccionario.TryGetValue(clave, out var valor) ? valor : null;
         }
 
         /// <summary>
@@ -244,9 +239,6 @@ namespace Shares.Genericos
         /// </summary>
         public async Task UpdateEstadoContext()
         {
-            dict ??= new Dictionary<ClavesEstado, string>();
-
-            _AppState.Estado = string.Join(";", dict.Select(kv => $"{kv.Key}={kv.Value}"));
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
@@ -285,18 +277,7 @@ namespace Shares.Genericos
                 Estado = estado ?? string.Empty
             };
 
-            // Reconstruir dict desde el nuevo Estado
-            dict.Clear();
-            var parejas = _AppState.Estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
-            foreach (var se in parejas)
-            {
-                var kv = se.Split('=', 2);
-                if (kv.Length == 2 &&
-                    Enum.TryParse<ClavesEstado>(kv[0], ignoreCase: true, out var clave))
-                {
-                    dict[clave] = kv[1];
-                }
-            }
+            
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();

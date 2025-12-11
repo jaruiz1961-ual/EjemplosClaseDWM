@@ -12,6 +12,8 @@
 cliente: @estadoCliente
 servidor:@estadoServidor
 
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
 <p>This component demonstrates showing data.</p>
 
 @if (forecasts == null)
@@ -46,26 +48,32 @@ else
 @code {
     private WeatherForecast[]? forecasts;
     //Seguridad seguridad = null;
+    private async void IncrementCount()
+    {
 
+
+        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor,estadoServidor);
+        await ContextProvider.UpdateEstadoContext();
+    }
 
 
     protected override async Task OnInitializedAsync()
     {
-        // if (OperatingSystem.IsBrowser())
-        // {
-        //     _initialized = true;
-        //     await ContextProvider.ReadContext();
-        // }
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
+       // await Task.Delay(500);   no se peuden poner await en la inicializacion 
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
+        var summaries = new[]
+        {
+        "Freezing", "Bracing", "Chilly", "Cool", "Mild",
+        "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+         };
+
         forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
         {
             Date = startDate.AddDays(index),
             TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
+            Summary = summaries[index]
         }).ToArray();
     }
 
@@ -89,13 +97,21 @@ else
         await ContextProvider.ReadAllContext();
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
+        var valores = estadoCliente.Split('=');
+        int contador = int.Parse(valores[1]);
+        if (contador >5)
+            contador = 0;
+        if (forecasts == null) return;
+        estadoServidor = forecasts[contador].Summary.ToString();
 
         // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, "WEATHER");
+
+        // Después de calcular estadoServidor en OnAfterRenderAsync
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor);
         await ContextProvider.UpdateEstadoContext();
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
+
+
 
         _initialized = true;
         _isInitializing = false;
