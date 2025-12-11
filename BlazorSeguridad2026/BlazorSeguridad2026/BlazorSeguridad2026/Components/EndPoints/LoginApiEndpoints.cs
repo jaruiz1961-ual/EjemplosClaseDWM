@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-
+using Microsoft.OpenApi.Models;
 using Shares.Genericos;
 using Shares.SeguridadToken;
 using Shares.Servicios;
@@ -23,25 +23,25 @@ namespace BlazorAppEFTenant.Components.EndPoints
     public static class LoginApiEndpoints
     {
 
-        public static void LoginApis(this WebApplication app) 
+        public static void LoginApis(this WebApplication app)
         {
             app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
             {
-                await ContextProvider.LogOut();
+                ContextProvider.LogOut();
                 await context.SignOutAsync(IdentityConstants.ApplicationScheme);
                 context.Response.Redirect(returnUrl ?? "/");
             }).RequireAuthorization();
 
 
             app.MapPost("/api/auth/token", async (
-            LoginData request,
+            LoginDataUser request,
             UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager, // opcional
             ITokenService tokenService) =>
             {
                 // Usa request.Email, no request.Username
-                var user = await userManager.FindByEmailAsync(request.email);
-                if (user == null || !await userManager.CheckPasswordAsync(user, request.password))
+                var user = await userManager.FindByEmailAsync(request.Email);
+                if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
                 {
                     return Results.Unauthorized();
                 }
@@ -51,9 +51,9 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     new Claim(ClaimTypes.NameIdentifier, user.Id), // o ClaimTypes.Sid
                     new Claim(ClaimTypes.Name, user.UserName ?? ""),
                     new Claim(ClaimTypes.Email, user.Email ?? ""),
-                    new Claim("TenantId", (user.TenantId??0).ToString()),
-                    new Claim("DbKey",user.DbKey??"SqlServer"),
-                    new Claim("AppState",user.AppState??"")
+                    new Claim("TenantId", (user.TenantId ?? 0).ToString()),
+                    new Claim("DbKey", user.DbKey ?? "SqlServer"),
+                    new Claim("AppState", user.AppState ?? "")
                 };
 
                 // Añadir roles
@@ -68,45 +68,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
             }).AllowAnonymous();
 
 
-            app.MapGet("/api/auth/login", async (
-               HttpContext httpContext,
-               string username,
-               string password,
-               IUnitOfWorkFactory uowFactory,
-               IContextProvider cp, // ← DI
-               ITokenService tokenService
-               ) =>
-           {
-               ServicioSeguridad sc = new ServicioSeguridad(cp, uowFactory, tokenService);
-               string filtro = $"UserName == \"{username}\" && Password == \"{password}\"";
-               var listaUsuarios = await sc.GetFilterAsync(filtro);
-               var user = listaUsuarios.FirstOrDefault();
-
-               if (user == null)
-                   return Results.Unauthorized();
-
-               var categoria = user.Roles;
-
-               // 2. Construir los claims
-               var claims = new[]
-               {
-                    new Claim(ClaimTypes.Name, user.UserName ?? ""),
-                    new Claim(ClaimTypes.Email, user.Email??""),
-                    new Claim(ClaimTypes.Role, user.Roles ?? ""),
-                    new Claim("TenantId", user.TenantId.ToString() ?? "0"),
-                    new Claim("UserId", user.Id.ToString()),
-                    new Claim("Categoria", categoria??"")
-
-               };
-
-               var tokenString = tokenService.GenerateToken(claims);
-
-               return Results.Ok(new { token = tokenString });
-           })
-           .AllowAnonymous();
         }
     }
-
 }
-
 

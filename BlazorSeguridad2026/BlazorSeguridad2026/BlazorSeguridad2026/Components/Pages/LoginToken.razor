@@ -53,10 +53,11 @@ else
             return;
         }
 
-        var loginData = new LoginData(email, password);
+        var loginData = new LoginDataUser(email, password);
 
         try
         {
+
             var response = await Http.PostAsJsonAsync($"{UrlApi}api/auth/token", loginData);
 
             if (response.IsSuccessStatusCode)

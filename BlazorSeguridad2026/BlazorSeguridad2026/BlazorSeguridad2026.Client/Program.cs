@@ -9,6 +9,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
 
 
+
+
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthenticationStateDeserialization();

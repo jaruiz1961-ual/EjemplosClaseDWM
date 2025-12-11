@@ -56,6 +56,7 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 builder.Services.AddScoped<IAppState, AppState>();
 //Acceso al archivo de configuracion appsetings.json
 IConfiguration configuration = builder.Configuration;
@@ -256,5 +257,6 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.GenericApis<Usuario>();//mapeo a APIS
+app.LoginApis();
 
 app.Run();

@@ -13,7 +13,28 @@ namespace Shares.Genericos
         Tema,
         Otro
     }
-    public record LoginData(string email, string password);
+
+    public interface ILoginDataUser
+    {
+        string? Email { get; set; }
+        string? Password { get; set; }
+
+    }
+    //se necesita un constructorvacio para que minimal api pueda funcionar !!!!   
+    public class LoginDataUser:ILoginDataUser
+    {
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+        public LoginDataUser(string email, string password)
+        {
+            Email = email;
+            Password = password;
+        }
+        public LoginDataUser()
+        {
+        }
+    }
+
 
     public interface IContextProvider
     {
