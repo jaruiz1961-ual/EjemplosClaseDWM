@@ -101,7 +101,7 @@ else
         estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
         var valores = estadoCliente.Split('=');
         int contador = int.Parse(valores[1]);
-        if (contador >5)
+        if (contador >=5)
             contador = 0;
         if (forecasts == null) return;
         estadoServidor = forecasts[contador].Summary.ToString();

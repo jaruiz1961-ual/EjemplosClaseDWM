@@ -38,6 +38,7 @@ builder.Services.AddScoped<IContextProvider, ContextProvider>();
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 
 // Factoría de UoW
+builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 await builder.Build().RunAsync();

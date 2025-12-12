@@ -176,6 +176,7 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 
 // Factoría de UoW
+builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 using (var scope = builder.Services.BuildServiceProvider().CreateScope())
