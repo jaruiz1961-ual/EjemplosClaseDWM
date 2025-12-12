@@ -14,15 +14,15 @@ namespace Shares.Servicios
 {
     public interface IGenericDataService<T> where T : class, ITenantEntity, IEntity
     {
-        Task<IEnumerable<T>> ObtenerTodosAsync();
-        Task<T?> ObtenerPorIdAsync(int id);
-        Task<IEnumerable<T>> ObtenerFiltradosCadenaAsync(string filtro);
-        Task<IEnumerable<T>> ObtenerFiltradosExpresionAsync(Expression<Func<T, bool>> predicate);
+        Task<IEnumerable<T>> ObtenerTodosAsync(bool reload);
+        Task<T?> ObtenerPorIdAsync(int id, bool reload);
+        Task<IEnumerable<T>> ObtenerFiltradosCadenaAsync(string filtro, bool reload);
+        Task<IEnumerable<T>> ObtenerFiltradosExpresionAsync(Expression<Func<T, bool>> predicate, bool reload);
 
 
-        Task<T?> AñadirAsync(T data);
-        Task<T?> ActualizarAsync(T data);
-        Task<T?> EliminarAsync(int id);
+        Task<T?> AñadirAsync(T data, bool reload);
+        Task<T?> ActualizarAsync(T data, bool reload);
+        Task<T?> EliminarAsync(int id, bool reload);
     }
     public class GenericDataService<T> : IGenericDataService<T> where T : class, ITenantEntity, IEntity
     {
@@ -39,63 +39,63 @@ namespace Shares.Servicios
             }
             _unitOfWorkFactory = uowFactory;       
         }
-         public async Task<IEnumerable<T>> ObtenerTodosAsync()
+         public async Task<IEnumerable<T>> ObtenerTodosAsync(bool reload)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var allEntities = await repo.GetAllAsync();
+            var repo = uow.GetRepository<T>(reload);
+            var allEntities = await repo.GetAllAsync(reload);
             return allEntities.ToList();
         }
-        public async Task<IEnumerable<T>> ObtenerFiltradosCadenaAsync(string filtro)
+        public async Task<IEnumerable<T>> ObtenerFiltradosCadenaAsync(string filtro, bool reload)
         {
             var predicate = DynamicExpressionParser.ParseLambda<T, bool>(
                 ParsingConfig.Default,false,filtro );
 
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var filterEntities = await repo.GetFilterAsync(predicate);
+            var repo = uow.GetRepository<T>(reload);
+            var filterEntities = await repo.GetFilterAsync(predicate,reload);
             return filterEntities.ToList();
         }
-        public async Task<IEnumerable<T>> ObtenerFiltradosExpresionAsync(Expression<Func<T, bool>> predicate)
+        public async Task<IEnumerable<T>> ObtenerFiltradosExpresionAsync(Expression<Func<T, bool>> predicate, bool reload)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var filterEntities = await repo.GetFilterAsync(predicate);
+            var repo = uow.GetRepository<T>(reload);
+            var filterEntities = await repo.GetFilterAsync(predicate,reload);
             return filterEntities.ToList();         
         }
-        public async Task<T?> ObtenerPorIdAsync(int id)
+        public async Task<T?> ObtenerPorIdAsync(int id, bool reload)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var entity = await repo.GetByIdAsync(id);
+            var repo = uow.GetRepository<T>(reload);
+            var entity = await repo.GetByIdAsync(id,reload);
             return entity;
         }
-        public async Task<T?> AñadirAsync(T data)
+        public async Task<T?> AñadirAsync(T data, bool reload)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var addedData = await repo.Add(data);
+            var repo = uow.GetRepository<T>(reload);
+            var addedData = await repo.Add(data,reload);
             var num = await uow.SaveChangesAsync();
             if (num>0)  return addedData;
             else return null;
         }
-        public async Task<T?> ActualizarAsync(T data)
+        public async Task<T?> ActualizarAsync(T data, bool reload)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var updatedData= await repo.Update(data);
+            var repo = uow.GetRepository<T>(reload);
+            var updatedData= await repo.Update(data,reload);
             var num = await uow.SaveChangesAsync();
             if (num > 0) return updatedData;
             else return null;
         }
-        public async Task<T?> EliminarAsync(int id)
+        public async Task<T?> EliminarAsync(int id, bool reload)
         {
             var uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<T>();
-            var entity = await repo.GetByIdAsync(id);
+            var repo = uow.GetRepository<T>(reload);
+            var entity = await repo.GetByIdAsync(id,reload);
             if (entity != null)
             {
-                var deletedData = await repo.Remove(entity);
+                var deletedData = await repo.Remove(entity,reload);
                 var num= await uow.SaveChangesAsync();
                 if (num > 0) return deletedData;
             }

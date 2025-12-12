@@ -15,7 +15,7 @@ namespace Shares.Genericos
 
     public interface IUnitOfWorkAsync : IDisposable
     {
-        IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload = true) where TEntity : class, IEntity;
+        IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload) where TEntity : class, IEntity;
         Task<int> SaveChangesAsync();
     }
 
@@ -31,7 +31,7 @@ namespace Shares.Genericos
             _provider = provider;
         }
 
-        public IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload)
+        public virtual IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload)
             where TEntity : class,IEntity
         {
             var type = typeof(TEntity);
@@ -40,8 +40,8 @@ namespace Shares.Genericos
             {
                 // Resolvemos la factoría específica para TEntity
                 var factory = _provider.GetRequiredService<IGenericRepositoryFactoryAsync<TEntity>>();
-                // Para API se crea el repositorio sin pasar DbContext
-                 repo = factory.Create(_cp);
+                // Para API se crea el repositorio pasando DbContext null
+                 repo = factory.Create(_cp,null);
                 _repositories[type] = repo;
             }
 

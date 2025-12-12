@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Shares.Modelo;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,6 +20,7 @@ namespace Shares.Genericos
     where TEntity : class
     where TContext : DbContext
     {
+        private readonly Dictionary<Type, object> _repositories = new();
         public TContext Context { get; }
         public DbSet<TEntity> Set;
 
@@ -28,26 +30,27 @@ namespace Shares.Genericos
             Set = context.Set<TEntity>();
         }
 
-        public async Task<IEnumerable<TEntity>> GetAllAsync() => await Set.ToListAsync<TEntity>();
 
-        public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate) => 
+        public async Task<IEnumerable<TEntity>> GetAllAsync(bool reload) => await Set.ToListAsync<TEntity>();
+
+        public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate, bool reload) => 
             await Set.Where(predicate).ToListAsync<TEntity>();
         
-        public async Task<TEntity?> GetByIdAsync(object id) => await Set.FindAsync(id);
+        public async Task<TEntity?> GetByIdAsync(object id, bool reload) => await Set.FindAsync(id);
 
-        public async Task<TEntity?> Add(TEntity entity)
+        public async Task<TEntity?> Add(TEntity entity, bool reload)
         {
             await Set.AddAsync(entity);
             return entity;
         }
 
-        public async  Task<TEntity?> Update(TEntity entity)
+        public async  Task<TEntity?> Update(TEntity entity, bool reload)
         {
             Set.Update(entity);
            return entity;
         }
 
-        public async Task<TEntity?> Remove(TEntity entity)
+        public async Task<TEntity?> Remove(TEntity entity, bool reload)
         {
             Set.Remove(entity);
             return entity;

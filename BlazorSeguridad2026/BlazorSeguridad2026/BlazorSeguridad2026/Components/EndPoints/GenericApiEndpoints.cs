@@ -25,7 +25,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string nombreEntidad,
                 int tenantId,           
                 IUnitOfWorkFactory uowFactory,
-                 IContextProvider cp
+                 IContextProvider cp,
+                 bool reload = false
                 ) =>
                 {
                 if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
@@ -39,7 +40,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     var service = new GenericDataService<T>(cp, uowFactory);
                     try
                     {
-                        var usuarios = await service.ObtenerTodosAsync();
+                        var usuarios = await service.ObtenerTodosAsync(reload);
                         return Results.Ok(usuarios);
                     }
                     catch (UnauthorizedAccessException)
@@ -56,7 +57,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 string filtro,
                 int tenantId,
                 IUnitOfWorkFactory uowFactory,
-                IContextProvider cp  // ← DI
+                IContextProvider cp, // ← DI,
+                bool reload = false
 
 
                 ) =>
@@ -69,7 +71,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp._AppState.TenantId = tenantId;
                 cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var usuarios = await service.ObtenerFiltradosCadenaAsync(filtro);
+                var usuarios = await service.ObtenerFiltradosCadenaAsync(filtro,reload);
                 return Results.Ok(usuarios);
             });
 
@@ -81,7 +83,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 int id,
                 int tenantId,           
                 IUnitOfWorkFactory uowFactory,
-                 IContextProvider cp
+                IContextProvider cp, // ← DI,
+                bool reload = false
                 ) =>
             {
                 if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
@@ -94,7 +97,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
-                    var usuario = await service.ObtenerPorIdAsync(id);
+                    var usuario = await service.ObtenerPorIdAsync(id, reload);
                     return usuario is not null ? Results.Ok(usuario) : Results.NotFound();
 
                 }
@@ -112,7 +115,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 T usuario,
                 int tenantId,
                 IUnitOfWorkFactory uowFactory,
-                 IContextProvider cp
+                 IContextProvider cp,
+                  bool reload = false
                 ) =>
             {
                 if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
@@ -125,7 +129,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
-                    await service.AñadirAsync(usuario);
+                    await service.AñadirAsync(usuario,reload);
                     return Results.Created($"/api/{contexto}/{nombreEntidad}/{usuario.Id}", usuario);
 
                 }
@@ -144,7 +148,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 T usuario,
                 int tenantId,
                 IUnitOfWorkFactory uowFactory,
-                 IContextProvider cp
+                 IContextProvider cp,
+                  bool reload = false
                 ) =>
             {
                 if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
@@ -157,14 +162,14 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
-                    var actual = await service.ObtenerPorIdAsync(id);
+                    var actual = await service.ObtenerPorIdAsync(id,reload);
                     if (actual is null)
                         return Results.NotFound();
                     actual.UpdateFrom(usuario);
                     // Copia campos actualizables -.. no puedo hacer esto 
                     // porque T es desconocido necesito una interfaz que lo permita
 
-                    await service.ActualizarAsync(actual);
+                    await service.ActualizarAsync(actual, reload);
                     return Results.Ok(actual);
 
                 }
@@ -183,7 +188,8 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 int id,
                 int tenantId,
                 IUnitOfWorkFactory uowFactory,
-                 IContextProvider cp
+                 IContextProvider cp,
+                  bool reload = false
                 ) =>
             {
                 if (!httpContext.User?.Identity?.IsAuthenticated ?? true)
@@ -194,10 +200,10 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp._AppState.TenantId = tenantId;
                 cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var usuario = await service.ObtenerPorIdAsync(id);
+                var usuario = await service.ObtenerPorIdAsync(id,reload);
                 if (usuario is null)
                     return Results.NotFound();
-                await service.EliminarAsync(id);
+                await service.EliminarAsync(id,reload);
                 try
                 {
                     return Results.Ok(usuario);

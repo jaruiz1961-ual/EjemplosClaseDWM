@@ -142,7 +142,7 @@ else
 
             scUsuario ??= new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
 
-            var list = await scUsuario.ObtenerTodosAsync();
+            var list = await scUsuario.ObtenerTodosAsync(false);
             usuarios = list.ToList();
 
             await InvokeAsync(StateHasChanged);

@@ -9,7 +9,7 @@ namespace Shares.Genericos
 {
     public interface IGenericRepositoryFactoryAsync<TEntity> where TEntity : class, IEntity
     {
-        public IGenericRepositoryAsync<TEntity> Create(IContextProvider ic, DbContext context = null);
+        public IGenericRepositoryAsync<TEntity> Create(IContextProvider ic, DbContext context );
 
     }
 
@@ -23,7 +23,7 @@ namespace Shares.Genericos
             _provider = provider;
         }
 
-        public IGenericRepositoryAsync<TEntity> Create(IContextProvider cp, DbContext? context = null)
+        public IGenericRepositoryAsync<TEntity> Create(IContextProvider cp, DbContext? context)
         {
             var mode = cp._AppState.ConnectionMode?.ToLowerInvariant();
 

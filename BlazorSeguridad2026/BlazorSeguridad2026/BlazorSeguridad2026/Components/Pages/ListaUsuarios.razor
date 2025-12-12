@@ -19,7 +19,7 @@
 
 @if (_isValidContext == false)
 {
-    <p><em>Debe seleccionar un conrtexto de ejecución para ver los usuarios...</em></p>
+    <p><em>Debe seleccionar un contexto de ejecución para ver los usuarios...</em></p>
 }
 else if (!usuarios.Any())
 {
@@ -97,7 +97,7 @@ else
             {  
 
                 var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
-                var list = await user.ObtenerTodosAsync();
+                var list = await user.ObtenerTodosAsync(true);
                 usuarios = list.ToList();
                 _isValidContext = true;                
             }
@@ -106,10 +106,7 @@ else
         }
         catch (Exception ex)
         {
-            Console.WriteLine("EX: " + ex.GetType().FullName);
-            Console.WriteLine(ex.ToString());
-            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
-            Console.WriteLine(ex.InnerException?.ToString());
+
             throw;
         }
     }

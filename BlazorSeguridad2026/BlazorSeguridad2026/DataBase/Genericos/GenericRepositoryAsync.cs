@@ -19,12 +19,12 @@ namespace Shares.Genericos
    where TEntity : class
     {
         // Mismos métodos (o un subconjunto), pero sin TContext
-        Task<TEntity?> GetByIdAsync(object id);
-        Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate);
-        Task<IEnumerable<TEntity>> GetAllAsync();
-        Task<TEntity?> Add(TEntity entity);
-        Task<TEntity?> Update(TEntity entity);
-        Task<TEntity?> Remove(TEntity entity);
+        Task<TEntity?> GetByIdAsync(object id,bool reload);
+        Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate,bool reload);
+        Task<IEnumerable<TEntity>> GetAllAsync(bool reload);
+        Task<TEntity?> Add(TEntity entity, bool reload);
+        Task<TEntity?> Update(TEntity entity, bool reload);
+        Task<TEntity?> Remove(TEntity entity, bool reload);
     }
 
     public class GenericRepositoryAsync<TEntity> : IGenericRepositoryAsync<TEntity>
@@ -49,14 +49,14 @@ namespace Shares.Genericos
         }
 
         // Métodos de la interfaz base
-        public async Task<TEntity?> GetByIdAsync(object id)
+        public async Task<TEntity?> GetByIdAsync(object id,bool reload)
         {
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
                  new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
-            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}";
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}&reload{reload}";
             var response = await _httpClient.GetAsync(url); // HttpResponseMessage
 
             // Controlar 401 (no autenticado)
@@ -75,13 +75,13 @@ namespace Shares.Genericos
             return resultado ?? default(TEntity);
 
         }
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
+        public async Task<IEnumerable<TEntity>> GetAllAsync(bool reload)
         {
             if (!string.IsNullOrEmpty(_token))            {
                 _httpClient.DefaultRequestHeaders.Authorization =
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
-            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}";
+            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&reload{reload}";
             var response = await _httpClient.GetAsync(url); // HttpResponseMessage
 
             // Controlar 401 (no autenticado)
@@ -104,14 +104,14 @@ namespace Shares.Genericos
             return resultado ?? Enumerable.Empty<TEntity>();
         }
 
-        public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate, bool reload)
         {
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
-            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&predicate={predicate}";
+            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&predicate={predicate}&reload{reload}";
             var response = await _httpClient.GetAsync(url);
              if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
@@ -128,14 +128,14 @@ namespace Shares.Genericos
             var resultado = await _httpClient.GetFromJsonAsync<IEnumerable<TEntity>>(url);
             return resultado ?? Enumerable.Empty<TEntity>();
         }
-        public async Task<TEntity?> Add(TEntity entity)
+        public async Task<TEntity?> Add(TEntity entity, bool reload)
         {
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
          new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
-            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}";
+            var url = $"/api/{_contexto}/{_resourceName}?tenantId={_tenantId}&reload{reload}";
             var response = await _httpClient.GetAsync(url);
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
@@ -154,7 +154,7 @@ namespace Shares.Genericos
             return entity;
         }
 
-        public async Task<TEntity?> Update(TEntity entity)
+        public async Task<TEntity?> Update(TEntity entity, bool reload)
         {
             if (!string.IsNullOrEmpty(_token))
             {
@@ -166,7 +166,7 @@ namespace Shares.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}";
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}&reload{reload}";
             var response = await _httpClient.GetAsync(url);
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
@@ -185,7 +185,7 @@ namespace Shares.Genericos
             return entity;
         }
 
-        public async Task<TEntity?> Remove(TEntity entity)
+        public async Task<TEntity?> Remove(TEntity entity, bool reload)
         {
             if (!string.IsNullOrEmpty(_token))
             {
@@ -195,7 +195,7 @@ namespace Shares.Genericos
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
             if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}";
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}&reload{reload}";
             var response = await _httpClient.GetAsync(url);
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
