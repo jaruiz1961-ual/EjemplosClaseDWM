@@ -1,0 +1,121 @@
+﻿@page "/users/{UserId}/roles"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
+@using BlazorSeguridad2026.Data
+@* @attribute [Authorize(Roles = "Admin")] *@
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+@inject IUserService UserService
+@inject RoleManager<IdentityRole> RoleManager
+@inject NavigationManager Nav
+
+<h3>Asignar roles al usuario</h3>
+
+@if (!string.IsNullOrEmpty(error))
+{
+    <div class="alert alert-danger">@error</div>
+}
+@if (!string.IsNullOrEmpty(success))
+{
+    <div class="alert alert-success">@success</div>
+}
+
+@if (isLoading)
+{
+    <p>Cargando...</p>
+}
+else if (user is null)
+{
+    <p>Usuario no encontrado.</p>
+}
+else
+{
+    <p><strong>Usuario:</strong> @user.Email (@user.Id)</p>
+
+    <h4>Roles</h4>
+
+    @if (allRoles.Count == 0)
+    {
+        <p>No hay roles definidos.</p>
+    }
+    else
+    {
+        @foreach (var role in allRoles)
+        {
+            <div>
+                <input type="checkbox"
+                       checked="@selectedRoles.Contains(role.Name!)"
+                       @onchange="e => ToggleRole(role.Name!, e.Value)" />
+                <span>@role.Name</span>
+            </div>
+        }
+
+        <button @onclick="SaveRoles">Guardar roles</button>
+        <button @onclick="BackToUsers">Volver a usuarios</button>
+    }
+}
+
+@code {
+    [Parameter] public string UserId { get; set; } = string.Empty;
+
+    private ApplicationUser? user;
+    private List<IdentityRole> allRoles = new();
+    private HashSet<string> selectedRoles = new(StringComparer.OrdinalIgnoreCase);
+
+    private bool isLoading = true;
+    private string? error;
+    private string? success;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        isLoading = true;
+        error = success = null;
+
+        user = await UserService.GetByIdAsync(UserId);
+        if (user is null)
+        {
+            isLoading = false;
+            return;
+        }
+
+        // todos los roles existentes
+        allRoles = RoleManager.Roles.OrderBy(r => r.Name).ToList();
+
+        // roles actuales del usuario
+        var userRoles = await UserService.GetUserRolesAsync(UserId);
+        selectedRoles = new HashSet<string>(userRoles, StringComparer.OrdinalIgnoreCase);
+
+        isLoading = false;
+    }
+
+    private void ToggleRole(string roleName, object? isChecked)
+    {
+        var check = isChecked is bool b && b;
+        if (check)
+            selectedRoles.Add(roleName);
+        else
+            selectedRoles.Remove(roleName);
+    }
+
+    private async Task SaveRoles()
+    {
+        if (user is null)
+        {
+            error = "Usuario no encontrado.";
+            return;
+        }
+
+        var result = await UserService.SetUserRolesAsync(user.Id, selectedRoles);
+
+        if (result.Succeeded)
+        {
+            success = "Roles actualizados.";
+        }
+        else
+        {
+            error = string.Join(" ", result.Errors.Select(e => e.Description));
+        }
+    }
+
+    private void BackToUsers() => Nav.NavigateTo("/users");
+}
