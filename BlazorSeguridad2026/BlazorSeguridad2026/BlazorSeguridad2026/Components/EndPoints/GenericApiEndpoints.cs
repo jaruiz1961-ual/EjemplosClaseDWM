@@ -44,7 +44,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     {
                         return Results.Unauthorized();
                     }
-                }); 
+                }).RequireAuthorization(); 
 
             // GET: listar filtro 
             app.MapGet("/api/{contexto}/{nombreEntidad}/filtrar", async (

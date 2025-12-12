@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorSeguridad2026.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251208193809_AddRoles")]
-    partial class AddRoles
+    [Migration("20251208110808_TenantId")]
+    partial class TenantId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
