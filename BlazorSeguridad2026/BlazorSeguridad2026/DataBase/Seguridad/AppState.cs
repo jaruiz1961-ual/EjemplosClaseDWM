@@ -1,26 +1,14 @@
-﻿
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.Globalization;
 using System.Security;
 using System.Text.Json;
 
-namespace Shares.Genericos
+namespace Shares.Seguridad
 {
 
-    public interface IAppState
-    {
-        string ApiName { get; set; }
-        string ConnectionMode { get; set; }
-        string DbKey { get; set; }
-        Uri DirBase { get; set; }
-        int? TenantId { get; set; }
-        string Token { get; set; }
-        bool isValid { get; }
-        bool IsAutenticated { get; }
-        string Estado { get; set; }
-    }
+  
     [TypeConverter(typeof(AppState))]
-    public class AppState : IAppState
+    public class AppState 
     {
         public int? TenantId { get; set; } = 0;
         public string DbKey { get; set; }

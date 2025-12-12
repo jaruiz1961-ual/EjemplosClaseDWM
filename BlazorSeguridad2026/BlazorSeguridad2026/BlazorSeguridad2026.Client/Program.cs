@@ -3,6 +3,7 @@ using Blazored.LocalStorage;
 
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Shares.Genericos;
+using Shares.Seguridad;
 using System.Net.NetworkInformation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -34,7 +35,7 @@ builder.Services.AddBlazoredLocalStorage();
 
 builder.Services.AddScoped<IContextProvider, ContextProvider>();
 
-builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRepositoryFactory<>));
+builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 
 // Factoría de UoW
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();

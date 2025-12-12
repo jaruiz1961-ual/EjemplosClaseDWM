@@ -11,6 +11,7 @@ using Microsoft.OpenApi.Models;
 using Shares.Contextos;
 using Shares.Genericos;
 using Shares.Modelo;
+using Shares.Seguridad;
 using Shares.SeguridadToken;
 
 
@@ -57,7 +58,7 @@ builder.Services.AddSwaggerGen(c =>
 });
 
 
-builder.Services.AddScoped<IAppState, AppState>();
+
 //Acceso al archivo de configuracion appsetings.json
 IConfiguration configuration = builder.Configuration;
 var UrlApi = builder.Configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
@@ -172,7 +173,7 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
 }, ServiceLifetime.Transient);
 
 // Factoría genérica por entidad
-builder.Services.AddScoped(typeof(IGenericRepositoryFactory<>), typeof(GenericRepositoryFactory<>));
+builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 
 // Factoría de UoW
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();

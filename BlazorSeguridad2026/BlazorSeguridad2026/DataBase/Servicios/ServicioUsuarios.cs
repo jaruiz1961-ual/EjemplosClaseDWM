@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shares.Seguridad;
 
 namespace Shares.Servicios
 {
@@ -19,9 +20,9 @@ namespace Shares.Servicios
 
     public class ServicioUsuariosCliente : GenericDataService<Usuario>, IGenericDataService<Usuario>
     {
-        public ServicioUsuariosCliente(IContextProvider cp, IUnitOfWorkFactory uowFactory) : base(cp, uowFactory)
+        public ServicioUsuariosCliente(IContextProvider cp, IUnitOfWorkFactory uowFactory) : base(cp, uowFactory,true)
         {
-            cp._AppState.ConnectionMode = "Api";
+
         }
     }
 

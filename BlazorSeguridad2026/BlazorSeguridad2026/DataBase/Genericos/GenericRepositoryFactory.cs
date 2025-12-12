@@ -2,11 +2,18 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using Shares.Modelo;
+using Shares.Seguridad;
 
 namespace Shares.Genericos
 {
+    public interface IGenericRepositoryFactoryAsync<TEntity> where TEntity : class, IEntity
+    {
+        public IGenericRepositoryAsync<TEntity> Create(IContextProvider ic, DbContext context = null);
 
-    public class GenericRepositoryFactory<TEntity> : IGenericRepositoryFactory<TEntity>
+    }
+
+    public class GenericRepositoryFactory<TEntity> : IGenericRepositoryFactoryAsync<TEntity>
     where TEntity : class, IEntity
     {
         private readonly IServiceProvider _provider;
@@ -16,7 +23,7 @@ namespace Shares.Genericos
             _provider = provider;
         }
 
-        public IGenericRepository<TEntity> Create(IContextProvider cp, DbContext? context = null)
+        public IGenericRepositoryAsync<TEntity> Create(IContextProvider cp, DbContext? context = null)
         {
             var mode = cp._AppState.ConnectionMode?.ToLowerInvariant();
 
@@ -28,7 +35,7 @@ namespace Shares.Genericos
                 var httpClient = httpClientFactory.CreateClient(cp._AppState.ApiName);
 
                 var resource = typeof(TEntity).Name.ToLower() + "s";
-                return new GenericRepositoryApi<TEntity>(httpClient, cp, resource);
+                return new GenericRepositoryAsync<TEntity>(httpClient, cp, resource);
             }
 
             if (mode == "ef")
@@ -41,19 +48,19 @@ namespace Shares.Genericos
                     case "sqlserver":
                         {
                             var sqlServerDbContext = context as SqlServerDbContext;
-                            return new GenericRepositoryEF<TEntity, SqlServerDbContext>(sqlServerDbContext);
+                            return new GenericRepositoryEFAsync<TEntity, SqlServerDbContext>(sqlServerDbContext);
                         }
 
                     case "sqlite":
                         {
                             var sqLiteDbContext = context as SqLiteDbContext;
-                            return new GenericRepositoryEF<TEntity, SqLiteDbContext>(sqLiteDbContext);
+                            return new GenericRepositoryEFAsync<TEntity, SqLiteDbContext>(sqLiteDbContext);
                         }
 
                     case "inmemory":
                         {
                             var inMemoryDbContext = context as InMemoryDbContext;
-                            return new GenericRepositoryEF<TEntity, InMemoryDbContext> (inMemoryDbContext);
+                            return new GenericRepositoryEFAsync<TEntity, InMemoryDbContext> (inMemoryDbContext);
                         }
 
                     default:

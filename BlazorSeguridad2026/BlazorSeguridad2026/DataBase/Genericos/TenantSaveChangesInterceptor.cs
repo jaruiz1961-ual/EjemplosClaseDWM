@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
+using Shares.Modelo;
+using Shares.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Linq;

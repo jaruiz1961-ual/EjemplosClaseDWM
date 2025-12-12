@@ -9,14 +9,20 @@ using System.Threading.Tasks;
 
 namespace Shares.Genericos
 {
-    public class GenericRepositoryEF<TEntity, TContext> : IGenericRepositoryEF<TEntity, TContext>, IGenericRepository<TEntity>
+    public interface IGenericRepositoryEfAsync<TEntity, TContext> : IGenericRepositoryAsync<TEntity>
+    where TEntity : class
+
+    {
+        TContext Context { get; }
+    }
+    public class GenericRepositoryEFAsync<TEntity, TContext> : IGenericRepositoryEfAsync<TEntity, TContext>, IGenericRepositoryAsync<TEntity>
     where TEntity : class
     where TContext : DbContext
     {
         public TContext Context { get; }
         public DbSet<TEntity> Set;
 
-        public GenericRepositoryEF(TContext context)
+        public GenericRepositoryEFAsync(TContext context)
         {
             Context = context;
             Set = context.Set<TEntity>();

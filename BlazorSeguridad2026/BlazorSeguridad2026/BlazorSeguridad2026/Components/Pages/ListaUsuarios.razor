@@ -3,6 +3,7 @@
 
 @using Shares.Genericos
 @using Shares.Modelo
+@using Shares.Seguridad
 @using Shares.Servicios
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject IContextProvider ContextProvider 
@@ -59,13 +60,12 @@ else
 
 
 @code {
-    [CascadingParameter]
-    public IAppState AppState { get; set; } = default!;
+
 
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="";
-    Seguridad seguridad = new Seguridad();
+ 
     bool _isValidContext;
 
     private Action? _onContextChangedHandler;
@@ -97,7 +97,7 @@ else
             {  
 
                 var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
-                var list = await user.GetAllAsync();
+                var list = await user.ObtenerTodosAsync();
                 usuarios = list.ToList();
                 _isValidContext = true;                
             }

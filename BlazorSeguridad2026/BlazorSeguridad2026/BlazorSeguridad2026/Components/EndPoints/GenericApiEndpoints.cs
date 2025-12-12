@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shares.Genericos;
+using Shares.Modelo;
+using Shares.Seguridad;
 using Shares.Servicios;
 using System.Linq.Expressions;
 
@@ -37,7 +39,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     var service = new GenericDataService<T>(cp, uowFactory);
                     try
                     {
-                        var usuarios = await service.GetAllAsync();
+                        var usuarios = await service.ObtenerTodosAsync();
                         return Results.Ok(usuarios);
                     }
                     catch (UnauthorizedAccessException)
@@ -67,7 +69,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp._AppState.TenantId = tenantId;
                 cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var usuarios = await service.GetFilterAsync(filtro);
+                var usuarios = await service.ObtenerFiltradosCadenaAsync(filtro);
                 return Results.Ok(usuarios);
             });
 
@@ -92,7 +94,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
-                    var usuario = await service.GetByIdAsync(id);
+                    var usuario = await service.ObtenerPorIdAsync(id);
                     return usuario is not null ? Results.Ok(usuario) : Results.NotFound();
 
                 }
@@ -123,7 +125,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
-                    await service.AddAsync(usuario);
+                    await service.AñadirAsync(usuario);
                     return Results.Created($"/api/{contexto}/{nombreEntidad}/{usuario.Id}", usuario);
 
                 }
@@ -155,14 +157,14 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
-                    var actual = await service.GetByIdAsync(id);
+                    var actual = await service.ObtenerPorIdAsync(id);
                     if (actual is null)
                         return Results.NotFound();
                     actual.UpdateFrom(usuario);
                     // Copia campos actualizables -.. no puedo hacer esto 
                     // porque T es desconocido necesito una interfaz que lo permita
 
-                    await service.UpdateAsync(actual);
+                    await service.ActualizarAsync(actual);
                     return Results.Ok(actual);
 
                 }
@@ -192,10 +194,10 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp._AppState.TenantId = tenantId;
                 cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
                 var service = new GenericDataService<T>(cp, uowFactory);
-                var usuario = await service.GetByIdAsync(id);
+                var usuario = await service.ObtenerPorIdAsync(id);
                 if (usuario is null)
                     return Results.NotFound();
-                await service.DeleteAsync(id);
+                await service.EliminarAsync(id);
                 try
                 {
                     return Results.Ok(usuario);

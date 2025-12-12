@@ -1,6 +1,7 @@
 ﻿using Azure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Shares.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,20 @@ using static System.Net.WebRequestMethods;
 
 namespace Shares.Genericos
 {
-    public class GenericRepositoryApi<TEntity> : IGenericRepository<TEntity>
+
+    public interface IGenericRepositoryAsync<TEntity>
+   where TEntity : class
+    {
+        // Mismos métodos (o un subconjunto), pero sin TContext
+        Task<TEntity?> GetByIdAsync(object id);
+        Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate);
+        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<TEntity?> Add(TEntity entity);
+        Task<TEntity?> Update(TEntity entity);
+        Task<TEntity?> Remove(TEntity entity);
+    }
+
+    public class GenericRepositoryAsync<TEntity> : IGenericRepositoryAsync<TEntity>
      where TEntity : class
      
     {
@@ -23,7 +37,7 @@ namespace Shares.Genericos
         int _tenantId;
         string _token;
 
-        public GenericRepositoryApi(HttpClient httpClient, IContextProvider cp, string resourceName)
+        public GenericRepositoryAsync(HttpClient httpClient, IContextProvider cp, string resourceName)
         {
             _httpClient = httpClient;
             _resourceName = resourceName.ToLower();

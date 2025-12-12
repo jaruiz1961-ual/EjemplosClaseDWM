@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Shares.Genericos;
+using Shares.Seguridad;
 using Shares.SeguridadToken;
 using Shares.Servicios;
 using System.IdentityModel.Tokens.Jwt;

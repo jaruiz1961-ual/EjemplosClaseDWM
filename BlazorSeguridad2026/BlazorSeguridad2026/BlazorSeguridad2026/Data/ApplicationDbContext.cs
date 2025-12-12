@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Design;
 using Shares.Genericos;
 using System.Linq.Expressions;
   using Microsoft.Extensions.Configuration;
+using Shares.Modelo;
 
 namespace BlazorSeguridad2026.Data
 {

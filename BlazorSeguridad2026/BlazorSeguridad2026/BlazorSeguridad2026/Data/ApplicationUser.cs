@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using Shares.Genericos;
+using Shares.Modelo;
 
 namespace BlazorSeguridad2026.Data
 {
