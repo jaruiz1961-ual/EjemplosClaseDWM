@@ -2,21 +2,21 @@
 
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using SQLitePCL;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 
 namespace Shares.SeguridadToken
 {
-
-
     public interface ITokenService
     {
         string GenerateToken(IEnumerable<Claim> claims);
         bool ValidateToken(string? token);
-        ClaimsPrincipal? GetPrincipal(string token);
+
     }
 
 
@@ -59,7 +59,6 @@ namespace Shares.SeguridadToken
         public string GenerateToken(IEnumerable<Claim> claims)
         {
             var creds = new SigningCredentials(_signingKey, SecurityAlgorithms.HmacSha256);
-
             var token = new JwtSecurityToken(
                 issuer: _issuer,
                 audience: _audience,
@@ -68,7 +67,6 @@ namespace Shares.SeguridadToken
                 expires: DateTime.UtcNow.AddMinutes(_expiresMinutes),
                 signingCredentials: creds
             );
-
             return _handler.WriteToken(token);
         }
 
@@ -76,7 +74,6 @@ namespace Shares.SeguridadToken
         {
             if (string.IsNullOrWhiteSpace(token))
                 return false;
-
             try
             {
                 _ = _handler.ValidateToken(token, _validation, out _);
@@ -88,19 +85,23 @@ namespace Shares.SeguridadToken
             }
         }
 
-        public ClaimsPrincipal? GetPrincipal(string token)
+        public static Dictionary<string,string> GetClaims(string token)
         {
-            if (string.IsNullOrWhiteSpace(token))
-                return null;
-
-            try
-            {
-                return _handler.ValidateToken(token, _validation, out _);
-            }
-            catch
-            {
-                return null;
-            }
+            if (string.IsNullOrWhiteSpace(token)) return null;
+            var handler = new JwtSecurityTokenHandler();
+        
+            var doc = JsonDocument.Parse(token);
+            var tokenString = doc.RootElement.GetProperty("token").GetString();
+ 
+            var jwt = handler.ReadJwtToken(tokenString); //
+            IEnumerable<Claim> claims = jwt.Claims;
+            var claimsDict = claims
+            .GroupBy(c => c.Type)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Select(c => c.Value).FirstOrDefault()
+            );
+            return claimsDict;
         }
     }
 

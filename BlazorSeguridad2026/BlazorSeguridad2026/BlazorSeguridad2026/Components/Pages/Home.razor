@@ -1,4 +1,9 @@
 ﻿@page "/"
+@using Shares.Seguridad
+@using Shares.SeguridadToken
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@inject IContextProvider ContextProvider
+
 
 <PageTitle>Home</PageTitle>
 
@@ -14,5 +19,8 @@
                 Rol: Admin
             </div>
         }
+
     </Authorized>
 </AuthorizeView>
+
+    

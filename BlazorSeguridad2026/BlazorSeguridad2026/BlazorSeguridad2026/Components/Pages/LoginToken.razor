@@ -58,13 +58,12 @@ else
 
         try
         {
-
             var response = await Http.PostAsJsonAsync($"{UrlApi}api/auth/token", loginData);
 
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadAsStringAsync();
-                await ContextProvider.UpdateTokenContext(token);
+                await ContextProvider.UpdateContextFromToken(token);
 
                 _initialized = true;
                 isLoading = false;

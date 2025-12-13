@@ -190,7 +190,7 @@
         var token = TokenService.GenerateToken(userClaims);
 
         // guardar token y limpiar estado en tu ContextProvider para toda la app
-        await ContextProvider.UpdateTokenContext(token);
+        await ContextProvider.UpdateContextFromToken(token);
         
 
         Logger.LogInformation("User logged in.");

@@ -1,7 +1,9 @@
 ﻿using Blazored.LocalStorage;
+using Shares.SeguridadToken;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Threading.Tasks;
 
@@ -50,13 +52,13 @@ namespace Shares.Seguridad
         string? GetValor(ClavesEstado clave);
         bool IsValid();
         Task LogOut();
-        Task ReadAllContext(bool force = false);
+        Task<IContextProvider> ReadAllContext(bool force = false);
         Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
         Task SaveAllContextAsync(IContextProvider? cp);
         Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, string? token, string? estado);
         void SetClaveValor(ClavesEstado clave, string valor);
         Task UpdateEstadoContext();
-        Task UpdateTokenContext(string token);
+        Task UpdateContextFromToken(string token);
     }
 
     public class ContextProvider : IContextProvider
@@ -86,10 +88,9 @@ namespace Shares.Seguridad
         /// Lee todo el contexto desde localStorage, incluida la cadena Estado y la reconstrucción del diccionario.
         /// Se ejecuta solo una vez.
         /// </summary>
-        public async Task ReadAllContext(bool force = false)
+        public async Task<IContextProvider> ReadAllContext(bool force = false)
         {
-            if (_initialized && !force)
-                return;
+            if (_initialized && !force) return this;
 
             var appState = await _localStorage.GetItemAsync<AppState>("appstate");
 
@@ -104,17 +105,15 @@ namespace Shares.Seguridad
                 _AppState.DirBase = appState.DirBase;
                 _AppState.Token = appState.Token;
                 _AppState.Estado = appState.Estado ?? string.Empty;
-
-
             }
             else
             {
                 // No había estado previo: asegurar valores iniciales coherentes
                 _AppState.Estado = string.Empty;
-
             }
 
             _initialized = true;
+            return this;
         }
 
         public bool IsValid()
@@ -201,9 +200,13 @@ namespace Shares.Seguridad
         /// <summary>
         /// Actualiza solo el token, manteniendo el resto del Estado/dict.
         /// </summary>
-        public async Task UpdateTokenContext(string token)
+        public async Task UpdateContextFromToken(string token)
         {
-            _AppState.Token = token;
+            _AppState.Token = token;           
+            var dict = TokenService.GetClaims(token);
+  
+            _AppState.DbKey = dict["DbKey"]?? _AppState.DbKey;
+            _AppState.TenantId = int.TryParse(dict["TenantId"], out var tid) ? tid : _AppState.TenantId;
 
             // Sin tocar Estado ni dict, se mantiene lo que hubiera
             await _localStorage.SetItemAsync("appstate", _AppState);
