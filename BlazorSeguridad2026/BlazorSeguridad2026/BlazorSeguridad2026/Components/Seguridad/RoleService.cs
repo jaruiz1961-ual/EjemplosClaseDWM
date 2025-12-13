@@ -1,4 +1,4 @@
-﻿namespace BlazorSeguridad2026.Components.Account
+﻿namespace BlazorSeguridad2026.Components.Seguridad
 {
     // Services/IRoleService.cs
     using Microsoft.AspNetCore.Identity;

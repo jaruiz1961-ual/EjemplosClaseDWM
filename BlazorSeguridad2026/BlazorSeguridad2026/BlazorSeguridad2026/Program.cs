@@ -2,6 +2,7 @@
 using Blazored.LocalStorage;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
+using BlazorSeguridad2026.Components.Seguridad;
 using BlazorSeguridad2026.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
