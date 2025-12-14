@@ -16,6 +16,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
+using static System.Net.WebRequestMethods;
 
 namespace BlazorAppEFTenant.Components.EndPoints
 {
@@ -67,6 +68,20 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 return Results.Ok(new { Token = token });
             }).AllowAnonymous();
 
+         //NO PUEDO USR JAVASCRIPT EN MINIMAL APIS .... 
+         //  app.MapPost("/Tenant/Change", async (
+         //[FromForm] int tenantId,
+         //HttpContext http,
+         //IContextProvider ContextProvider) =>
+         //   {
+         //       //await ContextProvider.ReadAllContext();
+         //       //ContextProvider._AppState.TenantId = tenantId;
+         //       //await ContextProvider.SaveAllContextAsync(ContextProvider);
+         //       var referer = http.Request.Headers.Referer.ToString();
+         //       var url = string.IsNullOrEmpty(referer) ? "/" : referer;
+
+         //       return Results.Redirect(url);
+         //   }).RequireAuthorization();
 
         }
     }

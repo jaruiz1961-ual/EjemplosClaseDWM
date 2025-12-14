@@ -1,0 +1,26 @@
+﻿@page "/Account/Logout"
+@using Microsoft.AspNetCore.Identity
+@using BlazorSeguridad2026.Data
+@using Shares.Seguridad
+@inject SignInManager<ApplicationUser> SignInManager
+@inject NavigationManager Nav
+@inject IContextProvider ContextProvider
+
+<h3>Cerrando sesión...</h3>
+
+@code {
+    [Parameter] public string? ReturnUrl { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // TUS TAREAS PERSONALIZADAS
+
+        ContextProvider.LogOut();
+        await SignInManager.SignOutAsync();
+
+        if (!string.IsNullOrWhiteSpace(ReturnUrl))
+            Nav.NavigateTo(ReturnUrl, forceLoad: true);
+        else
+            Nav.NavigateTo("/", forceLoad: true);
+    }
+}

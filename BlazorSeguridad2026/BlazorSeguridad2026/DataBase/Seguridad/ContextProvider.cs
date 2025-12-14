@@ -47,7 +47,7 @@ namespace Shares.Seguridad
         ContextProvider Copia();
         string[] GetApiNames();
         string[] GetConnectionModes();
-        string[] GetContextKeyDbs();
+        string[] GetContextDbKeys();
         int[] GetTenantIds();
         string? GetValor(ClavesEstado clave);
         bool IsValid();
@@ -74,7 +74,7 @@ namespace Shares.Seguridad
         // Siempre inicializado
    
 
-        public string[] GetContextKeyDbs() => new[] { "SqlServer", "SqLite", "InMemory" };
+        public string[] GetContextDbKeys() => new[] { "SqlServer", "SqLite", "InMemory" };
         public string[] GetApiNames() => new[] { "ApiRest", "" };
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
@@ -289,11 +289,11 @@ namespace Shares.Seguridad
         public async Task LogOut()
         {
             await SetAllContext(
-                _AppState.TenantId,
-                _AppState.DbKey,
-                _AppState.ApiName,
-                _AppState.DirBase,
-                _AppState.ConnectionMode,
+                null,
+                null,
+                null,
+                null,
+                null,
                 null,
                 null);
         }

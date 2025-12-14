@@ -14,6 +14,7 @@ using Shares.Genericos;
 using Shares.Modelo;
 using Shares.Seguridad;
 using Shares.SeguridadToken;
+using static TenantInterop;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -205,11 +206,14 @@ builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
     options.DetailedErrors = true;
 });
 
+builder.Services.AddAntiforgery();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
 
-// Minimal API para autenticación en APIs y generación de token JWT
+//registro para poder acceder desde js a los servicios de DI clase estatica en NavMenu para acceder al TenantId del contexto
+ServiceLocator.Services = app.Services;
 
 
 
@@ -267,5 +271,7 @@ app.MapAdditionalIdentityEndpoints();
 
 app.GenericApis<Usuario>();//mapeo a APIS
 app.LoginApis();
+
+
 
 app.Run();
