@@ -1,11 +1,13 @@
 ﻿@page "/roles"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
+@using Shares.Seguridad
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @* @attribute [Authorize(Roles = "Admin")] *@
 
 @inject IRoleService RoleService
 @inject NavigationManager Nav
+@inject IContextProvider ContextProvider
 
 <h3>Roles</h3>
 

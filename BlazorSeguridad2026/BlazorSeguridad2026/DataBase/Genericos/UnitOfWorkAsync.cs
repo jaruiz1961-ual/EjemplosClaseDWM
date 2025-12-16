@@ -15,7 +15,7 @@ namespace Shares.Genericos
 
     public interface IUnitOfWorkAsync : IDisposable
     {
-        IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload) where TEntity : class, IEntity;
+        IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload) where TEntity : class;
         Task<int> SaveChangesAsync();
     }
 
@@ -32,7 +32,7 @@ namespace Shares.Genericos
         }
 
         public virtual IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload)
-            where TEntity : class,IEntity
+            where TEntity : class
         {
             var type = typeof(TEntity);
             //comprobamos si el repositorio no existe en el diccionario o si es necesario recargarlo

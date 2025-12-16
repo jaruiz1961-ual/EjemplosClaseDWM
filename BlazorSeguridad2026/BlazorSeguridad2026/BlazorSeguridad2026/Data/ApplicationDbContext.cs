@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Shares.Genericos;
-using System.Linq.Expressions;
   using Microsoft.Extensions.Configuration;
+using Shares.Genericos;
 using Shares.Modelo;
+using Shares.Seguridad;
+using System.Linq.Expressions;
 
 namespace BlazorSeguridad2026.Data
 {
@@ -25,7 +26,8 @@ namespace BlazorSeguridad2026.Data
             : base(options)
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
+            TenantId = tenantInterceptor.ContextProvider._AppState.TenantId;
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -81,7 +83,7 @@ namespace BlazorSeguridad2026.Data
                 var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
                 optionsBuilder.UseSqlServer(connectionString);
 
-                return new ApplicationDbContext(optionsBuilder.Options, null);
+                return new ApplicationDbContext(optionsBuilder.Options,null);
             }
         }
 

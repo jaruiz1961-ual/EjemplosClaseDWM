@@ -7,7 +7,7 @@ using Shares.Seguridad;
 
 namespace Shares.Genericos
 {
-    public interface IGenericRepositoryFactoryAsync<TEntity> where TEntity : class, IEntity
+    public interface IGenericRepositoryFactoryAsync<TEntity> where TEntity : class
     {
         public IGenericRepositoryAsync<TEntity> Create(IContextProvider ic, DbContext context );
 

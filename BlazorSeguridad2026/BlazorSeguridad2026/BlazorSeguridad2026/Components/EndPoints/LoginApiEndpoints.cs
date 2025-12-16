@@ -68,20 +68,68 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 return Results.Ok(new { Token = token });
             }).AllowAnonymous();
 
-         //NO PUEDO USR JAVASCRIPT EN MINIMAL APIS .... 
-         //  app.MapPost("/Tenant/Change", async (
-         //[FromForm] int tenantId,
-         //HttpContext http,
-         //IContextProvider ContextProvider) =>
-         //   {
-         //       //await ContextProvider.ReadAllContext();
-         //       //ContextProvider._AppState.TenantId = tenantId;
-         //       //await ContextProvider.SaveAllContextAsync(ContextProvider);
-         //       var referer = http.Request.Headers.Referer.ToString();
-         //       var url = string.IsNullOrEmpty(referer) ? "/" : referer;
+            app.MapGet("/whoami", (HttpContext http) =>
+            {
+                var name = http.User.Identity?.IsAuthenticated == true
+                    ? http.User.Identity.Name
+                    : "ANON";
+                return Results.Text(name);
+            }).AllowAnonymous();
 
-         //       return Results.Redirect(url);
-         //   }).RequireAuthorization();
+            app.MapPost("/account/set-tenant2", (TenantUser tenantUser) =>
+            {
+                Console.WriteLine($"SetTenant endpoint => tenantId = {tenantUser.TenantId}");
+                return Results.Ok(new { tenantUser.TenantId });
+            });
+
+            app.MapPost("/account/set-tenant", async (
+                TenantUser tenantUser,
+                HttpContext http,
+                UserManager<ApplicationUser> userManager,
+                SignInManager<ApplicationUser> signInManager) =>
+            {
+                Console.WriteLine($"IsAuth: {http.User.Identity?.IsAuthenticated}, Name: {http.User.Identity?.Name}");
+                // Validar tenant
+                if (tenantUser.TenantId is null)
+                    return Results.BadRequest("TenantId es obligatorio.");
+
+                var tenantId = tenantUser.TenantId.Value;
+
+                // Obtener usuario autenticado
+                var user = await userManager.GetUserAsync(http.User);
+                if (user is null)
+                    return Results.Unauthorized();
+
+                // Actualizar claim de tenant
+                var claims = await userManager.GetClaimsAsync(user);
+                var oldTenantClaim = claims.FirstOrDefault(c => c.Type == "TenantId");
+                if (oldTenantClaim is not null)
+                    await userManager.RemoveClaimAsync(user, oldTenantClaim);
+
+                await userManager.AddClaimAsync(user, new Claim("TenantId", tenantId.ToString()));
+
+                // Refrescar cookie
+                await signInManager.RefreshSignInAsync(user);
+
+                return Results.Ok();
+            }).AllowAnonymous();
+
+
+
+            //NO PUEDO USR JAVASCRIPT EN MINIMAL APIS .... 
+            //  app.MapPost("/Tenant/Change", async (
+            //[FromForm] int tenantId,
+            //HttpContext http,
+            //IContextProvider ContextProvider) =>
+            //   {
+            //       //await ContextProvider.ReadAllContext();
+            //       //ContextProvider._AppState.TenantId = tenantId;
+            //       //await ContextProvider.SaveAllContextAsync(ContextProvider);
+            //       var referer = http.Request.Headers.Referer.ToString();
+            //       var url = string.IsNullOrEmpty(referer) ? "/" : referer;
+
+            //       return Results.Redirect(url);
+            //   }).RequireAuthorization();
 
         }
     }

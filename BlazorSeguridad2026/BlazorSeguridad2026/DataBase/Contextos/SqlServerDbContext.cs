@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
 using Shares.Genericos;
 using Shares.Modelo;
+using Shares.Seguridad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,8 +70,8 @@ namespace Shares.Contextos
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
-          
+            TenantId = tenantInterceptor.ContextProvider._AppState.TenantId;
+
         }
 #endif
 

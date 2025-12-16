@@ -42,7 +42,7 @@ namespace Shares.Genericos
         private string _errorMessage = string.Empty;
         private Task<IDbContextTransaction>? _dbContextTransaction;
 
-        public new IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload)  where TEntity : class, IEntity
+        public new IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload)  where TEntity : class
         {
             var type = typeof(TEntity);
             //comprobamos si el repositorio no existe en el diccionario o si es necesario recargarlo

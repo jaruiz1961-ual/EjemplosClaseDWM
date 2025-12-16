@@ -1,5 +1,7 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.Extensions.Configuration;
 using Shares.SeguridadToken;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +39,25 @@ namespace Shares.Seguridad
         }
     }
 
+    public interface ITenantUser
+    {
+        string UserId { get; set; } 
+        int? TenantId { get; set; }
+    }
+    public class TenantUser : ITenantUser
+    {
+        public string UserId { get; set; } = default!;
+        public int? TenantId { get; set; }
+        public TenantUser(int? tenant,string userId)
+        {
+            TenantId = tenant;
+            UserId = userId;
+        }
+        public TenantUser()
+        {
+        }
+    }
+
 
     public interface IContextProvider
     {
@@ -52,7 +73,7 @@ namespace Shares.Seguridad
         string? GetValor(ClavesEstado clave);
         bool IsValid();
         Task LogOut();
-        Task<IContextProvider> ReadAllContext(bool force = false);
+        Task<IContextProvider> ReadAllContext(bool force );
         Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
         Task SaveAllContextAsync(IContextProvider? cp);
         Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, string? token, string? estado);
@@ -79,8 +100,22 @@ namespace Shares.Seguridad
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
 
-        public ContextProvider(ILocalStorageService localStorage)
+        private readonly IHttpContextAccessor http;
+        private readonly IConfiguration Configuracion;
+
+        public ContextProvider(ILocalStorageService localStorage,
+                               IHttpContextAccessor http,
+                               IConfiguration config)
         {
+            var defaultTenant = int.Parse(config["TenantId"] ?? "0");
+            var claim = http.HttpContext?.User?.FindFirst("TenantId")?.Value;
+
+            _AppState = new AppState
+            {
+                TenantId = int.TryParse(claim, out var t) ? t : defaultTenant,
+                // DbKey, etc.
+            };
+
             _localStorage = localStorage;
         }
 
@@ -88,7 +123,7 @@ namespace Shares.Seguridad
         /// Lee todo el contexto desde localStorage, incluida la cadena Estado y la reconstrucción del diccionario.
         /// Se ejecuta solo una vez.
         /// </summary>
-        public async Task<IContextProvider> ReadAllContext(bool force = false)
+        public async Task<IContextProvider> ReadAllContext(bool force )
         {
             if (_initialized && !force) return this;
 
@@ -134,7 +169,7 @@ namespace Shares.Seguridad
 
         public ContextProvider Copia()
         {
-            var cp = new ContextProvider(_localStorage)
+            var cp = new ContextProvider(_localStorage,http,Configuracion)
             {
                 _AppState = new AppState
                 {

@@ -4,10 +4,10 @@ using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
 using BlazorSeguridad2026.Components.Seguridad;
 using BlazorSeguridad2026.Data;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Shares.Contextos;
 using Shares.Genericos;
@@ -16,21 +16,22 @@ using Shares.Seguridad;
 using Shares.SeguridadToken;
 using static TenantInterop;
 
-
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultCorsPolicy", policy =>
     {
         policy
-            .AllowAnyOrigin()      // o .WithOrigins("https://tudominio.com")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
+// Swagger + JWT
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -59,44 +60,61 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-
-//Acceso al archivo de configuracion appsetings.json
+// Configuración
 IConfiguration configuration = builder.Configuration;
-var UrlApi = builder.Configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
-var ApiName = builder.Configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
-var ConnectionMode = builder.Configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
-var DataProvider = builder.Configuration["DataProvider"] ?? "SqlServer";
-var TenantId = builder.Configuration["TenantId"] ?? "0";
+var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
+var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
+var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
+var DataProvider = configuration["DataProvider"] ?? "SqlServer";
+var TenantId = configuration["TenantId"] ?? "0";
 
-//configuracion de la seguridad de Identidad de ASP.NET Core
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = configuration.GetConnectionString("DefaultConnection")
+                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
+// =================== HttpClient ===================
 
+// 1) HttpClient para el propio servidor Blazor (mismo host que la app + Identity)
+builder.Services.AddScoped(sp =>
+{
+    var nav = sp.GetRequiredService<NavigationManager>();
+    return new HttpClient
+    {
+        BaseAddress = new Uri(nav.BaseUri) // p.ej. https://localhost:7013/
+    };
+});
 
+// 2) IHttpClientFactory + cliente nombrado para API externa (UrlApi)
+builder.Services.AddHttpClient(ApiName, client =>
+{
+    client.BaseAddress = new Uri(UrlApi); // p.ej. https://api.midominio.com/
+});
 
-// Add services to the container.
+// (Opcional) Si quieres inyectar directamente un HttpClient para la API externa:
+builder.Services.AddScoped<HttpClient>(sp =>
+{
+    var factory = sp.GetRequiredService<IHttpClientFactory>();
+    return factory.CreateClient(ApiName);
+});
+
+// =================== Blazor / Identity ===================
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
-// Configuración de la autenticación y autorización (con roles)
-
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
-builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
+builder.Services.AddScoped<CustomAuthStateProvider>();
 
 builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
     .AddIdentityCookies();
 
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 builder.Services
@@ -113,21 +131,23 @@ builder.Services
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-
-
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddSingleton<ITokenService, TokenService>(); // para JWT hacia APIs
 
-// Generar toquen para acceso a las MInimal APIS del servidor desde el cliente Blazor
-builder.Services.AddSingleton<ITokenService, TokenService>();
+builder.Services.AddAntiforgery();
+builder.Services.AddHttpContextAccessor();
 
-// Configuración del Local Storage
+// Local Storage
 builder.Services.AddBlazoredLocalStorage();
 
-// Configuración del ContextProvider de la aplicación
+// ContextProvider multi-tenant
 builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
-    var cp = new ContextProvider(localStorage)
+    var http = sp.GetRequiredService<IHttpContextAccessor>();
+    var config = sp.GetRequiredService<IConfiguration>();
+
+    var cp = new ContextProvider(localStorage, http, config)
     {
         _AppState = new AppState
         {
@@ -144,17 +164,20 @@ builder.Services.AddScoped<ContextProvider>(sp =>
 });
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 
-// Configuración del HttpClient para llamadas a la API
-builder.Services.AddHttpClient(ApiName, (sp, client) =>
+// Interceptor multi-tenant
+builder.Services.AddScoped<TenantSaveChangesInterceptor>();
+builder.Services.AddScoped<ITenantService, TenantService>();
+
+// DbContext factories
+builder.Services.AddDbContextFactory<ApplicationDbContext>((sp, options) =>
 {
-    client.BaseAddress = new Uri(UrlApi);
-});
+    var config = sp.GetRequiredService<IConfiguration>();
+    var conn = config.GetConnectionString("DefaultConnection");
+    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+    options.UseSqlServer(conn);
+    options.AddInterceptors(interceptor);
+}, ServiceLifetime.Transient);
 
-
-// Interceptor para multitenant (opcional)
-builder.Services.AddTransient<TenantSaveChangesInterceptor>();
-
-// Factorías de DbContexts para todos los backends locales:
 builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -163,6 +186,7 @@ builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
     options.UseSqlServer(conn);
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
+
 builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -171,6 +195,7 @@ builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
     options.UseSqlite(conn);
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
+
 builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -180,14 +205,23 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
 
-// Factoría genérica por entidad
+// Factorías genéricas / UoW
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
-
-// Factoría de UoW
 builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
-using (var scope = builder.Services.BuildServiceProvider().CreateScope())
+builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
+{
+    options.DetailedErrors = true;
+});
+
+var app = builder.Build();
+
+// ServiceLocator para NavMenu
+ServiceLocator.Services = app.Services;
+
+// Migraciones
+using (var scope = app.Services.CreateScope())
 {
     void InitDb<TDb>(string factoryTypeKey, Action<TDb> migrator)
         where TDb : DbContext
@@ -201,26 +235,8 @@ using (var scope = builder.Services.BuildServiceProvider().CreateScope())
     InitDb<SqLiteDbContext>("SqLite", db => db?.Database.Migrate());
     InitDb<InMemoryDbContext>("InMemory", db => db?.Database.EnsureCreated());
 }
-builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
-{
-    options.DetailedErrors = true;
-});
 
-builder.Services.AddAntiforgery();
-builder.Services.AddHttpContextAccessor();
-
-var app = builder.Build();
-
-
-//registro para poder acceder desde js a los servicios de DI clase estatica en NavMenu para acceder al TenantId del contexto
-ServiceLocator.Services = app.Services;
-
-
-
-
-
-
-// Configure the HTTP request pipeline.
+// Pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -229,19 +245,17 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-
 app.UseCors(MyAllowSpecificOrigins);
 
-app.UseRouting();              // <- IMPORTANTE: routing antes de auth
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -249,15 +263,6 @@ if (app.Environment.IsDevelopment())
     //app.UseSwaggerUI();
 }
 
-if (app.Environment.IsDevelopment())
-    app.UseWebAssemblyDebugging();
-else
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
@@ -266,12 +271,10 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorSeguridad2026.Client._Imports).Assembly);
 
-// Add additional endpoints required by the Identity /Account Razor components.
 app.MapAdditionalIdentityEndpoints();
 
-app.GenericApis<Usuario>();//mapeo a APIS
+// Tus Minimal APIs
+app.GenericApis<Usuario>();
 app.LoginApis();
-
-
 
 app.Run();

@@ -1,22 +1,26 @@
 ﻿@implements IDisposable
 @inject NavigationManager NavigationManager
+@using BlazorSeguridad2026.Data
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Identity
 @using Shares.Seguridad
+@using System.Security.Claims
 @inject IContextProvider ContextProvider
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
-@inject IHttpContextAccessor HttpContextAccessor
+
+@inject ITenantService TenantService
+ @inject CustomAuthStateProvider AuthStateProvider  
+
+
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
+@inject UserManager<ApplicationUser> UserManager
+@inject AuthenticationStateProvider AuthStateProvider
+@inject SignInManager<ApplicationUser> SignInManager
 
 
-@functions {
-    string GetAntiforgeryToken()
-    {
-        var http = HttpContextAccessor.HttpContext!;
-        var tokens = Antiforgery.GetAndStoreTokens(http);
-        return tokens.RequestToken!;
-    }
-}
+
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BlazorSeguridad2026</a>
@@ -145,12 +149,22 @@
     </nav>
 </div>
 
-
+@if (!string.IsNullOrEmpty(_errorCambiarTenant))
+{
+    <div class="alert alert-danger m-2">
+        @_errorCambiarTenant
+    </div>
+}
 
 @code {
     private string? currentUrl;
     private bool adminMenuExpanded = false;
     int TenantId = 0;
+    string email = string.Empty;
+    string password = string.Empty;
+    string UrlApi = string.Empty;
+    bool isLoading = true;
+   
 
     private void ToggleAdminMenu()
         => adminMenuExpanded = !adminMenuExpanded;
@@ -158,41 +172,86 @@
     private int SelectedTenantId;
     private string SelectedDbKey;
 
+    protected override async void OnInitialized()
+    {
+        var uri = new Uri(NavigationManager.Uri);
+        var query = System.Web.HttpUtility.ParseQueryString(uri.Query);
+
+        email = query["email"] ?? string.Empty;
+        password = query["password"] ?? string.Empty;
+
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+        SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
+        SelectedDbKey = ContextProvider._AppState.DbKey ?? "InMemory";
+
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var principal = authState.User;
+        var userId = principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+       
+    }
 
     private async Task Actualizar()
     {
         ContextProvider._AppState.TenantId = SelectedTenantId;
         ContextProvider._AppState.DbKey = SelectedDbKey;
         await ContextProvider.SaveAllContextAsync(ContextProvider);
-        // Opcional: recargar toda la página
-        // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        await CambiarTenant();
+
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await ContextProvider.ReadAllContext();
+            await ContextProvider.ReadAllContext(true);
             SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
             SelectedDbKey = ContextProvider._AppState.DbKey;
         }
 
     }
 
-    
-
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
-        SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-        SelectedDbKey = ContextProvider._AppState.DbKey ?? "InMemory";
-    }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
         StateHasChanged();
     }
+
+    private string? _errorCambiarTenant;
+
+    private async Task CambiarTenant()
+    {
+        _errorCambiarTenant = null;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var principal = authState.User;
+
+            var user = await UserManager.GetUserAsync(principal);
+            if (user is null)
+                throw new InvalidOperationException("Usuario no autenticado.");
+
+            var claims = await UserManager.GetClaimsAsync(user);
+            var oldTenantClaim = claims.FirstOrDefault(c => c.Type == "TenantId");
+            if (oldTenantClaim is not null)
+                await UserManager.RemoveClaimAsync(user, oldTenantClaim);
+
+            await UserManager.AddClaimAsync(user, new Claim("TenantId", SelectedTenantId.ToString()));
+
+            // IMPORTANTE: no llames RefreshSignInAsync aquí en Blazor interactivo
+
+            // Fuerza recarga de página para que todo se re-evalúe
+            NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        }
+        catch (Exception ex)
+        {
+            _errorCambiarTenant = $"Error al cambiar de tenant: {ex.Message}";
+        }
+    }
+
+    
 
     public void Dispose()
     {

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Shares.Seguridad;
 
 namespace Shares.Genericos
 {
@@ -23,9 +24,10 @@ namespace Shares.Genericos
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
-          
+            TenantId = tenantInterceptor.ContextProvider._AppState.TenantId;
+
         }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

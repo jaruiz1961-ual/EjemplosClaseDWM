@@ -12,7 +12,7 @@ using Shares.Seguridad;
 
 namespace Shares.Servicios
 {
-    public interface IGenericDataService<T> where T : class, ITenantEntity, IEntity
+    public interface IGenericDataService<T> where T : class, ITenantEntity
     {
         Task<IEnumerable<T>> ObtenerTodosAsync(bool reload);
         Task<T?> ObtenerPorIdAsync(int id, bool reload);
@@ -24,7 +24,7 @@ namespace Shares.Servicios
         Task<T?> ActualizarAsync(T data, bool reload);
         Task<T?> EliminarAsync(int id, bool reload);
     }
-    public class GenericDataService<T> : IGenericDataService<T> where T : class, ITenantEntity, IEntity
+    public class GenericDataService<T> : IGenericDataService<T> where T : class, ITenantEntity
     {
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private IUnitOfWorkAsync uow;

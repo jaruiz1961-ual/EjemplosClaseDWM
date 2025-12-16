@@ -95,7 +95,7 @@ else
         {
             if (ContextProvider.IsValid())
             {  
-                await ContextProvider.ReadAllContext();
+                await ContextProvider.ReadAllContext(false);
                 var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await user.ObtenerTodosAsync(true);
                 usuarios = list.ToList();
