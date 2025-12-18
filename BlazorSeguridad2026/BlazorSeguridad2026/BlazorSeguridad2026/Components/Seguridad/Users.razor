@@ -3,7 +3,14 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
+@using Shares.Genericos
+@using Shares.Modelo
+@using Shares.Seguridad
+@using Shares.Servicios
+@inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject IContextProvider ContextProvider
 @* @attribute [Authorize(Roles = "Admin")] *@
+@inject UserManager<ApplicationUser> UserManager
 
 @inject IUserService UserService
 @inject NavigationManager Nav
@@ -184,6 +191,7 @@
     private List<ApplicationUser>? users;
     private string? error;
     private string? success;
+    bool _isValidContext;
 
     private int editingUserId;
     private int selectedUserId;
@@ -204,12 +212,37 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadUsersAsync();
+       
     }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await LoadUsersAsync();
+
+    }
+
 
     private async Task LoadUsersAsync()
     {
-        users = await UserService.GetAllAsync();
+        try
+        {
+            if (ContextProvider.IsValid())
+            {
+                await ContextProvider.ReadAllContext();
+                var user = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
+                var list = await user.GetAllAsync();
+                users = list.ToList();
+                _isValidContext = true;
+            }
+            else _isValidContext = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     private void StartEdit(ApplicationUser u)

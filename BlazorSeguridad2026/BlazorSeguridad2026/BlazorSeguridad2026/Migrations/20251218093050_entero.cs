@@ -12,7 +12,7 @@ namespace BlazorSeguridad2026.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AspNetRoles",
+                name: "Roles",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -29,7 +29,7 @@ namespace BlazorSeguridad2026.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUsers",
+                name: "AplicationUser",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -58,7 +58,7 @@ namespace BlazorSeguridad2026.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetRoleClaims",
+                name: "RoleClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -79,7 +79,7 @@ namespace BlazorSeguridad2026.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserClaims",
+                name: "UserClaims",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -100,7 +100,7 @@ namespace BlazorSeguridad2026.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserLogins",
+                name: "UserLogins",
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
@@ -120,7 +120,7 @@ namespace BlazorSeguridad2026.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AspNetUserRoles",
+                name: "UserRoles",
                 columns: table => new
                 {
                     UserId = table.Column<int>(type: "int", nullable: false),
