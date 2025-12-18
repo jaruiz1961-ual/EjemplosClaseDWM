@@ -10,14 +10,14 @@ namespace BlazorSeguridad2026.Data
 {
 
 
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser,ApplicationRole,int>
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
 
-        //public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-        //   : base(options)
-        //{ }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+           : base(options)
+        { }
 
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
@@ -81,7 +81,7 @@ namespace BlazorSeguridad2026.Data
                 var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
                 optionsBuilder.UseSqlServer(connectionString);
 
-                return new ApplicationDbContext(optionsBuilder.Options, null);
+                return new ApplicationDbContext(optionsBuilder.Options);
             }
         }
 

@@ -37,7 +37,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
             app.MapPost("/api/auth/token", async (
             LoginDataUser request,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager, // opcional
+            RoleManager<ApplicationRole> roleManager, // opcional
             ITokenService tokenService) =>
             {
                 // Usa request.Email, no request.Username
@@ -49,7 +49,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.NameIdentifier, user.Id), // o ClaimTypes.Sid
+                    new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // o ClaimTypes.Sid
                     new Claim(ClaimTypes.Name, user.UserName ?? ""),
                     new Claim(ClaimTypes.Email, user.Email ?? ""),
                     new Claim("TenantId", (user.TenantId ?? 0).ToString()),

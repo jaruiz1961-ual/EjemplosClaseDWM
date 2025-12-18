@@ -21,27 +21,27 @@ namespace Shares.Genericos
     //PM> dotnet ef database update --context SqLiteDbContext --project Shares
 
 
-    public class SqlLiteContextFactory
-        : IDesignTimeDbContextFactory<SqLiteDbContext>
-    {
-        private readonly TenantSaveChangesInterceptor _tenantInterceptor;
-        public SqLiteDbContext CreateDbContext(string[] args)
-        {
+    //public class SqlLiteContextFactory
+    //    : IDesignTimeDbContextFactory<SqLiteDbContext>
+    //{
+    //    private readonly TenantSaveChangesInterceptor _tenantInterceptor;
+    //    public SqLiteDbContext CreateDbContext(string[] args)
+    //    {
                 
-        // ruta al appsettings del proyecto host (ajusta según tu solución)
-        var config = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", optional: false)
-                .Build();
+    //    // ruta al appsettings del proyecto host (ajusta según tu solución)
+    //    var config = new ConfigurationBuilder()
+    //            .SetBasePath(Directory.GetCurrentDirectory())
+    //            .AddJsonFile("appsettings.json", optional: false)
+    //            .Build();
 
-            var connectionString = config.GetConnectionString("DefaultConnection");
+    //        var connectionString = config.GetConnectionString("DefaultConnection");
 
-            var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
-            optionsBuilder.UseSqlite(connectionString);
+    //        var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
+    //        optionsBuilder.UseSqlite(connectionString);
 
-            return new SqLiteDbContext(optionsBuilder.Options,_tenantInterceptor);
-        }
-    }
+    //        return new SqLiteDbContext(optionsBuilder.Options);
+    //    }
+    //}
 
 
 
@@ -54,8 +54,8 @@ namespace Shares.Genericos
     public SqLiteDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SqLiteDbContext>();
-            optionsBuilder.UseSqlite(@"data source = c:\\temp\\NuevaSqlite3.db");
-            return new SqLiteDbContext(optionsBuilder.Options, _tenantInterceptor);
+            optionsBuilder.UseSqlite(@"data source = c:\\temp\\NuevaSqlite5.db");
+            return new SqLiteDbContext(optionsBuilder.Options);
         }
     }
 #endif

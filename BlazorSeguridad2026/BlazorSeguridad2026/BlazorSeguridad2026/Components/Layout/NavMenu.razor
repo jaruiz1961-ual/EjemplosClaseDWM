@@ -1,4 +1,4 @@
-﻿@implements IDisposable
+﻿@* @implements IDisposable *@
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Authorization
 @using Shares.Seguridad
@@ -183,20 +183,20 @@
     protected override void OnInitialized()
     {
         currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        NavigationManager.LocationChanged += OnLocationChanged;
+        // NavigationManager.LocationChanged += OnLocationChanged;
         SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
         SelectedDbKey = ContextProvider._AppState.DbKey ?? "InMemory";
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        StateHasChanged();
+        // currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        // StateHasChanged();
     }
 
-    public void Dispose()
-    {
-        NavigationManager.LocationChanged -= OnLocationChanged;
-    }
+    // public void Dispose()
+    // {
+    //     NavigationManager.LocationChanged -= OnLocationChanged;
+    // }
 }
 

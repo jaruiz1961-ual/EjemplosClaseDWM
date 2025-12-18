@@ -6,15 +6,15 @@ namespace BlazorSeguridad2026.Components.Seguridad
     public interface IUserService
     {
         Task<List<ApplicationUser>> GetAllAsync();
-        Task<ApplicationUser?> GetByIdAsync(string id);
+        Task<ApplicationUser?> GetByIdAsync(int id);
 
         Task<IdentityResult> CreateAsync(string email, string password, int? TenantId, string KeyDb);
-        Task<IdentityResult> UpdateUserAsync(string id, Action<ApplicationUser> updateAction);
+        Task<IdentityResult> UpdateUserAsync(int id, Action<ApplicationUser> updateAction);
 
-        Task<IdentityResult> DeleteAsync(string id);
+        Task<IdentityResult> DeleteAsync(int id);
 
-        Task<IList<string>> GetUserRolesAsync(string userId);
-        Task<IdentityResult> SetUserRolesAsync(string userId, IEnumerable<string> roles);
+        Task<IList<string>> GetUserRolesAsync(int userId);
+        Task<IdentityResult> SetUserRolesAsync(int userId, IEnumerable<string> roles);
     }
 
     public class UserService : IUserService
@@ -29,7 +29,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
         public Task<List<ApplicationUser>> GetAllAsync() =>
             Task.FromResult(_userManager.Users.ToList());
 
-        public Task<ApplicationUser?> GetByIdAsync(string id) =>
+        public Task<ApplicationUser?> GetByIdAsync(int id) =>
             Task.FromResult(_userManager.Users.FirstOrDefault(u => u.Id == id));
 
         public async Task<IdentityResult> CreateAsync(string email, string password, int? tenantId, string keyDb)
@@ -38,9 +38,9 @@ namespace BlazorSeguridad2026.Components.Seguridad
             return await _userManager.CreateAsync(user, password);
         }
 
-        public async Task<IdentityResult> UpdateUserAsync(string id, Action<ApplicationUser> updateAction)
+        public async Task<IdentityResult> UpdateUserAsync(int id, Action<ApplicationUser> updateAction)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
             if (user is null)
                 return IdentityResult.Failed(new IdentityError { Description = "User not found." });
             updateAction(user);
@@ -50,26 +50,26 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
        
 
-        public async Task<IdentityResult> DeleteAsync(string id)
+        public async Task<IdentityResult> DeleteAsync(int id)
         {
-            var user = await _userManager.FindByIdAsync(id);
+            var user = await _userManager.FindByIdAsync(id.ToString());
             if (user is null)
                 return IdentityResult.Failed(new IdentityError { Description = "User not found." });
 
             return await _userManager.DeleteAsync(user);
         }
 
-        public async Task<IList<string>> GetUserRolesAsync(string userId)
+        public async Task<IList<string>> GetUserRolesAsync(int userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             return user is null
                 ? Array.Empty<string>()
                 : await _userManager.GetRolesAsync(user);
         }
 
-        public async Task<IdentityResult> SetUserRolesAsync(string userId, IEnumerable<string> roles)
+        public async Task<IdentityResult> SetUserRolesAsync(int userId, IEnumerable<string> roles)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var user = await _userManager.FindByIdAsync(userId.ToString());
             if (user is null)
                 return IdentityResult.Failed(new IdentityError { Description = "User not found." });
 

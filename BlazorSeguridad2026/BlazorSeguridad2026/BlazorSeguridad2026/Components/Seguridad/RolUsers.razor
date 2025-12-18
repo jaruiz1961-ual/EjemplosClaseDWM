@@ -6,7 +6,7 @@
 @attribute [Authorize(Roles = "Admin")]
 
 @inject IUserService UserService
-@inject RoleManager<IdentityRole> RoleManager
+@inject RoleManager<ApplicationRole> RoleManager
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager Nav
 
@@ -114,7 +114,7 @@ else
 @code {
     [Parameter] public string RoleId { get; set; } = string.Empty;
 
-    private IdentityRole? role;
+    private ApplicationRole? role;
     private List<ApplicationUser> usersInRole = new();
     private List<ApplicationUser> usersNotInRole = new();
 
@@ -153,10 +153,10 @@ else
         // Aquí uso GetUsersInRoleAsync para eficiencia
         var inRole = await UserManager.GetUsersInRoleAsync(role!.Name!);
 
-        var inRoleIds = new HashSet<string>(inRole.Select(u => u.Id));
+        var inRoleIds = new HashSet<string>(inRole.Select(u => u.Id.ToString()));
 
-        usersInRole = allUsers.Where(u => inRoleIds.Contains(u.Id)).ToList();
-        usersNotInRole = allUsers.Where(u => !inRoleIds.Contains(u.Id)).ToList();
+        usersInRole = allUsers.Where(u => inRoleIds.Contains(u.Id.ToString())).ToList();
+        usersNotInRole = allUsers.Where(u => !inRoleIds.Contains(u.Id.ToString())).ToList();
     }
 
     private async Task AddToRole()
@@ -187,14 +187,14 @@ else
         }
     }
 
-    private async Task RemoveFromRole(string userId)
+    private async Task RemoveFromRole(int userId)
     {
         if (role is null)
             return;
 
         error = success = null;
 
-        var user = await UserManager.FindByIdAsync(userId);
+        var user = await UserManager.FindByIdAsync(userId.ToString());
         if (user is null)
         {
             error = "Usuario no encontrado.";

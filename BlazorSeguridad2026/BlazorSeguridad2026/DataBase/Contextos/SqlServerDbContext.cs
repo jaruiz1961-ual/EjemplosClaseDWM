@@ -24,32 +24,32 @@ namespace Shares.Contextos
         public SqlServerDbContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva3; AttachDbFilename=c:\temp\Nueva3.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
+            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva5; AttachDbFilename=c:\temp\Nueva5.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
             return new SqlServerDbContext(optionsBuilder.Options);
         }
     }
 #endif
-    public class SqlServerContextFactory
-       : IDesignTimeDbContextFactory<SqlServerDbContext>
-    {
-        private readonly TenantSaveChangesInterceptor _tenantInterceptor;
-        public SqlServerDbContext CreateDbContext(string[] args)
-        {
+    //public class SqlServerContextFactory
+    //   : IDesignTimeDbContextFactory<SqlServerDbContext>
+    //{
+    //    private readonly TenantSaveChangesInterceptor _tenantInterceptor;
+    //    public SqlServerDbContext CreateDbContext(string[] args)
+    //    {
 
-            // ruta al appsettings del proyecto host (ajusta según tu solución)
-            var config = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false)
-                    .Build();
+    //        // ruta al appsettings del proyecto host (ajusta según tu solución)
+    //        var config = new ConfigurationBuilder()
+    //                .SetBasePath(Directory.GetCurrentDirectory())
+    //                .AddJsonFile("appsettings.json", optional: false)
+    //                .Build();
 
-            var connectionString = config.GetConnectionString("DefaultConnection");
+    //        var connectionString = config.GetConnectionString("DefaultConnection");
 
-            var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-            optionsBuilder.UseSqlServer(connectionString);
+    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
+    //        optionsBuilder.UseSqlServer(connectionString);
 
-            return new SqlServerDbContext(optionsBuilder.Options, _tenantInterceptor);
-        }
-    }
+    //        return new SqlServerDbContext(optionsBuilder.Options);
+    //    }
+    //}
 
     public class SqlServerDbContext : DbContext
     {

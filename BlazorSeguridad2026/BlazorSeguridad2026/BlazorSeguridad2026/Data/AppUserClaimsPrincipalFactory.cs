@@ -5,11 +5,11 @@ using System.Security.Claims;
 namespace BlazorSeguridad2026.Data
 {
     public class AppUserClaimsPrincipalFactory
-        : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>
+        : UserClaimsPrincipalFactory<ApplicationUser, ApplicationRole>
     {
         public AppUserClaimsPrincipalFactory(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
+            RoleManager<ApplicationRole> roleManager,
             IOptions<IdentityOptions> options)
             : base(userManager, roleManager, options)
         {

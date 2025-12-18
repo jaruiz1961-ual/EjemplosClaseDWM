@@ -7,7 +7,6 @@ using BlazorSeguridad2026.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Shares.Contextos;
 using Shares.Genericos;
@@ -16,21 +15,22 @@ using Shares.Seguridad;
 using Shares.SeguridadToken;
 using static TenantInterop;
 
-
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DefaultCorsPolicy", policy =>
     {
         policy
-            .AllowAnyOrigin()      // o .WithOrigins("https://tudominio.com")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
 
+// Swagger + JWT
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -59,71 +59,63 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
-
-//Acceso al archivo de configuracion appsetings.json
+// Configuración
 IConfiguration configuration = builder.Configuration;
-var UrlApi = builder.Configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
-var ApiName = builder.Configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
-var ConnectionMode = builder.Configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
-var DataProvider = builder.Configuration["DataProvider"] ?? "SqlServer";
-var TenantId = builder.Configuration["TenantId"] ?? "0";
+var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
+var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
+var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
+var DataProvider = configuration["DataProvider"] ?? "SqlServer";
+var TenantId = configuration["TenantId"] ?? "0";
 
-//configuracion de la seguridad de Identidad de ASP.NET Core
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var connectionString = configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-
-
-
-// Add services to the container.
+// Razor Components / Blazor
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
 
-// Configuración de la autenticación y autorización (con roles)
-
+// Autenticación/autorización (Identity + roles)
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 
 builder.Services.AddAuthentication(options =>
-    {
-        options.DefaultScheme = IdentityConstants.ApplicationScheme;
-        options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-    })
+{
+    options.DefaultScheme = IdentityConstants.ApplicationScheme;
+    options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
     .AddIdentityCookies();
 
-
+// DbContext Identity
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
+
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+// Identity con ApplicationUser / ApplicationRole (int)
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = true;
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
-    .AddRoles<IdentityRole>()
+    .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
+// Servicios de seguridad
 builder.Services.AddScoped<IRoleService, RoleService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-
-
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-
-// Generar toquen para acceso a las MInimal APIS del servidor desde el cliente Blazor
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
-// Configuración del Local Storage
+// Local Storage
 builder.Services.AddBlazoredLocalStorage();
 
-// Configuración del ContextProvider de la aplicación
+// ContextProvider multitenant
 builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
@@ -144,17 +136,16 @@ builder.Services.AddScoped<ContextProvider>(sp =>
 });
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 
-// Configuración del HttpClient para llamadas a la API
+// HttpClient hacia la API
 builder.Services.AddHttpClient(ApiName, (sp, client) =>
 {
     client.BaseAddress = new Uri(UrlApi);
 });
 
-
-// Interceptor para multitenant (opcional)
+// Interceptor multitenant
 builder.Services.AddTransient<TenantSaveChangesInterceptor>();
 
-// Factorías de DbContexts para todos los backends locales:
+// Factorías de DbContexts para backends locales
 builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -163,6 +154,7 @@ builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>
     options.UseSqlServer(conn);
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
+
 builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -171,6 +163,7 @@ builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
     options.UseSqlite(conn);
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
+
 builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
@@ -180,27 +173,12 @@ builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
 
-// Factoría genérica por entidad
+// Factoría genérica y UoW
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
-
-// Factoría de UoW
 builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
-using (var scope = builder.Services.BuildServiceProvider().CreateScope())
-{
-    void InitDb<TDb>(string factoryTypeKey, Action<TDb> migrator)
-        where TDb : DbContext
-    {
-        var factory = scope.ServiceProvider.GetService<IDbContextFactory<TDb>>();
-        var db = factory?.CreateDbContext();
-        migrator(db);
-    }
-
-    InitDb<SqlServerDbContext>("SqlServer", db => db?.Database.Migrate());
-    InitDb<SqLiteDbContext>("SqLite", db => db?.Database.Migrate());
-    InitDb<InMemoryDbContext>("InMemory", db => db?.Database.EnsureCreated());
-}
+// Blazor Server
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
 {
     options.DetailedErrors = true;
@@ -211,16 +189,26 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
-
-//registro para poder acceder desde js a los servicios de DI clase estatica en NavMenu para acceder al TenantId del contexto
+// Service locator (para JS/TenantInterop)
 ServiceLocator.Services = app.Services;
 
+// Migrar/crear bases de datos usando el ServiceProvider real
+using (var scope = app.Services.CreateScope())
+{
+    void InitDb<TDb>(Action<TDb> migrator)
+        where TDb : DbContext
+    {
+        var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<TDb>>();
+        using var db = factory.CreateDbContext();
+        migrator(db);
+    }
 
+    //InitDb<SqlServerDbContext>(db => db.Database.Migrate());
+    //InitDb<SqLiteDbContext>(db => db.Database.Migrate());
+    //InitDb<InMemoryDbContext>(db => db.Database.EnsureCreated());
+}
 
-
-
-
-// Configure the HTTP request pipeline.
+// Pipeline HTTP
 if (app.Environment.IsDevelopment())
 {
     app.UseWebAssemblyDebugging();
@@ -229,35 +217,18 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
-
 app.UseCors(MyAllowSpecificOrigins);
 
-app.UseRouting();              // <- IMPORTANTE: routing antes de auth
+app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-
-if (app.Environment.IsDevelopment())
-{
-    //app.UseSwagger();
-    //app.UseSwaggerUI();
-}
-
-if (app.Environment.IsDevelopment())
-    app.UseWebAssemblyDebugging();
-else
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
-}
-
-app.UseHttpsRedirection();
 app.UseAntiforgery();
 
 app.MapStaticAssets();
@@ -266,12 +237,11 @@ app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(BlazorSeguridad2026.Client._Imports).Assembly);
 
-// Add additional endpoints required by the Identity /Account Razor components.
+// Endpoints de /Account de Identity
 app.MapAdditionalIdentityEndpoints();
 
-app.GenericApis<Usuario>();//mapeo a APIS
+// Minimal APIs
+app.GenericApis<Usuario>();
 app.LoginApis();
-
-
 
 app.Run();

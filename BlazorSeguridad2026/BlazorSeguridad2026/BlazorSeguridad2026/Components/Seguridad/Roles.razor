@@ -1,4 +1,5 @@
 ﻿@page "/roles"
+@using BlazorSeguridad2026.Data
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
@@ -134,11 +135,11 @@
 </div>
 
 @code {
-    private List<IdentityRole>? roles;
+    private List<ApplicationRole>? roles;
     private string? error;
     private string? success;
 
-    private string? editingRoleId;
+    private int editingRoleId;
     private string? editRoleName;
 
     private class NewRoleModel
@@ -158,7 +159,7 @@
         roles = await RoleService.GetAllAsync();
     }
 
-    private void StartEdit(IdentityRole role)
+    private void StartEdit(ApplicationRole role)
     {
         editingRoleId = role.Id;
         editRoleName = role.Name;
@@ -167,13 +168,13 @@
 
     private void CancelEdit()
     {
-        editingRoleId = null;
+        editingRoleId = 0;
         editRoleName = null;
     }
 
     private async Task SaveEdit()
     {
-        if (editingRoleId is null || string.IsNullOrWhiteSpace(editRoleName))
+        if (editingRoleId == 0 || string.IsNullOrWhiteSpace(editRoleName))
         {
             error = "Nombre de rol no válido.";
             return;
@@ -186,7 +187,7 @@
         if (result.Succeeded)
         {
             success = "Rol actualizado.";
-            editingRoleId = null;
+            editingRoleId = 0;
             editRoleName = null;
             await LoadRolesAsync();
         }
@@ -220,7 +221,7 @@
         }
     }
 
-    private async Task DeleteRole(string id)
+    private async Task DeleteRole(int id)
     {
         error = success = null;
 
