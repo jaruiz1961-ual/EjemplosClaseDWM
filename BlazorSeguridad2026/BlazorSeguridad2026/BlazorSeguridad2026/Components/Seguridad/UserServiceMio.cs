@@ -29,25 +29,25 @@ namespace BlazorSeguridad2026.Components.Seguridad
             if (uow == null)
                 uow = _unitOfWorkFactory.Create(_contextProvider);
 
-            var repo = uow.GetRepository<Users>(reload);
+            var repo = uow.GetRepository<ApplicationUser>(reload);
 
             var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
-            var lista = ApplicationUser.Convert(allEntities.ToList());
+            var lista = allEntities.ToList();
             return lista;                 
         }
 
 
         public async Task<ApplicationUser?> GetByIdAsync(int id) 
-            {
-                        if (uow == null)
+        {
+            if (uow == null)
                 uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<Users>(reload);
+            var repo = uow.GetRepository<ApplicationUser>(reload);
        
             var entity = await repo.GetByIdAsync(id, reload);
-            var entidad = ApplicationUser.Convert(new List<Users> { entity }).FirstOrDefault();
-            return entidad;
+
+            return entity;
             
-            }
+        }
 
         public async Task<IdentityResult> CreateAsync(string email, string password, int? tenantId, string keyDb)
         {

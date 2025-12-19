@@ -1,4 +1,4 @@
-﻿#define UPDATE_DATABASE
+﻿//#define UPDATE_DATABASE
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -14,8 +14,8 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Shares.Contextos
 {
-    //PM>  dotnet ef migrations add Inicial --project BlazorSeguridad2026.Data --context SqlServerDbContext  --output-dir Migrations/SqlServerDbContext
-    //PM> dotnet ef database update --context SqlServerDbContext --project Database
+    //PM>  dotnet ef migrations add Inicial --project BlazorSeguridad2026.Data --context SqlServerDbContext  --output-dir Migrations/SqlServer
+    //PM> dotnet ef database update --project BlazorSeguridad2026.Data --context SqlserverDbContext 
 
 #if UPDATE_DATABASE
     public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>

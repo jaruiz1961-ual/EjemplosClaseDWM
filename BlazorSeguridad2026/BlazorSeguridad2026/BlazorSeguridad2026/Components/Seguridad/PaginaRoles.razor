@@ -1,14 +1,14 @@
-﻿@page "/Roles"
-@using BlazorSeguridad2026.Data
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Identity
-@using BlazorSeguridad2026.Data
+﻿@page "/roles"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@* @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity *@
+
+
 @* @attribute [Authorize(Roles = "Admin")] *@
 
 @inject IRoleService RoleService
 @inject NavigationManager Nav
-@inject UserManager<ApplicationRole> RoleManager
+@* @inject UserManager<ApplicationRole> RoleManager *@
 
 <h3>Roles</h3>
 
