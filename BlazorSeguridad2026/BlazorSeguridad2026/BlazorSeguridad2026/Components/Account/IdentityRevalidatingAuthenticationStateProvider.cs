@@ -1,3 +1,4 @@
+using System.Net.NetworkInformation;
 using System.Security.Claims;
 using BlazorSeguridad2026.Data;
 using Microsoft.AspNetCore.Components.Authorization;

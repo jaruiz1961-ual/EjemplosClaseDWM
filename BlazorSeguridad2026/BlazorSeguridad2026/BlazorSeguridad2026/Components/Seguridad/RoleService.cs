@@ -1,4 +1,6 @@
-﻿namespace BlazorSeguridad2026.Components.Seguridad
+﻿using System.Net.NetworkInformation;
+
+namespace BlazorSeguridad2026.Components.Seguridad
 {
     using BlazorSeguridad2026.Data;
     // Services/IRoleService.cs

@@ -3,14 +3,14 @@ using Blazored.LocalStorage;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
 using BlazorSeguridad2026.Components.Seguridad;
-using BlazorSeguridad2026.Data;
+
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Shares.Contextos;
 using Shares.Genericos;
-using Shares.Modelo;
+using BlazorSeguridad2026.Data;
 using Shares.Seguridad;
 using Shares.SeguridadToken;
 using static TenantInterop;
@@ -67,8 +67,8 @@ var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
 var DataProvider = configuration["DataProvider"] ?? "SqlServer";
 var TenantId = configuration["TenantId"] ?? "0";
 
-var connectionString = configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+var identityConnectionString = configuration.GetConnectionString("SqlServerDbContext")
+    ?? throw new InvalidOperationException("Connection string 'SqlServerDbContext' not found.");
 
 // Razor Components / Blazor
 builder.Services.AddRazorComponents()
@@ -89,8 +89,8 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 // DbContext Identity
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDbContext<SqlServerDbContext>(options =>
+    options.UseSqlServer(identityConnectionString));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -102,7 +102,7 @@ builder.Services
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
     .AddRoles<ApplicationRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddEntityFrameworkStores<SqlServerDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 

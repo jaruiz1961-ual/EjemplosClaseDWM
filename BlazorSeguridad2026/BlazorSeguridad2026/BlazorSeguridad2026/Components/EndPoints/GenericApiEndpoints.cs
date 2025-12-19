@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Shares.Genericos;
-using Shares.Modelo;
+using BlazorSeguridad2026.Data;
 using Shares.Seguridad;
 using Shares.Servicios;
 using System.Linq.Expressions;

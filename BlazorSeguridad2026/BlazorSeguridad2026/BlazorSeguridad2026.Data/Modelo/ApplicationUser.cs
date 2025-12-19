@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Abstractions;
-using Shares.Modelo;
+using BlazorSeguridad2026.Data;
 
 namespace BlazorSeguridad2026.Data
 {

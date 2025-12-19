@@ -1,31 +1,30 @@
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+ï»¿using BlazorSeguridad2026.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using Shares.Genericos;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
-  using Microsoft.Extensions.Configuration;
-using Shares.Modelo;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace BlazorSeguridad2026.Data
+namespace Shares.Genericos
 {
 
 
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser,ApplicationRole,int>
+
+    public class InMemoryDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-           : base(options)
-        { }
 
-
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options,
-            TenantSaveChangesInterceptor tenantInterceptor)
-            : base(options)
+        public InMemoryDbContext(DbContextOptions<InMemoryDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
+            : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
             TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
+          
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -60,30 +59,29 @@ namespace BlazorSeguridad2026.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(e => e.Codigo).IsRequired();
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Usuario>().HasData
+       (new Usuario { Id = 1, UserName = "Usuario1", Contexto = "InMemory", Codigo = "0001", Password = "abc 11", TenantId = 0 },
+       new Usuario { Id = 2, UserName = "Usuario2", Contexto = "InMemory", Codigo = "0002", Password = "abc 22", TenantId = 1 },
+       new Usuario { Id = 3, UserName = "Usuario3", Contexto = "InMemory", Codigo = "0003", Password = "abc 33", TenantId = 2 });
+
+
+
+
             ModelCreatingTenant(modelBuilder);
 
         }
 
-        public class ApplicationDbContextFactory
-    : IDesignTimeDbContextFactory<ApplicationDbContext>
-        {
-            public ApplicationDbContext CreateDbContext(string[] args)
-            {
-                TenantSaveChangesInterceptor tenantInterceptor = null;
-                // ruta al appsettings del proyecto host (ajusta según tu solución)
-                var config = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false)
-                    .Build();
-
-                var connectionString = config.GetConnectionString("DefaultConnection");
-
-                var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-                optionsBuilder.UseSqlServer(connectionString);
-
-                return new ApplicationDbContext(optionsBuilder.Options);
-            }
-        }
+        public virtual DbSet<Usuario>? Usuario { get; set; }
+       
 
     }
+
 }
