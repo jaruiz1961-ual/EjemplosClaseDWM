@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BlazorSeguridad2026.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251218133816_nombreTablas")]
-    partial class nombreTablas
+    [Migration("20251219101057_Inico")]
+    partial class Inico
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

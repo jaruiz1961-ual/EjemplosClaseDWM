@@ -29,10 +29,11 @@ namespace BlazorSeguridad2026.Components.Seguridad
             if (uow == null)
                 uow = _unitOfWorkFactory.Create(_contextProvider);
 
-            var repo = uow.GetRepository<ApplicationUser>(reload);
+            var repo = uow.GetRepository<Users>(reload);
 
-            var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar
-            return allEntities.ToList();                    // List<ApplicationUser>
+            var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
+            var lista = ApplicationUser.Convert(allEntities.ToList());
+            return lista;                 
         }
 
 
@@ -40,10 +41,11 @@ namespace BlazorSeguridad2026.Components.Seguridad
             {
                         if (uow == null)
                 uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<ApplicationUser>(reload);
+            var repo = uow.GetRepository<Users>(reload);
        
             var entity = await repo.GetByIdAsync(id, reload);
-            return entity;
+            var entidad = ApplicationUser.Convert(new List<Users> { entity }).FirstOrDefault();
+            return entidad;
             
             }
 
