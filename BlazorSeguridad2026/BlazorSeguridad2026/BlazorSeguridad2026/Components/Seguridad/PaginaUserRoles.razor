@@ -6,7 +6,7 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @* @attribute [Authorize(Roles = "Admin")] *@
 
-@inject IUserService UserService
+@inject IUserService UserServiceMio
 @inject RoleManager<ApplicationRole> RoleManager
 @inject NavigationManager Nav
 
@@ -94,7 +94,7 @@ else
         error = success = null;
         int userId = int.Parse(UserId);
 
-        user = await UserService.GetByIdAsync(userId);
+        user = await UserServiceMio.GetByIdAsync(userId);
         if (user is null)
         {
             isLoading = false;
@@ -108,7 +108,7 @@ else
 
         // roles actuales del usuario
      
-        var userRoles = await UserService.GetUserRolesAsync(userId);
+        var userRoles = await UserServiceMio.GetUserRolesAsync(userId);
         selectedRoles = new HashSet<string>(userRoles, StringComparer.OrdinalIgnoreCase);
 
         isLoading = false;
@@ -131,7 +131,7 @@ else
             return;
         }
 
-        var result = await UserService.SetUserRolesAsync(user.Id, selectedRoles);
+        var result = await UserServiceMio.SetUserRolesAsync(user.Id, selectedRoles);
 
         if (result.Succeeded)
         {

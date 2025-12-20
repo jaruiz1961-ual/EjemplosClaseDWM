@@ -37,7 +37,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
 
 
-        public async Task<IdentityResult> CreateAsync(string name, int tenantId, string DbKey)
+        public async Task<IdentityResult> CreateAsync(string name, int? tenantId, string DbKey)
         {
             var role = new ApplicationRole
             {
@@ -62,7 +62,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
             
         }
 
-        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName, int tenantId, string DbKey)
+        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName, int? tenantId, string DbKey)
         {
             var role = await _roleManager.FindByIdAsync(id.ToString());
             // O mejor: _roleManager.Roles.FirstOrDefaultAsync(r => r.Id == id)

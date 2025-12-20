@@ -9,9 +9,9 @@ namespace BlazorSeguridad2026.Components.Seguridad
     public interface IRoleService
     {
         Task<List<ApplicationRole>> GetAllAsync();
-        Task<IdentityResult> CreateAsync(string name, int tenantId, string DbKey);
+        Task<IdentityResult> CreateAsync(string name, int? tenantId, string DbKey);
         Task<ApplicationRole?> GetByIdAsync(int id);
-        Task<IdentityResult> UpdateRoleAsync(int id, string newName,int tenantId, string DbKey);
+        Task<IdentityResult> UpdateRoleAsync(int id, string newName,int? tenantId, string DbKey);
         Task<IdentityResult> DeleteAsync(int id);
     }
 
@@ -27,7 +27,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
         public Task<List<ApplicationRole>> GetAllAsync() =>
             Task.FromResult(_roleManager.Roles.ToList());
 
-        public async Task<IdentityResult> CreateAsync(string name, int tenantId, string DbKey)
+        public async Task<IdentityResult> CreateAsync(string name, int? tenantId, string DbKey)
         {
             var role = new ApplicationRole
             {
@@ -43,7 +43,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
         public Task<ApplicationRole?> GetByIdAsync(int id) =>
             Task.FromResult(_roleManager.Roles.FirstOrDefault(r => r.Id == id));
 
-        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName, int tenantId, string DbKey)
+        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName, int? tenantId, string DbKey)
         {
             var role = await _roleManager.FindByIdAsync(id.ToString());
             // O mejor: _roleManager.Roles.FirstOrDefaultAsync(r => r.Id == id)

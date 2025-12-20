@@ -1,9 +1,17 @@
 ﻿@page "/roles"
+@using Microsoft.AspNetCore.Identity
+@using Shares.Genericos
 @using Shares.Seguridad
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @inject IRoleService RoleServiceMio
 @inject NavigationManager Nav
 @inject IContextProvider ContextProvider
+
+@using Shares.Servicios
+@inject IUnitOfWorkFactory UnitOfWorkFactory
+@inject IContextProvider ContextProvider
+@* @attribute [Authorize(Roles = "Admin")] *@
+@inject RoleManager<ApplicationRole> RoleManager
 
 
 <h3>Roles</h3>
@@ -173,6 +181,7 @@
     private List<ApplicationRole>? roles;
     private string? error;
     private string? success;
+    bool _isValidContext;
 
     private int editingRoleId;
     private string? editRoleName;
@@ -182,7 +191,7 @@
     private class NewRoleModel
     {
         public string Name { get; set; } = string.Empty;
-        public int TenantId { get; set; }
+        public int? TenantId { get; set; }
         public string DbKey { get; set; } = string.Empty;
     }
 
@@ -193,9 +202,32 @@
         await LoadRolesAsync();
     }
 
-    private async Task LoadRolesAsync()
+    private async Task LoadRole2sAsync()
     {
         roles = await RoleServiceMio.GetAllAsync();
+    }
+    private async Task LoadRolesAsync()
+    {
+        try
+        {
+            if (ContextProvider.IsValid())
+            {
+                await ContextProvider.ReadAllContext();
+                var user = new RoleServiceMio(RoleManager, ContextProvider, UnitOfWorkFactory);
+                var list = await user.GetAllAsync();
+                roles = list.ToList();
+                newRoleModel.TenantId = ContextProvider._AppState.TenantId ?? 0;
+                newRoleModel.DbKey = ContextProvider._AppState.DbKey;
+                _isValidContext = true;
+            }
+            else _isValidContext = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
     }
 
     private void StartEdit(ApplicationRole role)
