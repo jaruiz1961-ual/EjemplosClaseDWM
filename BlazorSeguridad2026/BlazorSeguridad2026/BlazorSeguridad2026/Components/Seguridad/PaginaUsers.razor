@@ -233,6 +233,8 @@
                 var user = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 users = list.ToList();
+                newUserModel.TenantId = ContextProvider._AppState.TenantId;
+                newUserModel.DbKey = ContextProvider._AppState.DbKey;
                 _isValidContext = true;
             }
             else _isValidContext = false;
@@ -251,8 +253,8 @@
         selectedUserId = u.Id;
 
         editEmail = u.Email;
-        editTenantId = u.TenantId;
-        editKeyDb = u.DbKey;
+        editTenantId = ContextProvider._AppState.TenantId;
+        editKeyDb = ContextProvider._AppState.DbKey;
 
         error = success = null;
     }

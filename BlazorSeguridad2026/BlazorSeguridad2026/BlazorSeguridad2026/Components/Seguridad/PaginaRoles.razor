@@ -1,14 +1,10 @@
 ﻿@page "/roles"
+@using Shares.Seguridad
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-@* @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Identity *@
-
-
-@* @attribute [Authorize(Roles = "Admin")] *@
-
-@inject IRoleService RoleService
+@inject IRoleService RoleServiceMio
 @inject NavigationManager Nav
-@* @inject UserManager<ApplicationRole> RoleManager *@
+@inject IContextProvider ContextProvider
+
 
 <h3>Roles</h3>
 
@@ -32,6 +28,8 @@
     <thead class="table-light">
         <tr>
             <th>Nombre</th>
+            <th>TenantId</th>
+            <th>DbKey</th>
             <th style="width: 260px;"></th>
         </tr>
     </thead>
@@ -62,7 +60,30 @@
                         }
                         else
                         {
-                            @r.Name
+                            @r.Name  
+                        }
+                    </td>
+                    <td>
+                        @if (editingRoleId == r.Id)
+                        {
+
+                            <InputNumber class="form-control form-control-sm"
+                                         @bind-Value="editTenantId" />
+                        }
+                        else
+                        {
+                            @r.TenantId
+                        }
+                    </td>
+                    <td>
+                        @if (editingRoleId == r.Id)
+                        {
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="editDbKey" />
+                        }
+                        else
+                        {
+                            @r.DbKey
                         }
                     </td>
 
@@ -121,6 +142,18 @@
                         <InputText class="form-control"
                                    @bind-Value="newRoleModel.Name" />
                     </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">TenantId</label>
+                        <InputNumber class="form-control"
+                                   @bind-Value="newRoleModel.TenantId" />
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label">DbKey</label>
+                        <InputText class="form-control"
+                                   @bind-Value="newRoleModel.DbKey" />
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary"
@@ -143,10 +176,14 @@
 
     private int editingRoleId;
     private string? editRoleName;
+    private int editTenantId;
+    private string editDbKey = string.Empty;
 
     private class NewRoleModel
     {
         public string Name { get; set; } = string.Empty;
+        public int TenantId { get; set; }
+        public string DbKey { get; set; } = string.Empty;
     }
 
     private NewRoleModel newRoleModel = new();
@@ -158,13 +195,15 @@
 
     private async Task LoadRolesAsync()
     {
-        roles = await RoleService.GetAllAsync();
+        roles = await RoleServiceMio.GetAllAsync();
     }
 
     private void StartEdit(ApplicationRole role)
     {
         editingRoleId = role.Id;
         editRoleName = role.Name;
+        editDbKey = ContextProvider._AppState.DbKey ?? "";
+        editTenantId = ContextProvider._AppState.TenantId??0;
         error = success = null;
     }
 
@@ -184,7 +223,7 @@
 
         error = success = null;
 
-        var result = await RoleService.UpdateNameAsync(editingRoleId, editRoleName);
+        var result = await RoleServiceMio.UpdateRoleAsync(editingRoleId, editRoleName,editTenantId, editDbKey);
 
         if (result.Succeeded)
         {
@@ -209,7 +248,7 @@
             return;
         }
 
-        var result = await RoleService.CreateAsync(newRoleModel.Name);
+        var result = await RoleServiceMio.CreateAsync(newRoleModel.Name,newRoleModel.TenantId,newRoleModel.DbKey);
 
         if (result.Succeeded)
         {
@@ -227,7 +266,7 @@
     {
         error = success = null;
 
-        var result = await RoleService.DeleteAsync(id);
+        var result = await RoleServiceMio.DeleteAsync(id);
         if (result.Succeeded)
         {
             success = "Rol eliminado.";

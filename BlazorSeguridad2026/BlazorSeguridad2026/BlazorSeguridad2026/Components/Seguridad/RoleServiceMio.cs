@@ -1,31 +1,41 @@
-﻿using System.Net.NetworkInformation;
+﻿using BlazorSeguridad2026.Data;
+using Microsoft.AspNetCore.Identity;
+using Shares.Genericos;
+using Shares.Seguridad;
+using System.Net.NetworkInformation;
 
 namespace BlazorSeguridad2026.Components.Seguridad
 {
-    using BlazorSeguridad2026.Data;
-    // Services/IRoleService.cs
-    using Microsoft.AspNetCore.Identity;
 
-    public interface IRoleService
+    public class RoleServiceMio : IRoleService
     {
-        Task<List<ApplicationRole>> GetAllAsync();
-        Task<IdentityResult> CreateAsync(string name, int tenantId, string DbKey);
-        Task<ApplicationRole?> GetByIdAsync(int id);
-        Task<IdentityResult> UpdateRoleAsync(int id, string newName,int tenantId, string DbKey);
-        Task<IdentityResult> DeleteAsync(int id);
-    }
-
-    public class RoleService : IRoleService
-    {
+        IContextProvider _contextProvider;
+        private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+        private IUnitOfWorkAsync uow;
+        bool reload = true;
         private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public RoleService(RoleManager<ApplicationRole> roleManager)
+        public RoleServiceMio(RoleManager<ApplicationRole> roleManager, IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
+            _contextProvider = contextKeyProvider;
+            _unitOfWorkFactory = uowFactory;
+            
             _roleManager = roleManager;
         }
 
-        public Task<List<ApplicationRole>> GetAllAsync() =>
-            Task.FromResult(_roleManager.Roles.ToList());
+        public async Task<List<ApplicationRole>> GetAllAsync()
+        {
+            if (uow == null)
+                uow = _unitOfWorkFactory.Create(_contextProvider);
+
+            var repo = uow.GetRepository<ApplicationRole>(reload);
+
+            var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
+            var lista = allEntities.ToList();
+            return lista;
+        }
+
+
 
         public async Task<IdentityResult> CreateAsync(string name, int tenantId, string DbKey)
         {
@@ -40,8 +50,17 @@ namespace BlazorSeguridad2026.Components.Seguridad
             return await _roleManager.CreateAsync(role);
         }
 
-        public Task<ApplicationRole?> GetByIdAsync(int id) =>
-            Task.FromResult(_roleManager.Roles.FirstOrDefault(r => r.Id == id));
+        public async Task<ApplicationRole?> GetByIdAsync(int id)
+        {
+            if (uow == null)
+                uow = _unitOfWorkFactory.Create(_contextProvider);
+            var repo = uow.GetRepository<ApplicationRole>(reload);
+
+        var entity = await repo.GetByIdAsync(id, reload);
+
+            return entity;
+            
+        }
 
         public async Task<IdentityResult> UpdateRoleAsync(int id, string newName, int tenantId, string DbKey)
         {
