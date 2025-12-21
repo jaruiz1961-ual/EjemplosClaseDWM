@@ -18,7 +18,9 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
         public UserServiceMio(UserManager<ApplicationUser> userManager,IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = contextKeyProvider;
+            _contextProvider = contextKeyProvider.Copia();
+            _contextProvider._AppState.ApplyTenantFilter = true;
+            _contextProvider._AppState.DbKey="Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
             _userManager = userManager;
 

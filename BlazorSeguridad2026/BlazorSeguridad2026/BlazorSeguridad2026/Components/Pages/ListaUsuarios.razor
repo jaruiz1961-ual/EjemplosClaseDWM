@@ -65,7 +65,7 @@ else
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="";
- 
+
     bool _isValidContext;
 
     private Action? _onContextChangedHandler;
@@ -98,6 +98,7 @@ else
                 await ContextProvider.ReadAllContext();
                 var user = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await user.ObtenerTodosAsync(true);
+                if (list is null) return;
                 usuarios = list.ToList();
                 _isValidContext = true;                
             }

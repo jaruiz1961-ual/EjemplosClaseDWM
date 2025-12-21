@@ -18,7 +18,7 @@ namespace Shares.Seguridad
         public Uri DirBase { get; set; }
 
         public string Token { get; set; }
-        public string Estado { get; set; }
+        public string Status { get; set; }
         public bool isValid { get
             {
                 if (string.IsNullOrEmpty(TenantId.ToString())) return false;
@@ -29,6 +29,8 @@ namespace Shares.Seguridad
                 return true;
             } }
         public bool IsAutenticated {get { return !string.IsNullOrEmpty(Token); } }
+
+        public bool ApplyTenantFilter { get; set; } = true;
 
     }
 

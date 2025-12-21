@@ -213,11 +213,14 @@
             if (ContextProvider.IsValid())
             {
                 await ContextProvider.ReadAllContext();
-                var user = new RoleServiceMio(RoleManager, ContextProvider, UnitOfWorkFactory);
+                var cp = ContextProvider.Copia();
+                cp._AppState.DbKey = "Application";
+                var user = new RoleServiceMio(RoleManager, cp, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
+                if (list is null) return;
                 roles = list.ToList();
-                newRoleModel.TenantId = ContextProvider._AppState.TenantId ?? 0;
-                newRoleModel.DbKey = ContextProvider._AppState.DbKey;
+                newRoleModel.TenantId = cp._AppState.TenantId ?? 0;
+                newRoleModel.DbKey = cp._AppState.DbKey;
                 _isValidContext = true;
             }
             else _isValidContext = false;

@@ -212,7 +212,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-       
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -230,11 +230,14 @@
             if (ContextProvider.IsValid())
             {
                 await ContextProvider.ReadAllContext();
-                var user = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
+                var cp = ContextProvider.Copia();
+                cp._AppState.DbKey = "Application";
+                var user = new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
+                if (list is null) return;           
                 users = list.ToList();
-                newUserModel.TenantId = ContextProvider._AppState.TenantId;
-                newUserModel.DbKey = ContextProvider._AppState.DbKey;
+                newUserModel.TenantId = cp._AppState.TenantId;
+                newUserModel.DbKey = cp._AppState.DbKey;
                 _isValidContext = true;
             }
             else _isValidContext = false;

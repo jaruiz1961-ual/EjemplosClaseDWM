@@ -5,10 +5,11 @@
 @attribute [Authorize]
 @rendermode InteractiveAuto
 
-<PageTitle>Auth</PageTitle>
+<PageTitle>Auth en cliente</PageTitle>
 
 <h1>You are authenticated</h1>
 
 <AuthorizeView>
     Hello @context.User.Identity?.Name!
-</AuthorizeView>
+@if (@context.User.IsInRole("Admin")) { <p> Eres Administrador !!</p> }
+    </AuthorizeView>

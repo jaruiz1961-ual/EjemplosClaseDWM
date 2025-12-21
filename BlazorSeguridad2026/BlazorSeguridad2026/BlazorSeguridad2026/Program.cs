@@ -67,8 +67,8 @@ var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
 var DataProvider = configuration["DataProvider"] ?? "SqlServer";
 var TenantId = configuration["TenantId"] ?? "0";
 
-var identityConnectionString = configuration.GetConnectionString("SqlServerDbContext")
-    ?? throw new InvalidOperationException("Connection string 'SqlServerDbContext' not found.");
+var applicationConnectionString = configuration.GetConnectionString("ApplicationDbContext")
+    ?? throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.");
 
 // Razor Components / Blazor
 builder.Services.AddRazorComponents()
@@ -89,8 +89,15 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 // DbContext Identity
-builder.Services.AddDbContext<SqlServerDbContext>(options =>
-    options.UseSqlServer(identityConnectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(applicationConnectionString, sql =>
+    {
+        sql.EnableRetryOnFailure(
+            maxRetryCount: 5,                     // nº de reintentos
+            maxRetryDelay: TimeSpan.FromSeconds(10), // retraso máx. entre reintentos
+            errorNumbersToAdd: null);             // o lista de códigos de error específicos
+    }));
+
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
@@ -102,7 +109,7 @@ builder.Services
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
     .AddRoles<ApplicationRole>()
-    .AddEntityFrameworkStores<SqlServerDbContext>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
@@ -142,8 +149,22 @@ builder.Services.AddHttpClient(ApiName, (sp, client) =>
     client.BaseAddress = new Uri(UrlApi);
 });
 
+
+
+
+
 // Interceptor multitenant
 builder.Services.AddTransient<TenantSaveChangesInterceptor>();
+
+// Factorías de DbContexts para backends locales
+builder.Services.AddDbContextFactory<ApplicationDbContext>((sp, options) =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var conn = config.GetConnectionString("ApplicationDbContext");
+    var interceptor = sp.GetRequiredService<TenantSaveChangesInterceptor>();
+    options.UseSqlServer(conn);
+    options.AddInterceptors(interceptor);
+}, ServiceLifetime.Transient);
 
 // Factorías de DbContexts para backends locales
 builder.Services.AddDbContextFactory<SqlServerDbContext>((sp, options) =>

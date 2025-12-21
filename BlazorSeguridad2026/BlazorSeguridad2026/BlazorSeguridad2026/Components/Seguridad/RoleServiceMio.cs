@@ -17,7 +17,8 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
         public RoleServiceMio(RoleManager<ApplicationRole> roleManager, IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = contextKeyProvider;
+            _contextProvider = contextKeyProvider.Copia();
+            _contextProvider._AppState.DbKey = "Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
             
             _roleManager = roleManager;
@@ -31,6 +32,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
             var repo = uow.GetRepository<ApplicationRole>(reload);
 
             var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
+            if (allEntities == null) return null;
             var lista = allEntities.ToList();
             return lista;
         }
@@ -55,8 +57,9 @@ namespace BlazorSeguridad2026.Components.Seguridad
             if (uow == null)
                 uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<ApplicationRole>(reload);
+            if (repo == null) return null;
 
-        var entity = await repo.GetByIdAsync(id, reload);
+            var entity = await repo.GetByIdAsync(id, reload);
 
             return entity;
             

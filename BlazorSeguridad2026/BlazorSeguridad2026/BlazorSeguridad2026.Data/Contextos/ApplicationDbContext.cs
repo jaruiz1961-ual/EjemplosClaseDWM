@@ -1,4 +1,4 @@
-﻿#define UPDATE_DATABASE
+﻿//#define UPDATE_DATABASE
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -18,13 +18,13 @@ namespace Shares.Contextos
     //PM> dotnet ef database update --project BlazorSeguridad2026.Data --context SqlserverDbContext 
 
 #if UPDATE_DATABASE
-    public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>
+    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
     {
-        public SqlServerDbContext CreateDbContext(string[] args)
+        public ApplicationDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva5; AttachDbFilename=c:\temp\Nueva5.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
-            return new SqlServerDbContext(optionsBuilder.Options);
+            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
+            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=App; AttachDbFilename=c:\temp\App.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
+            return new ApplicationDbContext(optionsBuilder.Options);
         }
     }
 #endif
@@ -50,38 +50,40 @@ namespace Shares.Contextos
     //    }
     //}
 
-    public class SqlServerDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
+        public bool UseFilter { get; set; } = false;
 
 #if UPDATE_DATABASE
 
-        public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
 
         }
 #else
 
-        public SqlServerDbContext(DbContextOptions<SqlServerDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, TenantSaveChangesInterceptor tenantInterceptor) 
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
             TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
+           
           
         }
 #endif
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+            if (UseFilter)
             optionsBuilder.AddInterceptors(_tenantInterceptor);
             base.OnConfiguring(optionsBuilder);
         }
 
         protected void ModelCreatingTenant(ModelBuilder modelBuilder)
         {
-            
             var tenantEntityType = typeof(ITenantEntity);
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -89,44 +91,41 @@ namespace Shares.Contextos
                 if (tenantEntityType.IsAssignableFrom(entityType.ClrType))
                 {
                     var parameter = Expression.Parameter(entityType.ClrType, "e");
-                    var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId));
+                    var property = Expression.Property(parameter, nameof(ITenantEntity.TenantId)); // e.TenantId
 
                     // this.TenantId
                     var currentTenantId = Expression.Property(
                         Expression.Constant(this),
                         nameof(TenantId));
 
+                    // this.UseTenantFilter
+                    var useTenantFilter = Expression.Property(
+                        Expression.Constant(this),
+                        nameof(UseFilter));
+
+                    // !UseTenantFilter
+                    var notUseTenantFilter = Expression.Not(useTenantFilter);
+
+                    // e.TenantId == this.TenantId
                     var equals = Expression.Equal(property, currentTenantId);
-                    var lambda = Expression.Lambda(equals, parameter);
+
+                    // (!UseTenantFilter) || (e.TenantId == this.TenantId)
+                    var body = Expression.OrElse(notUseTenantFilter, equals);
+
+                    var lambda = Expression.Lambda(body, parameter);
 
                     modelBuilder.Entity(entityType.ClrType).HasQueryFilter(lambda);
                 }
             }
         }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Usuario>(entity =>
-            {
-                entity.Property(e => e.Codigo).IsRequired();
-                entity.Property(e => e.UserName)
-                    .IsRequired()
-                    .HasMaxLength(100);
-            });
-
-            modelBuilder.Entity<Usuario>().HasData
-       (new Usuario { Id = 1, UserName = "Usuario1", Contexto = "SqlServer", Codigo = "0001", Password = "abc 11", TenantId = 0 },
-       new Usuario { Id = 2, UserName = "Usuario2", Contexto = "SqlServer", Codigo = "0002", Password = "abc 22", TenantId = 1 },
-       new Usuario { Id = 3, UserName = "Usuario3", Contexto = "SqlServer", Codigo = "0003", Password = "abc 33", TenantId = 2 });
-
-
-
             ModelCreatingTenant(modelBuilder);
-            
+
         }
         
-        public virtual DbSet<Usuario>? Usuario { get; set; }
-   
 
     }
 

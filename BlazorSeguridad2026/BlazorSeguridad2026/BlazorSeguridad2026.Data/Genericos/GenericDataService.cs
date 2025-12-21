@@ -45,7 +45,15 @@ namespace Shares.Servicios
             if (uow == null)
              uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
-            var allEntities = await repo.GetAllAsync(reload);
+            IEnumerable<T> allEntities = null;
+            try
+            {
+                allEntities = await repo.GetAllAsync(reload);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
             return allEntities.ToList();
         }
         public async Task<IEnumerable<T>> ObtenerFiltradosCadenaAsync(string filtro, bool reload)
