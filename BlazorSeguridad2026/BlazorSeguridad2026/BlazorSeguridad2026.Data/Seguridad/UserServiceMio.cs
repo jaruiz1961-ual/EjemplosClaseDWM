@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Shares.Genericos;
 using Shares.Seguridad;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Runtime.InteropServices;
 
 namespace BlazorSeguridad2026.Components.Seguridad
 {
@@ -14,12 +15,16 @@ namespace BlazorSeguridad2026.Components.Seguridad
         private IUnitOfWorkAsync uow;
         bool reload = true;
         private readonly UserManager<ApplicationUser> _userManager;
+        bool EsWasm => RuntimeInformation.IsOSPlatform(OSPlatform.Create("Browser"));
 
 
         public UserServiceMio(UserManager<ApplicationUser> userManager,IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
             _contextProvider = contextKeyProvider.Copia();
             _contextProvider._AppState.ApplyTenantFilter = true;
+            _contextProvider._AppState.DbKey = "Application";
+            if (EsWasm) _contextProvider._AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
+            else _contextProvider._AppState.ConnectionMode = "Ef";
             _contextProvider._AppState.DbKey="Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
             _userManager = userManager;

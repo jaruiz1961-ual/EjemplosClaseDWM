@@ -1,8 +1,10 @@
-﻿@page "/roles/{RoleId}/users"
+﻿@* @page "/seguridad/roles/{RoleId}/users" *@
+@namespace BlazorSeguridad2026.Data.Seguridad
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
 @using Shares.Seguridad
+@using BlazorSeguridad2026.Components.Seguridad
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 @inject IUserService UserService
