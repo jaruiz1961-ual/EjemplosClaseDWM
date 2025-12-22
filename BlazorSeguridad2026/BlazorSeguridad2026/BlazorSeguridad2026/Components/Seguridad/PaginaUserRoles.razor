@@ -3,12 +3,14 @@
 @using Microsoft.AspNetCore.Identity
 
 @using BlazorSeguridad2026.Data
+@using Shares.Seguridad
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @* @attribute [Authorize(Roles = "Admin")] *@
 
-@inject IUserService UserServiceMio
+@inject IUserService UserService
 @inject RoleManager<ApplicationRole> RoleManager
 @inject NavigationManager Nav
+
 
 <h3>Asignar roles al usuario</h3>
 
@@ -41,6 +43,12 @@ else
             </p>
             <p class="mb-0 text-muted">
                 <strong>Id:</strong> @user.Id
+            </p>
+            <p class="mb-0 text-muted">
+                <strong>TenantId:</strong> @user.TenantId
+            </p>
+            <p class="mb-0 text-muted">
+                <strong>DbKey:</strong> @user.DbKey
             </p>
         </div>
     </div>
@@ -88,30 +96,40 @@ else
     private string? error;
     private string? success;
 
+
     protected override async Task OnParametersSetAsync()
     {
         isLoading = true;
         error = success = null;
         int userId = int.Parse(UserId);
 
-        user = await UserServiceMio.GetByIdAsync(userId);
+        user = await UserService.GetByIdAsync(userId);
         if (user is null)
         {
             isLoading = false;
             return;
         }
+        await LoadRolesAsync();
+        isLoading = false;
 
+    }
+
+    private async Task LoadRolesAsync()
+    {
+        isLoading = true;
         // todos los roles existentes
         allRoles = RoleManager.Roles
-            .OrderBy(r => r.Name)
+            .Where(r => r.TenantId == user.TenantId)
+        .OrderBy(r => r.Name)
             .ToList();
+        // roles actuales del usuario Filtrados 
 
-        // roles actuales del usuario
-     
-        var userRoles = await UserServiceMio.GetUserRolesAsync(userId);
+        var userRoles = await UserService.GetUserRolesAsync(int.Parse(UserId));
         selectedRoles = new HashSet<string>(userRoles, StringComparer.OrdinalIgnoreCase);
 
         isLoading = false;
+   
+
     }
 
     private void ToggleRole(string roleName, object? isChecked)
@@ -131,7 +149,7 @@ else
             return;
         }
 
-        var result = await UserServiceMio.SetUserRolesAsync(user.Id, selectedRoles);
+        var result = await UserService.SetUserRolesAsync(user.Id, selectedRoles);
 
         if (result.Succeeded)
         {

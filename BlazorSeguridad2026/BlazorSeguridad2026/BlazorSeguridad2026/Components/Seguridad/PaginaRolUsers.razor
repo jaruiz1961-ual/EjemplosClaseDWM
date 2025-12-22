@@ -2,8 +2,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
+@using Shares.Seguridad
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
-@attribute [Authorize(Roles = "Admin")]
 
 @inject IUserService UserService
 @inject RoleManager<ApplicationRole> RoleManager
@@ -38,6 +38,8 @@ else
         <div class="card-body">
             <p class="mb-1"><strong>Rol:</strong> @role.Name</p>
             <p class="mb-0 text-muted"><strong>Id:</strong> @role.Id</p>
+            <p class="mb-0 text-muted"><strong>TenantId:</strong> @role.TenantId</p>
+            <p class="mb-0 text-muted"><strong>DbKey:</strong> @role.DbKey</p>
         </div>
     </div>
 
@@ -113,6 +115,7 @@ else
 
 @code {
     [Parameter] public string RoleId { get; set; } = string.Empty;
+    [Parameter] public int? TenantId { get; set; } = null;
 
     private ApplicationRole? role;
     private List<ApplicationUser> usersInRole = new();
@@ -135,14 +138,16 @@ else
             isLoading = false;
             return;
         }
-
         await LoadUsersForRole();
 
         isLoading = false;
     }
 
+
+
     private async Task LoadUsersForRole()
     {
+        isLoading = true;
         usersInRole.Clear();
         usersNotInRole.Clear();
 
@@ -155,8 +160,9 @@ else
 
         var inRoleIds = new HashSet<string>(inRole.Select(u => u.Id.ToString()));
 
-        usersInRole = allUsers.Where(u => inRoleIds.Contains(u.Id.ToString())).ToList();
-        usersNotInRole = allUsers.Where(u => !inRoleIds.Contains(u.Id.ToString())).ToList();
+        usersInRole = allUsers.Where(u => u.TenantId==role.TenantId && inRoleIds.Contains(u.Id.ToString())).ToList();
+        usersNotInRole = allUsers.Where(u => u.TenantId == role.TenantId && !inRoleIds.Contains(u.Id.ToString())).ToList();
+        isLoading = false;
     }
 
     private async Task AddToRole()

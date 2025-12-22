@@ -1,5 +1,6 @@
 ﻿using BlazorSeguridad2026.Data;
 using Microsoft.AspNetCore.Identity;
+using Shares.Seguridad;
 
 namespace BlazorSeguridad2026.Components.Seguridad
 {
@@ -20,10 +21,12 @@ namespace BlazorSeguridad2026.Components.Seguridad
     public class UserService : IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private int? tenantId;
 
-        public UserService(UserManager<ApplicationUser> userManager)
+        public UserService(UserManager<ApplicationUser> userManager, IContextProvider contextKeyProvider)
         {
             _userManager = userManager;
+            tenantId = contextKeyProvider._AppState.TenantId;
         }
 
         public Task<List<ApplicationUser>> GetAllAsync() =>

@@ -14,6 +14,8 @@ namespace BlazorSeguridad2026.Components.Seguridad
         private IUnitOfWorkAsync uow;
         bool reload = true;
         private readonly RoleManager<ApplicationRole> _roleManager;
+        private int? _tenantId;
+        private string _dbKey;
 
         public RoleServiceMio(RoleManager<ApplicationRole> roleManager, IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
@@ -39,14 +41,14 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
 
 
-        public async Task<IdentityResult> CreateAsync(string name, int? tenantId, string DbKey)
+        public async Task<IdentityResult> CreateAsync(string name)
         {
             var role = new ApplicationRole
             {
                 Name = name.Trim(),
                 NormalizedName = name.Trim().ToUpperInvariant(),
-                TenantId = tenantId,
-                DbKey = DbKey
+                TenantId = _tenantId,
+                DbKey = _dbKey
             };
 
             return await _roleManager.CreateAsync(role);
@@ -65,7 +67,7 @@ namespace BlazorSeguridad2026.Components.Seguridad
             
         }
 
-        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName, int? tenantId, string DbKey)
+        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName)
         {
             var role = await _roleManager.FindByIdAsync(id.ToString());
             // O mejor: _roleManager.Roles.FirstOrDefaultAsync(r => r.Id == id)
@@ -74,8 +76,8 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
             role.Name = newName.Trim();
             role.NormalizedName = role.Name.ToUpperInvariant();
-            role.TenantId = tenantId;
-            role.DbKey = DbKey;
+            role.TenantId = _tenantId;
+            role.DbKey = _dbKey;
             return await _roleManager.UpdateAsync(role);
         }
 

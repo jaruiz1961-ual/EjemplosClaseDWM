@@ -1,15 +1,19 @@
 ﻿@page "/auth"
 
+@using BlazorSeguridad2026.Data
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Identity
 
 @attribute [Authorize]
 @rendermode InteractiveAuto
+@inject RoleManager<ApplicationRole> RoleManager
 
 <PageTitle>Auth en cliente</PageTitle>
 
-<h1>You are authenticated</h1>
+<h1>You are authenticated in Cliente App</h1>
 
 <AuthorizeView>
     Hello @context.User.Identity?.Name!
+    RoleManager.
 @if (@context.User.IsInRole("Admin")) { <p> Eres Administrador !!</p> }
     </AuthorizeView>

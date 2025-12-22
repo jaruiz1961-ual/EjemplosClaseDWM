@@ -12,7 +12,7 @@
 @* @attribute [Authorize(Roles = "Admin")] *@
 @inject UserManager<ApplicationUser> UserManager
 
-@inject IUserService UserService
+
 @inject NavigationManager Nav
 
 <h3>Usuarios</h3>
@@ -192,6 +192,7 @@
     private string? error;
     private string? success;
     bool _isValidContext;
+    UserServiceMio userService;
 
     private int editingUserId;
     private int selectedUserId;
@@ -210,9 +211,18 @@
 
     private NewUserModel newUserModel = new();
 
+    private Action? _onContextChangedHandler;
+
     protected override async Task OnInitializedAsync()
     {
+        _onContextChangedHandler += async () =>
+        {
+            await LoadUsersAsync();
 
+        };
+
+
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -232,12 +242,12 @@
                 await ContextProvider.ReadAllContext();
                 var cp = ContextProvider.Copia();
                 cp._AppState.DbKey = "Application";
-                var user = new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
-                var list = await user.GetAllAsync();
+                userService= new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
+                var list = await userService.GetAllAsync();
                 if (list is null) return;           
                 users = list.ToList();
-                newUserModel.TenantId = cp._AppState.TenantId;
-                newUserModel.DbKey = cp._AppState.DbKey;
+                newUserModel.TenantId = ContextProvider._AppState.TenantId;
+                newUserModel.DbKey = ContextProvider._AppState.DbKey;
                 _isValidContext = true;
             }
             else _isValidContext = false;
@@ -280,7 +290,7 @@
 
         error = success = null;
 
-        var result = await UserService.UpdateUserAsync(
+        var result = await userService.UpdateUserAsync(
             editingUserId,
             user =>
             {
@@ -309,7 +319,7 @@
     {
         error = success = null;
 
-        var result = await UserService.DeleteAsync(id);
+        var result = await userService.DeleteAsync(id);
         if (result.Succeeded)
         {
             success = "Usuario borrado.";
@@ -336,7 +346,7 @@
             return;
         }
 
-        var result = await UserService.CreateAsync(
+        var result = await userService.CreateAsync(
             newUserModel.Email,
             newUserModel.Password,
             newUserModel.TenantId,
@@ -354,5 +364,11 @@
         {
             error = string.Join(" ", result.Errors.Select(e => e.Description));
         }
+    }
+    private void Dispose()
+    {
+
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
+
     }
 }
