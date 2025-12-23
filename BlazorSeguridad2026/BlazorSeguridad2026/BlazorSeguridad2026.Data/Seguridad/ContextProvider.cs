@@ -53,7 +53,7 @@ namespace Shares.Seguridad
         bool IsValid();
         Task LogOut();
         Task<IContextProvider> ReadAllContext(bool force);
-        Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
+        Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, bool filter, string? token = null, string? estado = null);
         Task SaveAllContextAsync(IContextProvider? cp);
         Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, bool filter,string? token, string? estado);
         void SetClaveValor(ClavesEstado clave, string valor);

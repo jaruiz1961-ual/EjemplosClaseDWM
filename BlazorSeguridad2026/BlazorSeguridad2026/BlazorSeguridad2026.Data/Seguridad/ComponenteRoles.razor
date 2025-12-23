@@ -231,7 +231,7 @@
         {
             if (ContextProvider.IsValid())
             {
-                await ContextProvider.ReadAllContext();
+                await ContextProvider.ReadAllContext(true);
                 var cp = ContextProvider.Copia();
                 // cp._AppState.DbKey = "Application";
                 // cp._AppState.ConnectionMode = "Api";
