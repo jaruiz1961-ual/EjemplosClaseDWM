@@ -1,7 +1,7 @@
 ﻿@* @page "/seguridad/roles/{RoleId:int}/users" *@
 @rendermode InteractiveAuto
-
 @namespace BlazorSeguridad2026.Data.Seguridad
+
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
@@ -119,6 +119,9 @@ else
 
 @code {
     [Parameter]  public int RoleId { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? From { get; set; }
 
 
     private ApplicationRole? role;
@@ -224,5 +227,13 @@ else
         }
     }
 
-    private void BackToRoles() => Nav.NavigateTo("/cliente/roles");
+    private void BackToRoles()
+    {
+            if (!string.IsNullOrEmpty(From))
+                Nav.NavigateTo(From);
+            else
+                Nav.NavigateTo("/seguridad/roles"); // fallback
+        
+    }
+ 
 }

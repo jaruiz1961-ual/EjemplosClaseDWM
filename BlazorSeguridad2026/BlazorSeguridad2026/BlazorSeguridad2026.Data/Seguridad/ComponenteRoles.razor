@@ -1,8 +1,8 @@
 ﻿@* @page "/roles" *@
 
 @rendermode InteractiveAuto
-
 @namespace BlazorSeguridad2026.Data.Seguridad
+
 @using BlazorSeguridad2026.Components.Seguridad
 @using Microsoft.AspNetCore.Identity
 @using Shares.Genericos
@@ -116,7 +116,7 @@
                         else
                         {
                             <button class="btn btn-sm btn-outline-info me-1"
-                                    @onclick="@(() => Nav.NavigateTo($"/cliente/roles/{r.Id}/users"))">
+                                    @onclick="@(() => Nav.NavigateTo($"/seguridad/roles/{r.Id}/users?from={Uri.EscapeDataString(fromUrl)}"))">                          
                                 Usuarios
                             </button>
                             <button class="btn btn-sm btn-outline-primary me-1"
@@ -192,6 +192,7 @@
     private string? editRoleName;
     private int editTenantId;
     private string editDbKey = string.Empty;
+    string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
     private class NewRoleModel
     {

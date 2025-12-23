@@ -1,7 +1,7 @@
 ﻿@* @page "/seguridad/users/{UserId}/roles" *@
 @rendermode InteractiveAuto
-
 @namespace BlazorSeguridad2026.Data.Seguridad
+
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Components.Seguridad
@@ -92,6 +92,9 @@ else
 @code {
     [Parameter]
     public int userId { get; set; } 
+    [Parameter]
+    [SupplyParameterFromQuery]
+    public string? From { get; set; }
 
     private ApplicationUser? user;
     private List<ApplicationRole> allRoles = new();
@@ -165,5 +168,12 @@ else
         }
     }
 
-    private void BackToUsers() => Nav.NavigateTo("/cliente/users");
+    private void BackToUsers()
+    {
+        if (!string.IsNullOrEmpty(From))
+            Nav.NavigateTo(From);
+        else
+            Nav.NavigateTo("/seguridad/users"); // fallback
+
+    }
 }

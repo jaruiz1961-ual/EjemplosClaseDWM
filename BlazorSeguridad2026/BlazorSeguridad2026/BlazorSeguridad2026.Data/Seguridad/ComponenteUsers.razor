@@ -1,5 +1,6 @@
 ﻿@* @page "/seguridad/users" *@
 @rendermode InteractiveAuto
+@namespace BlazorSeguridad2026.Data.Seguridad
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
@@ -117,7 +118,7 @@
                         else
                         {
                             <button class="btn btn-sm btn-outline-info me-1"
-                                    @onclick="@(() => Nav.NavigateTo($"/cliente/users/{u.Id.ToString()}/roles"))">
+                                    @onclick="@(() => Nav.NavigateTo($"/seguridad/users/{u.Id.ToString()}/roles?from={Uri.EscapeDataString(fromUrl)}"))">
                                 Roles
                             </button>
                             <button class="btn btn-sm btn-outline-primary me-1"
@@ -195,6 +196,7 @@
     private string? success;
     bool _isValidContext;
     UserServiceMio userService;
+    string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
     private int editingUserId;
     private int selectedUserId;
