@@ -1,8 +1,13 @@
-﻿@page "/roles"
+﻿@* @page "/roles" *@
+
+@rendermode InteractiveAuto
+@namespace BlazorSeguridad2026.Data.Seguridad
+
+@using BlazorSeguridad2026.Components.Seguridad
 @using Microsoft.AspNetCore.Identity
 @using Shares.Genericos
 @using Shares.Seguridad
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
 @inject IRoleService RoleServiceMio
 @inject NavigationManager Nav
 @inject IContextProvider ContextProvider
@@ -111,7 +116,7 @@
                         else
                         {
                             <button class="btn btn-sm btn-outline-info me-1"
-                                    @onclick="@(() => Nav.NavigateTo($"/roles/{r.Id}/users"))">
+                                    @onclick="@(() => Nav.NavigateTo($"/seguridad/roles/{r.Id}/users?from={Uri.EscapeDataString(fromUrl)}"))">                          
                                 Usuarios
                             </button>
                             <button class="btn btn-sm btn-outline-primary me-1"
@@ -187,6 +192,7 @@
     private string? editRoleName;
     private int editTenantId;
     private string editDbKey = string.Empty;
+    string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
     private class NewRoleModel
     {
@@ -197,24 +203,41 @@
 
     private NewRoleModel newRoleModel = new();
 
+
+    private Action? _onContextChangedHandler;
+
     protected override async Task OnInitializedAsync()
     {
-        await LoadRolesAsync();
+        _onContextChangedHandler += async () =>
+        {
+            await LoadRolesAsync();
+
+        };
+
+
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
     }
 
-    private async Task LoadRole2sAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        roles = await RoleServiceMio.GetAllAsync();
+        if (firstRender)
+            await LoadRolesAsync();
+
     }
+
     private async Task LoadRolesAsync()
     {
         try
         {
             if (ContextProvider.IsValid())
             {
-                await ContextProvider.ReadAllContext(true);
-                var user = new RoleServiceMio(RoleManager, ContextProvider, UnitOfWorkFactory);
+                await ContextProvider.ReadAllContext();
+                var cp = ContextProvider.Copia();
+                // cp._AppState.DbKey = "Application";
+                // cp._AppState.ConnectionMode = "Api";
+                var user = new RoleServiceMio(RoleManager, cp, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
+                if (list is null) return;
                 roles = list.ToList();
                 newRoleModel.TenantId = ContextProvider._AppState.TenantId ?? 0;
                 newRoleModel.DbKey = ContextProvider._AppState.DbKey;
@@ -255,7 +278,7 @@
 
         error = success = null;
 
-        var result = await RoleServiceMio.UpdateRoleAsync(editingRoleId, editRoleName,editTenantId, editDbKey);
+        var result = await RoleServiceMio.UpdateRoleAsync(editingRoleId, editRoleName);
 
         if (result.Succeeded)
         {
@@ -280,7 +303,7 @@
             return;
         }
 
-        var result = await RoleServiceMio.CreateAsync(newRoleModel.Name,newRoleModel.TenantId,newRoleModel.DbKey);
+        var result = await RoleServiceMio.CreateAsync(newRoleModel.Name);
 
         if (result.Succeeded)
         {
@@ -308,5 +331,11 @@
         {
             error = string.Join(" ", result.Errors.Select(e => e.Description));
         }
+    }
+    private void Dispose()
+    {
+
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
+
     }
 }

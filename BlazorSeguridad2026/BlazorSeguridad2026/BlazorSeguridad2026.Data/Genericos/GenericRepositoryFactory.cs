@@ -45,6 +45,13 @@ namespace Shares.Genericos
 
                 switch (cp._AppState.DbKey?.ToLowerInvariant())
                 {
+                    case "application":
+                        {
+                            var applicationDbContext = context as ApplicationDbContext;
+                            applicationDbContext.UseFilter = cp._AppState.ApplyTenantFilter;
+                            return new GenericRepositoryEFAsync<TEntity, ApplicationDbContext>(applicationDbContext);
+                        }
+
                     case "sqlserver":
                         {
                             var sqlServerDbContext = context as SqlServerDbContext;

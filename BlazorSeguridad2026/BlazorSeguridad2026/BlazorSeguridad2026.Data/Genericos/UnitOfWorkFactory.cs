@@ -37,6 +37,11 @@ namespace Shares.Genericos
             else if (cp._AppState.ConnectionMode.ToLower() == "ef")
                 switch (cp._AppState.DbKey.ToLower())
                 {
+                    case "application":
+                        var AppFactorySqlServer = _provider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+                        ApplicationDbContext AppSqlServer = AppFactorySqlServer.CreateDbContext(); // nuevo contexto por llamada
+                        AppSqlServer.TenantId = cp._AppState.TenantId;
+                        return new UnitOfWorkEfAsync<ApplicationDbContext>(AppSqlServer, _provider, cp);
                     case "sqlserver":
                         var dbFactorySqlServer = _provider.GetRequiredService<IDbContextFactory<SqlServerDbContext>>();
                         SqlServerDbContext dbSqlServer = dbFactorySqlServer.CreateDbContext(); // nuevo contexto por llamada

@@ -55,10 +55,12 @@ namespace Shares.Seguridad
         Task<IContextProvider> ReadAllContext(bool force);
         Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
         Task SaveAllContextAsync(IContextProvider? cp);
-        Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, string? token, string? estado);
+        Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, bool filter,string? token, string? estado);
         void SetClaveValor(ClavesEstado clave, string valor);
         Task UpdateEstadoContext();
         Task UpdateContextFromToken(string token);
+
+        bool ApplyTenantFilter { get; set; }
     }
 
     public class ContextProvider : IContextProvider
@@ -78,6 +80,8 @@ namespace Shares.Seguridad
         public string[] GetApiNames() => new[] { "ApiRest", "" };
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
+
+        public bool ApplyTenantFilter { get; set;  } = true; 
 
         public ContextProvider(ILocalStorageService localStorage)
         {
@@ -104,12 +108,13 @@ namespace Shares.Seguridad
                 _AppState.ApiName = appState.ApiName;
                 _AppState.DirBase = appState.DirBase;
                 _AppState.Token = appState.Token;
-                _AppState.Estado = appState.Estado ?? string.Empty;
+                _AppState.Status = appState.Status ?? string.Empty;
+                _AppState.ApplyTenantFilter = appState.ApplyTenantFilter;
             }
             else
             {
                 // No había estado previo: asegurar valores iniciales coherentes
-                _AppState.Estado = string.Empty;
+                _AppState.Status = string.Empty;
             }
 
             _initialized = true;
@@ -144,7 +149,8 @@ namespace Shares.Seguridad
                     ApiName = _AppState.ApiName,
                     DirBase = _AppState.DirBase,
                     Token = _AppState.Token,
-                    Estado = _AppState.Estado
+                    Status = _AppState.Status,
+                    ApplyTenantFilter = _AppState.ApplyTenantFilter
                 }
             };
             return cp;
@@ -179,8 +185,10 @@ namespace Shares.Seguridad
             string? apiName,
             Uri? dirBase,
             string? conectionMode,
+             bool filter,
             string? token,
-            string? estado)
+            string? estado
+           )
         {
             _AppState.TenantId = tenantId;
             _AppState.DbKey = contextDbKey;
@@ -188,7 +196,8 @@ namespace Shares.Seguridad
             _AppState.ApiName = apiName;
             _AppState.DirBase = dirBase;
             _AppState.Token = token;
-            _AppState.Estado = estado ?? string.Empty;
+            _AppState.Status = estado ?? string.Empty;
+            _AppState.ApplyTenantFilter = filter;
 
       
             
@@ -220,19 +229,19 @@ namespace Shares.Seguridad
         public void SetClaveValor(ClavesEstado clave, string valor)
         {
             Dictionary<ClavesEstado, string> diccionario = 
-            diccionario = StringToDictionary(_AppState.Estado);
+            diccionario = StringToDictionary(_AppState.Status);
 
             if (diccionario.ContainsKey(clave))
                 diccionario[clave] = valor;
             else
                 diccionario.Add(clave, valor);
-            _AppState.Estado = DictionaryToString(diccionario);
+            _AppState.Status = DictionaryToString(diccionario);
         }
 
         public string? GetValor(ClavesEstado clave)
         {
             Dictionary<ClavesEstado, string> diccionario = 
-            diccionario = StringToDictionary(_AppState.Estado);
+            diccionario = StringToDictionary(_AppState.Status);
 
             return diccionario.TryGetValue(clave, out var valor) ? valor : null;
         }
@@ -266,8 +275,10 @@ namespace Shares.Seguridad
             string apiName,
             Uri dirBase,
             string conectionMode,
+             bool filter,
             string? token = null,
-            string? estado = null)
+            string? estado = null
+           )
         {
             _AppState = new AppState
             {
@@ -277,7 +288,8 @@ namespace Shares.Seguridad
                 ApiName = apiName,
                 DirBase = dirBase,
                 Token = token ?? string.Empty,
-                Estado = estado ?? string.Empty
+                Status = estado ?? string.Empty,
+                ApplyTenantFilter = filter
             };
 
             
@@ -294,6 +306,7 @@ namespace Shares.Seguridad
                 null,
                 null,
                 null,
+                false,
                 null,
                 null);
         }

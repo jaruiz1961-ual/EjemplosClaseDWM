@@ -1,9 +1,12 @@
-﻿@page "/users"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+﻿@* @page "/seguridad/users" *@
+@rendermode InteractiveAuto
+@namespace BlazorSeguridad2026.Data.Seguridad
+
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
 @using Shares.Genericos
+@using BlazorSeguridad2026.Components.Seguridad
 
 @using Shares.Seguridad
 @using Shares.Servicios
@@ -12,10 +15,10 @@
 @* @attribute [Authorize(Roles = "Admin")] *@
 @inject UserManager<ApplicationUser> UserManager
 
-@inject IUserService UserService
+
 @inject NavigationManager Nav
 
-<h3>Usuarios</h3>
+<h3>Usuarios ... </h3>
 
 @if (!string.IsNullOrEmpty(error))
 {
@@ -115,7 +118,7 @@
                         else
                         {
                             <button class="btn btn-sm btn-outline-info me-1"
-                                    @onclick="@(() => Nav.NavigateTo($"/users/{u.Id.ToString()}/roles"))">
+                                    @onclick="@(() => Nav.NavigateTo($"/seguridad/users/{u.Id.ToString()}/roles?from={Uri.EscapeDataString(fromUrl)}"))">
                                 Roles
                             </button>
                             <button class="btn btn-sm btn-outline-primary me-1"
@@ -192,6 +195,8 @@
     private string? error;
     private string? success;
     bool _isValidContext;
+    UserServiceMio userService;
+    string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
     private int editingUserId;
     private int selectedUserId;
@@ -210,9 +215,18 @@
 
     private NewUserModel newUserModel = new();
 
+    private Action? _onContextChangedHandler;
+
     protected override async Task OnInitializedAsync()
     {
-       
+        _onContextChangedHandler += async () =>
+        {
+            await LoadUsersAsync();
+
+        };
+
+
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -229,9 +243,13 @@
         {
             if (ContextProvider.IsValid())
             {
-                await ContextProvider.ReadAllContext(true);
-                var user = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
-                var list = await user.GetAllAsync();
+                await ContextProvider.ReadAllContext();
+                var cp = ContextProvider.Copia();
+                // cp._AppState.DbKey = "Application";
+                // cp._AppState.ConnectionMode = "Api";
+                userService= new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
+                var list = await userService.GetAllAsync();
+                if (list is null) return;           
                 users = list.ToList();
                 newUserModel.TenantId = ContextProvider._AppState.TenantId;
                 newUserModel.DbKey = ContextProvider._AppState.DbKey;
@@ -277,7 +295,7 @@
 
         error = success = null;
 
-        var result = await UserService.UpdateUserAsync(
+        var result = await userService.UpdateUserAsync(
             editingUserId,
             user =>
             {
@@ -306,7 +324,7 @@
     {
         error = success = null;
 
-        var result = await UserService.DeleteAsync(id);
+        var result = await userService.DeleteAsync(id);
         if (result.Succeeded)
         {
             success = "Usuario borrado.";
@@ -333,7 +351,7 @@
             return;
         }
 
-        var result = await UserService.CreateAsync(
+        var result = await userService.CreateAsync(
             newUserModel.Email,
             newUserModel.Password,
             newUserModel.TenantId,
@@ -351,5 +369,11 @@
         {
             error = string.Join(" ", result.Errors.Select(e => e.Description));
         }
+    }
+    private void Dispose()
+    {
+
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
+
     }
 }

@@ -1,0 +1,15 @@
+﻿@page "/seguridad/users/{UserId:int}/roles" 
+
+    <ComponenteUserRoles UserId="@UserId" />
+
+@code {
+    [Parameter]
+    public int UserId { get; set; }
+    protected override Task OnParametersSetAsync()
+    {
+        if (UserId == 0) 
+        return Task.FromException(new FieldAccessException());
+        // si necesitas hacer algo con UserId en el padre, hazlo aquí
+        return Task.CompletedTask;
+    }
+}
