@@ -2,7 +2,7 @@
 using Blazored.LocalStorage;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
-using BlazorSeguridad2026.Components.Seguridad;
+
 
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,6 +14,7 @@ using BlazorSeguridad2026.Data;
 using Shares.Seguridad;
 using Shares.SeguridadToken;
 using static TenantInterop;
+using BlazorSeguridad2026.Components.Seguridad;
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
