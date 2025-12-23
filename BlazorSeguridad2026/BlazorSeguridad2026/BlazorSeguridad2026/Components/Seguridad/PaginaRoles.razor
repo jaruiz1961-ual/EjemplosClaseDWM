@@ -212,7 +212,7 @@
         {
             if (ContextProvider.IsValid())
             {
-                await ContextProvider.ReadAllContext();
+                await ContextProvider.ReadAllContext(true);
                 var user = new RoleServiceMio(RoleManager, ContextProvider, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 roles = list.ToList();

@@ -229,7 +229,7 @@
         {
             if (ContextProvider.IsValid())
             {
-                await ContextProvider.ReadAllContext();
+                await ContextProvider.ReadAllContext(true);
                 var user = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
                 var list = await user.GetAllAsync();
                 users = list.ToList();

@@ -171,7 +171,7 @@
     {
         if (firstRender)
         {
-            await ContextProvider.ReadAllContext();
+            await ContextProvider.ReadAllContext(true);
             SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
             SelectedDbKey = ContextProvider._AppState.DbKey;
         }
