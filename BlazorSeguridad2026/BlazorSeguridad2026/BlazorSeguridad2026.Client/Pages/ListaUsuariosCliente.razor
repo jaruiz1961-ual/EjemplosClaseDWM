@@ -104,7 +104,7 @@ else
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext();
+        await ContextProvider.ReadAllContext(true);
 
         // 3. Leer estado actual
         estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";

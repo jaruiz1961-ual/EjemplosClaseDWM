@@ -52,7 +52,7 @@ namespace Shares.Seguridad
         string? GetValor(ClavesEstado clave);
         bool IsValid();
         Task LogOut();
-        Task<IContextProvider> ReadAllContext(bool force = false);
+        Task<IContextProvider> ReadAllContext(bool force);
         Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, string? token = null, string? estado = null);
         Task SaveAllContextAsync(IContextProvider? cp);
         Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, string? token, string? estado);
@@ -88,7 +88,7 @@ namespace Shares.Seguridad
         /// Lee todo el contexto desde localStorage, incluida la cadena Estado y la reconstrucción del diccionario.
         /// Se ejecuta solo una vez.
         /// </summary>
-        public async Task<IContextProvider> ReadAllContext(bool force = false)
+        public async Task<IContextProvider> ReadAllContext(bool force )
         {
             if (_initialized && !force) return this;
 
