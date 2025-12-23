@@ -7,6 +7,19 @@ using System.Runtime.InteropServices;
 
 namespace BlazorSeguridad2026.Components.Seguridad
 {
+    public interface IUserService
+    {
+        Task<List<ApplicationUser>> GetAllAsync();
+        Task<ApplicationUser?> GetByIdAsync(int id);
+
+        Task<IdentityResult> CreateAsync(string email, string password, int? TenantId, string KeyDb);
+        Task<IdentityResult> UpdateUserAsync(int id, Action<ApplicationUser> updateAction);
+
+        Task<IdentityResult> DeleteAsync(int id);
+
+        Task<IList<string>> GetUserRolesAsync(int userId);
+        Task<IdentityResult> SetUserRolesAsync(int userId, IEnumerable<string> roles);
+    }
 
     public class UserServiceMio : IUserService
     {
@@ -43,7 +56,8 @@ namespace BlazorSeguridad2026.Components.Seguridad
             return lista;                 
         }
 
-
+    //    public Task<ApplicationUser?> GetByIdAsync(int id) =>
+    //Task.FromResult(_userManager.Users.FirstOrDefault(u => u.Id == id));
         public async Task<ApplicationUser?> GetByIdAsync(int id) 
         {
             if (uow == null)
@@ -72,13 +86,13 @@ namespace BlazorSeguridad2026.Components.Seguridad
             if (!identityResult.Succeeded)
                 return identityResult;
 
-            // 3) Si quieres que pase también por tu UoW/Repositorio (opcional, normalmente con Identity no hace falta):
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            //// 3) Si quieres que pase también por tu UoW/Repositorio (opcional, normalmente con Identity no hace falta):
+            //if (uow == null)
+            //    uow = _unitOfWorkFactory.Create(_contextProvider);
 
-            var repo = uow.GetRepository<ApplicationUser>(reload: true);
-            await repo.Add(user, reload: true);
-            await uow.SaveChangesAsync();
+            //var repo = uow.GetRepository<ApplicationUser>(reload: true);
+            //await repo.Add(user, reload: true);
+            //await uow.SaveChangesAsync();
 
             return IdentityResult.Success;
         }

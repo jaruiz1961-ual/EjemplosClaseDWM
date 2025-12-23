@@ -1,0 +1,16 @@
+﻿@page "/cliente/roles/{RoleId:int}/users"
+
+    <ComponenteRolUsers RoleId = "@RoleId" />
+
+@code {
+    [Parameter]
+    public int RoleId { get; set; }
+
+    protected override Task OnParametersSetAsync()
+    {
+        if (RoleId == 0)
+            return Task.FromException(new FieldAccessException());
+        // si necesitas hacer algo con RoleId en el padre, hazlo aquí
+        return Task.CompletedTask;
+    }
+}

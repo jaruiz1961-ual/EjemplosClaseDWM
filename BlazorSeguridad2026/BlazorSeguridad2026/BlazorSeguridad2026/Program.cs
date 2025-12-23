@@ -114,8 +114,8 @@ builder.Services
     .AddDefaultTokenProviders();
 
 // Servicios de seguridad
-builder.Services.AddScoped<IRoleService, RoleService>();
-builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IRoleService, RoleServiceMio>();
+builder.Services.AddScoped<IUserService, UserServiceMio>();
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
 

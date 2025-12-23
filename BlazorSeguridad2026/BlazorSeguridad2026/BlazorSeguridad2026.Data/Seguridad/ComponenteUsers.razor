@@ -1,5 +1,5 @@
 ﻿@* @page "/seguridad/users" *@
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode InteractiveAuto
 
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
@@ -117,7 +117,7 @@
                         else
                         {
                             <button class="btn btn-sm btn-outline-info me-1"
-                                    @onclick="@(() => Nav.NavigateTo($"/users/{u.Id.ToString()}/roles"))">
+                                    @onclick="@(() => Nav.NavigateTo($"/cliente/users/{u.Id.ToString()}/roles"))">
                                 Roles
                             </button>
                             <button class="btn btn-sm btn-outline-primary me-1"
@@ -243,8 +243,8 @@
             {
                 await ContextProvider.ReadAllContext();
                 var cp = ContextProvider.Copia();
-                cp._AppState.DbKey = "Application";
-                cp._AppState.ConnectionMode = "Api";
+                // cp._AppState.DbKey = "Application";
+                // cp._AppState.ConnectionMode = "Api";
                 userService= new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
                 var list = await userService.GetAllAsync();
                 if (list is null) return;           

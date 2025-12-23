@@ -7,7 +7,14 @@ using System.Runtime.InteropServices;
 
 namespace BlazorSeguridad2026.Components.Seguridad
 {
-
+    public interface IRoleService
+    {
+        Task<List<ApplicationRole>> GetAllAsync();
+        Task<IdentityResult> CreateAsync(string name);
+        Task<ApplicationRole?> GetByIdAsync(int id);
+        Task<IdentityResult> UpdateRoleAsync(int id, string newName);
+        Task<IdentityResult> DeleteAsync(int id);
+    }
     public class RoleServiceMio : IRoleService
     {
         IContextProvider _contextProvider;
@@ -30,10 +37,13 @@ namespace BlazorSeguridad2026.Components.Seguridad
             _unitOfWorkFactory = uowFactory;
    
 
-
+            //original
             _roleManager = roleManager;
         }
 
+        //original
+    //    public Task<List<ApplicationRole>> GetAllAsync() =>
+    //Task.FromResult(_roleManager.Roles.ToList());
         public async Task<List<ApplicationRole>> GetAllAsync()
         {
             if (uow == null)
@@ -61,6 +71,10 @@ namespace BlazorSeguridad2026.Components.Seguridad
 
             return await _roleManager.CreateAsync(role);
         }
+
+        //original
+        //public Task<ApplicationRole?> GetByIdAsync(int id) =>
+    //Task.FromResult(_roleManager.Roles.FirstOrDefault(r => r.Id == id));
 
         public async Task<ApplicationRole?> GetByIdAsync(int id)
         {

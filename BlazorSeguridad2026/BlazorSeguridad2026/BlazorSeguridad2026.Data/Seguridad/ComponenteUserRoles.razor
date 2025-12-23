@@ -1,4 +1,6 @@
 ﻿@* @page "/seguridad/users/{UserId}/roles" *@
+@rendermode InteractiveAuto
+
 @namespace BlazorSeguridad2026.Data.Seguridad
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
@@ -6,7 +8,7 @@
 
 @using BlazorSeguridad2026.Data
 @using Shares.Seguridad
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
 @* @attribute [Authorize(Roles = "Admin")] *@
 
 @inject IUserService UserService
@@ -88,7 +90,8 @@ else
 }
 
 @code {
-    [Parameter] public string UserId { get; set; } 
+    [Parameter]
+    public int userId { get; set; } 
 
     private ApplicationUser? user;
     private List<ApplicationRole> allRoles = new();
@@ -97,14 +100,13 @@ else
     private bool isLoading = true;
     private string? error;
     private string? success;
-
+  
 
     protected override async Task OnParametersSetAsync()
     {
         isLoading = true;
         error = success = null;
-        int userId = int.Parse(UserId);
-
+    
         user = await UserService.GetByIdAsync(userId);
         if (user is null)
         {
@@ -126,7 +128,7 @@ else
             .ToList();
         // roles actuales del usuario Filtrados 
 
-        var userRoles = await UserService.GetUserRolesAsync(int.Parse(UserId));
+        var userRoles = await UserService.GetUserRolesAsync(int.Parse(userId.ToString()));
         selectedRoles = new HashSet<string>(userRoles, StringComparer.OrdinalIgnoreCase);
 
         isLoading = false;
@@ -163,5 +165,5 @@ else
         }
     }
 
-    private void BackToUsers() => Nav.NavigateTo("/users");
+    private void BackToUsers() => Nav.NavigateTo("/cliente/users");
 }

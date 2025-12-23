@@ -1,11 +1,13 @@
-﻿@* @page "/seguridad/roles/{RoleId}/users" *@
+﻿@* @page "/seguridad/roles/{RoleId:int}/users" *@
+@rendermode InteractiveAuto
+
 @namespace BlazorSeguridad2026.Data.Seguridad
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
 @using Shares.Seguridad
 @using BlazorSeguridad2026.Components.Seguridad
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
 
 @inject IUserService UserService
 @inject RoleManager<ApplicationRole> RoleManager
@@ -116,8 +118,8 @@ else
 }
 
 @code {
-    [Parameter] public string RoleId { get; set; } = string.Empty;
-    [Parameter] public int? TenantId { get; set; } = null;
+    [Parameter]  public int RoleId { get; set; }
+
 
     private ApplicationRole? role;
     private List<ApplicationUser> usersInRole = new();
@@ -134,7 +136,7 @@ else
         isLoading = true;
         error = success = null;
 
-        role = await RoleManager.FindByIdAsync(RoleId);
+        role = await RoleManager.FindByIdAsync(RoleId.ToString());
         if (role is null)
         {
             isLoading = false;
@@ -222,5 +224,5 @@ else
         }
     }
 
-    private void BackToRoles() => Nav.NavigateTo("/roles");
+    private void BackToRoles() => Nav.NavigateTo("/cliente/roles");
 }
