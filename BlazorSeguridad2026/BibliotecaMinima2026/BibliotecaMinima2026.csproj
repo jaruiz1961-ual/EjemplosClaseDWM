@@ -1,16 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
-
-
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-
 	<ItemGroup>
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="10.0" />
@@ -33,10 +27,5 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\BibliotecaMinima2026\BibliotecaMinima2026.csproj" />
-	</ItemGroup>
-
 
 </Project>

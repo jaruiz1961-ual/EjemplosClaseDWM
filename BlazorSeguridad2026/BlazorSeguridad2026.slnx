@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="BibliotecaMinima2026/BibliotecaMinima2026.csproj" Id="99e18345-c564-4c47-b310-0b4dd0cc1262" />
   <Project Path="BlazorSeguridad2026.Seguridad/BlazorSeguridad2026.Base.csproj" Id="c4ff405b-3ba2-4980-a679-57a4b3531d84" />
   <Project Path="BlazorSeguridad2026/BlazorSeguridad2026.Client/BlazorSeguridad2026.Client.csproj" />
   <Project Path="BlazorSeguridad2026/BlazorSeguridad2026.Data/BlazorSeguridad2026.Data.csproj" />

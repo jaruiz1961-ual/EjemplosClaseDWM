@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BlazorSeguridad2026.Base.Modelo;
 
+
 namespace BlazorSeguridad2026.Base.Genericos
 {
     public class TenantSaveChangesInterceptor : SaveChangesInterceptor
