@@ -10,6 +10,7 @@ using BlazorSeguridad2026.Base.Contextos;
 
 
 
+
 namespace BlazorSeguridad2026.Base.Genericos
 {
     public interface IGenericRepositoryFactoryAsync<TEntity> where TEntity : class, IEntity

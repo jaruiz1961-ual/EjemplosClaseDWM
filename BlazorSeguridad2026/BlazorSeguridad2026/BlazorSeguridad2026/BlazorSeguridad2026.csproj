@@ -14,10 +14,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BibliotecaContextosDb\BibliotecaContextosDb.csproj" />
     <ProjectReference Include="..\..\BibliotecaMinima2026\BibliotecaMinima2026.csproj" />
     <ProjectReference Include="..\..\BlazorSeguridad2026.Seguridad\BlazorSeguridad2026.Base.csproj" />
     <ProjectReference Include="..\BlazorSeguridad2026.Client\BlazorSeguridad2026.Client.csproj" />
-    <ProjectReference Include="..\BlazorSeguridad2026.Data\BlazorSeguridad2026.Data.csproj" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />

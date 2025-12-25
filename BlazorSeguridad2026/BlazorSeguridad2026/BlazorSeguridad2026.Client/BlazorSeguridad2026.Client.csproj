@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BibliotecaMinima2026\BibliotecaMinima2026.csproj" />
     <ProjectReference Include="..\..\BlazorSeguridad2026.Seguridad\BlazorSeguridad2026.Base.csproj" />
-    <ProjectReference Include="..\BlazorSeguridad2026.Data\BlazorSeguridad2026.Data.csproj" />
   </ItemGroup>
 
   <ItemGroup>
