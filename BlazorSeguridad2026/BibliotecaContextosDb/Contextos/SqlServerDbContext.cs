@@ -1,4 +1,4 @@
-﻿#define UPDATE_DATABASE
+﻿//#define UPDATE_DATABASE
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -11,48 +11,42 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 using BlazorSeguridad2026.Base.Modelo;
 using BlazorSeguridad2026.Base.Genericos;
+using BlazorSeguridad2026.Data.Modelo;
 
 
 
 namespace BlazorSeguridad2026.Base.Contextos
 {
-    //PM>  dotnet ef migrations add Inicial --project BlazorSeguridad2026.Data --context SqlServerDbContext  --output-dir Migrations/SqlServer
-    //PM> dotnet ef database update --project BlazorSeguridad2026.Data --context SqlserverDbContext 
+    //PM>  dotnet ef migrations add Inicial --context SqlServerDbContext  --output-dir Migrations/SqlServer
+    //PM> dotnet ef database update  --context SqlserverDbContext 
 
 #if UPDATE_DATABASE
     public class SqlServerDbContextFactory : IDesignTimeDbContextFactory<SqlServerDbContext>
     {
         public SqlServerDbContext CreateDbContext(string[] args)
         {
-            var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva5; AttachDbFilename=c:\temp\Nueva5.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
-            return new SqlServerDbContext(optionsBuilder.Options);
+            var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false)
+                    .Build();
+
+            if (config != null)
+            {
+                var connectionString = config.GetConnectionString("SqlServerDbContext");
+
+                var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
+                optionsBuilder.UseSqlServer(connectionString);
+
+                return new SqlServerDbContext(optionsBuilder.Options);
+            }
+            var optionsBuilder2 = new DbContextOptionsBuilder<SqlServerDbContext>();
+            optionsBuilder2.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Nueva5; AttachDbFilename=c:\temp\Nueva5.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
+            return new SqlServerDbContext(optionsBuilder2.Options);
         }
     }
 #endif
-    //public class SqlServerContextFactory
-    //   : IDesignTimeDbContextFactory<SqlServerDbContext>
-    //{
-    //    private readonly TenantSaveChangesInterceptor _tenantInterceptor;
-    //    public SqlServerDbContext CreateDbContext(string[] args)
-    //    {
 
-    //        // ruta al appsettings del proyecto host (ajusta según tu solución)
-    //        var config = new ConfigurationBuilder()
-    //                .SetBasePath(Directory.GetCurrentDirectory())
-    //                .AddJsonFile("appsettings.json", optional: false)
-    //                .Build();
-
-    //        var connectionString = config.GetConnectionString("DefaultConnection");
-
-    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-    //        optionsBuilder.UseSqlServer(connectionString);
-
-    //        return new SqlServerDbContext(optionsBuilder.Options);
-    //    }
-    //}
-
-    public class SqlServerDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
+    public class SqlServerDbContext : DbContext
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
         public int? TenantId { get; set; }
@@ -108,27 +102,27 @@ namespace BlazorSeguridad2026.Base.Contextos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-       //     modelBuilder.Entity<Usuario>(entity =>
-       //     {
-       //         entity.Property(e => e.Codigo).IsRequired();
-       //         entity.Property(e => e.UserName)
-       //             .IsRequired()
-       //             .HasMaxLength(100);
-       //     });
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(e => e.Codigo).IsRequired();
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
 
-       //     modelBuilder.Entity<Usuario>().HasData
-       //(new Usuario { Id = 1, UserName = "Usuario1", Contexto = "SqlServer", Codigo = "0001", Password = "abc 11", TenantId = 0 },
-       //new Usuario { Id = 2, UserName = "Usuario2", Contexto = "SqlServer", Codigo = "0002", Password = "abc 22", TenantId = 1 },
-       //new Usuario { Id = 3, UserName = "Usuario3", Contexto = "SqlServer", Codigo = "0003", Password = "abc 33", TenantId = 2 });
+            modelBuilder.Entity<Usuario>().HasData
+       (new Usuario { Id = 1, UserName = "Usuario1", Contexto = "SqlServer", Codigo = "0001", Password = "abc 11", TenantId = 0 },
+       new Usuario { Id = 2, UserName = "Usuario2", Contexto = "SqlServer", Codigo = "0002", Password = "abc 22", TenantId = 1 },
+       new Usuario { Id = 3, UserName = "Usuario3", Contexto = "SqlServer", Codigo = "0003", Password = "abc 33", TenantId = 2 });
 
 
 
             ModelCreatingTenant(modelBuilder);
-            
+
         }
-        
-      //  public virtual DbSet<Usuario>? Usuario { get; set; }
-   
+
+        public virtual DbSet<Usuario>? Usuario { get; set; }
+
 
     }
 

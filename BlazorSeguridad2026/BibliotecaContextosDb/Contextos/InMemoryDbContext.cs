@@ -1,6 +1,7 @@
 ﻿
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Data.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using System;
@@ -61,18 +62,18 @@ namespace BlazorSeguridad2026.Base.Contextos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-       //     modelBuilder.Entity<Usuario>(entity =>
-       //     {
-       //         entity.Property(e => e.Codigo).IsRequired();
-       //         entity.Property(e => e.UserName)
-       //             .IsRequired()
-       //             .HasMaxLength(100);
-       //     });
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.Property(e => e.Codigo).IsRequired();
+                entity.Property(e => e.UserName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
 
-       //     modelBuilder.Entity<Usuario>().HasData
-       //(new Usuario { Id = 1, UserName = "Usuario1", Contexto = "InMemory", Codigo = "0001", Password = "abc 11", TenantId = 0 },
-       //new Usuario { Id = 2, UserName = "Usuario2", Contexto = "InMemory", Codigo = "0002", Password = "abc 22", TenantId = 1 },
-       //new Usuario { Id = 3, UserName = "Usuario3", Contexto = "InMemory", Codigo = "0003", Password = "abc 33", TenantId = 2 });
+            modelBuilder.Entity<Usuario>().HasData
+       (new Usuario { Id = 1, UserName = "Usuario1", Contexto = "InMemory", Codigo = "0001", Password = "abc 11", TenantId = 0 },
+       new Usuario { Id = 2, UserName = "Usuario2", Contexto = "InMemory", Codigo = "0002", Password = "abc 22", TenantId = 1 },
+       new Usuario { Id = 3, UserName = "Usuario3", Contexto = "InMemory", Codigo = "0003", Password = "abc 33", TenantId = 2 });
 
 
 
@@ -81,8 +82,8 @@ namespace BlazorSeguridad2026.Base.Contextos
 
         }
 
-      //  public virtual DbSet<Usuario>? Usuario { get; set; }
-       
+        public virtual DbSet<Usuario>? Usuario { get; set; }
+
 
     }
 

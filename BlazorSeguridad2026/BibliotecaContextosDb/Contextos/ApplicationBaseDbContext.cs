@@ -17,42 +17,37 @@ using BlazorSeguridad2026.Base.Genericos;
 
 namespace BlazorSeguridad2026.Base.Contextos
 {
-    //PM>  dotnet ef migrations add Inicial --project BlazorSeguridad2026.Data --context SqlServerDbContext  --output-dir Migrations/SqlServer
-    //PM> dotnet ef database update --project BlazorSeguridad2026.Data --context SqlserverDbContext 
+    //PM>  dotnet ef migrations add Inicial --context ApplicationBaseDbContext --output-dir Migrations/ApplicationBase
+    //PM> dotnet ef database update  --context ApplicationBaseDbContext 
 
 #if UPDATE_DATABASE
-    public class ApplicationDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+    public class ApplicationBaseDbContextFactory : IDesignTimeDbContextFactory<ApplicationBaseDbContext>
     {
-        public ApplicationDbContext CreateDbContext(string[] args)
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-            optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=App; AttachDbFilename=c:\temp\App.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
-            return new ApplicationDbContext(optionsBuilder.Options);
+        public ApplicationBaseDbContext CreateDbContext(string[] args)
+        { 
+
+             var config = new ConfigurationBuilder()
+                    .SetBasePath(Directory.GetCurrentDirectory())
+                    .AddJsonFile("appsettings.json", optional: false)
+                    .Build();
+            if (config != null)
+            {
+
+                var connectionString = config.GetConnectionString("ApplicationBaseDbContext");
+
+                var optionsBuilder = new DbContextOptionsBuilder<ApplicationBaseDbContext>();
+                optionsBuilder.UseSqlServer(connectionString);
+
+                return new ApplicationBaseDbContext(optionsBuilder.Options);
+            }
+            
+            var optionsBuilder2 = new DbContextOptionsBuilder<ApplicationBaseDbContext>();
+            optionsBuilder2.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=App; AttachDbFilename=c:\temp\App.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
+            return new ApplicationBaseDbContext(optionsBuilder2.Options);
         }
     }
+
 #endif
-    //public class SqlServerContextFactory
-    //   : IDesignTimeDbContextFactory<SqlServerDbContext>
-    //{
-    //    private readonly TenantSaveChangesInterceptor _tenantInterceptor;
-    //    public SqlServerDbContext CreateDbContext(string[] args)
-    //    {
-
-    //        // ruta al appsettings del proyecto host (ajusta según tu solución)
-    //        var config = new ConfigurationBuilder()
-    //                .SetBasePath(Directory.GetCurrentDirectory())
-    //                .AddJsonFile("appsettings.json", optional: false)
-    //                .Build();
-
-    //        var connectionString = config.GetConnectionString("DefaultConnection");
-
-    //        var optionsBuilder = new DbContextOptionsBuilder<SqlServerDbContext>();
-    //        optionsBuilder.UseSqlServer(connectionString);
-
-    //        return new SqlServerDbContext(optionsBuilder.Options);
-    //    }
-    //}
-
     public class ApplicationBaseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, int>
     {
         private readonly TenantSaveChangesInterceptor _tenantInterceptor;
@@ -61,7 +56,7 @@ namespace BlazorSeguridad2026.Base.Contextos
 
 #if UPDATE_DATABASE
 
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationBaseDbContext(DbContextOptions<ApplicationBaseDbContext> options)
             : base(options)
         {
 
