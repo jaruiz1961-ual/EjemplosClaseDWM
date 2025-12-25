@@ -1,13 +1,12 @@
 ﻿
+using BlazorSeguridad2026.Base.Genericos;
+using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base.Seguridad;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Shares.Genericos;
-using BlazorSeguridad2026.Data;
-using Shares.Seguridad;
-using Shares.Servicios;
 using System.Linq.Expressions;
 
 namespace BlazorAppEFTenant.Components.EndPoints

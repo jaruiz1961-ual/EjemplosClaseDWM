@@ -1,4 +1,6 @@
-﻿using BlazorSeguridad2026.Data;
+﻿using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base.Seguridad;
+using BlazorSeguridad2026.Data;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
@@ -9,9 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Shares.Seguridad;
-using Shares.SeguridadToken;
-using Shares.Servicios;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Security.Claims;

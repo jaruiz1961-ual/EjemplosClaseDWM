@@ -1,10 +1,11 @@
 ﻿@page "/ListaUsuarios"
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
-@using Shares.Genericos
-@using BlazorSeguridad2026.Data
-@using Shares.Seguridad
-@using Shares.Servicios
+@using BlazorSeguridad2026.Base.Genericos
+@using BlazorSeguridad2026.Base.Seguridad
+@using BlazorSeguridad2026.Data.Modelo
+@using BlazorSeguridad2026.Data.Servicios
+
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject IContextProvider ContextProvider 
 

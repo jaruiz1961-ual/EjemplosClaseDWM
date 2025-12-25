@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BlazorSeguridad2026.Seguridad\BlazorSeguridad2026.Base.csproj" />
     <ProjectReference Include="..\BlazorSeguridad2026.Data\BlazorSeguridad2026.Data.csproj" />
   </ItemGroup>
 

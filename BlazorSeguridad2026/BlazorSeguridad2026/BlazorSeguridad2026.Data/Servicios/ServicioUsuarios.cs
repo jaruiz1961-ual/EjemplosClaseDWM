@@ -1,4 +1,4 @@
-﻿using Shares.Genericos;
+﻿using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Data;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -6,9 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Shares.Seguridad;
+using BlazorSeguridad2026.Base.Seguridad;
+using BlazorSeguridad2026.Data.Modelo;
 
-namespace Shares.Servicios
+namespace BlazorSeguridad2026.Data.Servicios
 {
     public class ServicioUsuarios : GenericDataService<Usuario>, IGenericDataService<Usuario>
     {

@@ -2,8 +2,8 @@
 using Blazored.LocalStorage;
 
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Shares.Genericos;
-using Shares.Seguridad;
+using BlazorSeguridad2026.Base.Genericos;
+using BlazorSeguridad2026.Base.Seguridad;
 using System.Net.NetworkInformation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

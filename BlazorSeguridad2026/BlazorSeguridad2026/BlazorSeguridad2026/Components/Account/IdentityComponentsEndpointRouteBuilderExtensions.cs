@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using BlazorSeguridad2026.Base.Modelo;
 using BlazorSeguridad2026.Components.Account.Pages;
 using BlazorSeguridad2026.Components.Account.Pages.Manage;
 using BlazorSeguridad2026.Data;

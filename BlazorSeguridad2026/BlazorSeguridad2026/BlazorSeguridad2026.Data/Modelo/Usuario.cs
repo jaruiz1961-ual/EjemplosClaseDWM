@@ -1,11 +1,13 @@
-﻿using System;
+﻿using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlazorSeguridad2026.Data
+namespace BlazorSeguridad2026.Data.Modelo
 {
     public class Usuario: Entidad, IUpdatableFrom<Usuario>
     {

@@ -1,20 +1,19 @@
 ﻿using BlazorAppEFTenant.Components.EndPoints;
 using Blazored.LocalStorage;
+using BlazorSeguridad2026.Base.Contextos;
+using BlazorSeguridad2026.Base.Genericos;
+using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base.Seguridad;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
-
-
+using BlazorSeguridad2026.Data.Modelo;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Shares.Contextos;
-using Shares.Genericos;
-using BlazorSeguridad2026.Data;
-using Shares.Seguridad;
-using Shares.SeguridadToken;
+
 using static TenantInterop;
-using BlazorSeguridad2026.Components.Seguridad;
+
 
 var builder = WebApplication.CreateBuilder(args);
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
@@ -90,7 +89,7 @@ builder.Services.AddAuthentication(options =>
     .AddIdentityCookies();
 
 // DbContext Identity
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
+builder.Services.AddDbContext<ApplicationBaseDbContext>(options =>
     options.UseSqlServer(applicationConnectionString, sql =>
     {
         sql.EnableRetryOnFailure(
@@ -110,7 +109,7 @@ builder.Services
         options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
     })
     .AddRoles<ApplicationRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddEntityFrameworkStores<ApplicationBaseDbContext>()
     .AddSignInManager()
     .AddDefaultTokenProviders();
 
@@ -158,7 +157,7 @@ builder.Services.AddHttpClient(ApiName, (sp, client) =>
 builder.Services.AddTransient<TenantSaveChangesInterceptor>();
 
 // Factorías de DbContexts para backends locales
-builder.Services.AddDbContextFactory<ApplicationDbContext>((sp, options) =>
+builder.Services.AddDbContextFactory<ApplicationBaseDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     var conn = config.GetConnectionString("ApplicationDbContext");
@@ -186,7 +185,7 @@ builder.Services.AddDbContextFactory<SqLiteDbContext>((sp, options) =>
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
 
-builder.Services.AddDbContextFactory<InMemoryDbContext>((sp, options) =>
+builder.Services.AddDbContextFactory<InMemoryBaseDbContext>((sp, options) =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     var conn = config.GetConnectionString("InMemoryDbContext");

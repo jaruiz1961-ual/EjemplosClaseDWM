@@ -1,7 +1,8 @@
-﻿using BlazorSeguridad2026.Data;
+﻿using BlazorSeguridad2026.Base.Seguridad;
+using BlazorSeguridad2026.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.JSInterop;
-using Shares.Seguridad;
+
 
 public static class TenantInterop
 {

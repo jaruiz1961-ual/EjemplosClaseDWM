@@ -1,3 +1,4 @@
+using BlazorSeguridad2026.Base.Modelo;
 using BlazorSeguridad2026.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
