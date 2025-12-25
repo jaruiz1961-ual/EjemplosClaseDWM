@@ -145,13 +145,15 @@ else
                 await InvokeAsync(StateHasChanged);
                 return;
             }
-       
+
             scUsuario ??= new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
 
-            var list = await scUsuario.ObtenerTodosAsync(false);
-            usuarios = list.ToList();
+                var list = await scUsuario.ObtenerTodosAsync(false);
+                if (list is null) return;
+                usuarios = list.ToList();
 
-            await InvokeAsync(StateHasChanged);
+                await InvokeAsync(StateHasChanged);
+            
         }
         catch (Exception ex)
         {
@@ -167,9 +169,13 @@ else
         currentCount++;
         // 4. Persistir de nuevo en el contexto
         ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
-        var list = await scUsuario.ObtenerTodosAsync(false);
-        usuarios = list.ToList();
-        await ContextProvider.UpdateEstadoContext();
+        if (scUsuario != null)
+        {
+            var list = await scUsuario.ObtenerTodosAsync(false);
+            if (list is null) return;
+            usuarios = list.ToList();
+            await ContextProvider.UpdateEstadoContext();
+        }
     }
   
 
