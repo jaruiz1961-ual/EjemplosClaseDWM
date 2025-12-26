@@ -34,10 +34,6 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
-	</ItemGroup>	
-
-  <ItemGroup>
-    <ProjectReference Include="..\BibliotecaMinima2026\BibliotecaMinima2026.csproj" />
-  </ItemGroup>
+	</ItemGroup>
 
 </Project>

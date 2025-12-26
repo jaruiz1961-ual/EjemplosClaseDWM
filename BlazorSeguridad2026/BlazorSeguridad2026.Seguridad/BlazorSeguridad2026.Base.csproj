@@ -36,7 +36,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\BibliotecaContextosDb\BibliotecaContextosDb.csproj" />
-	  <ProjectReference Include="..\BibliotecaMinima2026\BibliotecaMinima2026.csproj" />
 	</ItemGroup>
 
 
