@@ -1,9 +1,11 @@
 
 using Blazored.LocalStorage;
-
-using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using BlazorSeguridad2026.Base.Contextos;
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Seguridad;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using System.Net.NetworkInformation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -28,6 +30,30 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddHttpClient("ApiRest", client =>
 {
     client.BaseAddress = new Uri(apiUrl);
+});
+
+builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
+{
+    var map = new Dictionary<string, Func<DbContext>>
+    {
+        ["application"] = () =>
+            sp.GetRequiredService<IDbContextFactory<ApplicationBaseDbContext>>()
+              .CreateDbContext(),
+
+        ["sqlserver"] = () =>
+            sp.GetRequiredService<IDbContextFactory<SqlServerDbContext>>()
+              .CreateDbContext(),
+
+        ["sqlite"] = () =>
+            sp.GetRequiredService<IDbContextFactory<SqLiteDbContext>>()
+              .CreateDbContext(),
+
+        ["inmemory"] = () =>
+            sp.GetRequiredService<IDbContextFactory<InMemoryBaseDbContext>>()
+              .CreateDbContext()
+    };
+
+    return new MultiDbContextFactory(map);
 });
 
 

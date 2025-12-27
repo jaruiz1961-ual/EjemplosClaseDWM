@@ -10,6 +10,7 @@ using BlazorSeguridad2026.Data.Modelo;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.OpenApi.Models;
 
 using static TenantInterop;
@@ -194,10 +195,43 @@ builder.Services.AddDbContextFactory<InMemoryBaseDbContext>((sp, options) =>
     options.AddInterceptors(interceptor);
 }, ServiceLifetime.Transient);
 
+
+
+
+//IDictionary<string, IDbContextFactory<DbContext>>
+//necesito crear la factoria para quitar el switch de UnitOfWorkFactory
+builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
+{
+    var map = new Dictionary<string, Func<DbContext>>
+    {
+        ["application"] = () =>
+            sp.GetRequiredService<IDbContextFactory<ApplicationBaseDbContext>>()
+              .CreateDbContext(),
+
+        ["sqlserver"] = () =>
+            sp.GetRequiredService<IDbContextFactory<SqlServerDbContext>>()
+              .CreateDbContext(),
+
+        ["sqlite"] = () =>
+            sp.GetRequiredService<IDbContextFactory<SqLiteDbContext>>()
+              .CreateDbContext(),
+
+        ["inmemory"] = () =>
+            sp.GetRequiredService<IDbContextFactory<InMemoryBaseDbContext>>()
+              .CreateDbContext()
+    };
+
+    return new MultiDbContextFactory(map);
+});
+
 // Factoría genérica y UoW
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+
+
+
+
 
 // Blazor Server
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
