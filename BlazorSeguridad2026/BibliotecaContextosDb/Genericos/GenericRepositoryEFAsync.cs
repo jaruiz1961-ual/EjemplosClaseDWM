@@ -29,6 +29,8 @@ namespace BlazorSeguridad2026.Base.Genericos
         {
             Context = context;
             Set = context.Set<TEntity>();
+            
+
         }
 
 

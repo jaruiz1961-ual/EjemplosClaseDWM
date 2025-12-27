@@ -1,4 +1,5 @@
-﻿using BlazorAppEFTenant.Components.EndPoints;
+﻿using BibliotecaContextosDb.Genericos;
+using BlazorAppEFTenant.Components.EndPoints;
 using Blazored.LocalStorage;
 using BlazorSeguridad2026.Base.Contextos;
 using BlazorSeguridad2026.Base.Genericos;
@@ -223,6 +224,18 @@ builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
 
     return new MultiDbContextFactory(map);
 });
+
+
+// Estrategias por contexto (una vez, para todos los TEntity)
+builder.Services.AddScoped<IRepositoryContextStrategy, ApplicationRepositoryStrategy>();
+builder.Services.AddScoped<IRepositoryContextStrategy, SqlServerRepositoryStrategy>();
+builder.Services.AddScoped<IRepositoryContextStrategy, SqLiteRepositoryStrategy>();
+builder.Services.AddScoped<IRepositoryContextStrategy, InMemoryRepositoryStrategy>();
+
+// Factoría genérica de repositorios
+builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
+
+
 
 // Factoría genérica y UoW
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
