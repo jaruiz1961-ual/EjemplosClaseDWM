@@ -24,26 +24,10 @@
 cliente: @estadoCliente
 servidor:@estadoServidor
 
-@if (ContextProvider._AppState.TenantId == null)
-{
-    <p><em>Debe seleccionar un tenant para ver los usuarios...</em></p>
-}
-else
-{
-    <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
-    <p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
-    <p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
-    <p>Mode <strong>@ContextProvider._AppState.ConnectionMode</strong>:</p>
-    <p>Token <strong>@ContextProvider._AppState.Token</strong>:</p>
-    @if (ContextProvider._AppState.ConnectionMode != "Ef")
-    {
-        <p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
-    }
-}
 
-@if (usuarios is null)
+@if (_isValidContext == false)
 {
-    <p><em>Cargando...</em></p>
+    <p><em>Debe seleccionar un contexto de ejecución para ver los usuarios...</em></p>
 }
 else if (!usuarios.Any())
 {
@@ -89,7 +73,7 @@ else
     private bool _isInitializing;
     private string estadoCliente = "";
     private string estadoServidor;
-
+    bool _isValidContext;
     public List<Usuario>? usuarios { get; set; } = new();
     private ServicioUsuariosCliente? scUsuario;
 
@@ -139,21 +123,17 @@ else
     {
         try
         {
-            if (ContextProvider._AppState.ConnectionMode == null)
+            if (ContextProvider.IsValid())
             {
-                usuarios = null;
-                await InvokeAsync(StateHasChanged);
-                return;
-            }
-
-            scUsuario ??= new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
-
-                var list = await scUsuario.ObtenerTodosAsync(false);
+                await ContextProvider.ReadAllContext(false);
+                scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+                var list = await scUsuario.ObtenerTodosAsync(true);
                 if (list is null) return;
                 usuarios = list.ToList();
-
-                await InvokeAsync(StateHasChanged);
-            
+                _isValidContext = true;
+            }
+            else _isValidContext = false;
+            StateHasChanged();
         }
         catch (Exception ex)
         {

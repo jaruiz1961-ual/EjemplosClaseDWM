@@ -1,0 +1,217 @@
+﻿@page "/DetalleUsuario"
+@page "/DetalleUsuario/{Id:int}"    //esta página se puede acceder tambien en modo de edición
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
+
+@using BlazorSeguridad2026.Base.Genericos
+@using BlazorSeguridad2026.Base.Seguridad
+@using BlazorSeguridad2026.Data.Modelo
+@using BlazorSeguridad2026.Data.Servicios
+
+@inject IUnitOfWorkFactory UnitOfWorkFactory 
+@inject IContextProvider ContextProvider 
+
+@inject NavigationManager nav
+@implements IDisposable
+
+
+
+<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+
+<div class="container">
+    @if (NewUser != null)
+    {
+        <EditForm Model="@NewUser" OnValidSubmit="@HandleValidSubmit" OnInvalidSubmit="@HandleInvalidSubmit" FormName="DetalleUsuarioForm">
+            <DataAnnotationsValidator />
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="Codigo">Codigo #</label>
+                            <input type="text" class="form-control" id="Codigo" @bind-value="NewUser.Codigo" placeholder="enter codigo ..." />
+                            <ValidationMessage For="@(() => NewUser.Codigo)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="UserName">UsertName #</label>
+                            <input type="text" class="form-control" id="UserName" @bind-value="NewUser.UserName" placeholder="enter UserName ..." />
+                            <ValidationMessage For="@(() => NewUser.UserName)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="NivelAcceso">NivelAcceso #</label>
+                            <input type="text" class="form-control" id="NivelAcceso" @bind-value="NewUser.Contexto" placeholder="enter NivelAcceso ..." />
+                            <ValidationMessage For="@(() => NewUser.Contexto)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="Password">Password #</label>
+                            <input type="text" class="form-control" id="Password" @bind-value="NewUser.Password" placeholder="enter Password ..." />
+                            <ValidationMessage For="@(() => NewUser.Password)" />
+                        </div>
+                    </div>
+
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="email">email #</label>
+                            <input type="text" class="form-control" id="email" @bind-value="NewUser.email" placeholder="enter email ..." />
+                            <ValidationMessage For="@(() => NewUser.email)" />
+                        </div>
+                    </div>
+                    <div class="row" style="margin-top:10px">
+                        <div class="col-md-12">
+                            <label for="email">Tenant #</label>
+                            <input type="text" class="form-control" id="tenant" @bind-value="NewUser.TenantId" placeholder="enter tenant ..." />
+                            <ValidationMessage For="@(() => NewUser.TenantId)" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-info" style="margin-top:10px">Save</button>
+                    <button type="button" class="btn btn-secondary" @onclick="Cancel" style="margin-top:10px">Cancel</button>
+                </div>
+                @if (displayValidationErrorMessages)
+                {
+                    <div class="col-md-4" style="margin-top:10px">
+                        <label>Validation Messages: </label>
+                        <ValidationSummary />
+                    </div>
+                }
+            </div>
+    </EditForm>
+    }
+
+</div>
+
+
+@code {
+
+    [Parameter]
+    public int Id { get; set; }
+
+    int currentCount = 0;
+    private bool _initialized;
+    private bool _isInitializing;
+    private string estadoCliente = "";
+    private string estadoServidor;
+    bool _isValidContext;
+    public Usuario? NewUser { get; set; }
+    private ServicioUsuarios? servicioUsuario;
+    bool displayValidationErrorMessages;
+    bool displayUserAddedToDB;
+
+    private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || _isInitializing || _initialized)
+            return;
+
+        _isInitializing = true;
+
+        // 1. Suscribirse a eventos del contexto
+        ContextProvider.OnContextChanged += OnContextChangedProxy;
+
+        // 2. Inicializar desde localStorage (JS interop seguro aquí)
+        await ContextProvider.ReadAllContext(true);
+
+        // 3. Leer estado actual
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+
+
+        // 4. Persistir de nuevo en el contexto
+
+        await ContextProvider.UpdateEstadoContext();
+
+        _initialized = true;
+        _isInitializing = false;
+
+        await CargarAsync();
+    }
+
+    private async Task HandleContextChangedAsync()
+    {
+        // 6. Reaccionar a cambios posteriores de contexto
+        await CargarAsync();
+        InvokeAsync(StateHasChanged);
+    }
+
+
+    private async Task HandleValidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = false;
+        displayUserAddedToDB = true;
+        if (servicioUsuario is null)
+        servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+        if (Id != 0)
+            servicioUsuario.ActualizarAsync(NewUser,true);
+        else
+            servicioUsuario.AñadirAsync(NewUser,true);
+
+        nav.NavigateTo("javascript:history.back()");
+     
+        //nav.NavigateTo("/ListaUsuarios");
+    }
+
+
+    private void HandleInvalidSubmit(EditContext context)
+    {
+        displayValidationErrorMessages = true;
+        displayUserAddedToDB = false;
+        //  nav.NavigateTo("/ListaUsuarios");
+    }
+
+
+
+
+    private async Task CargarAsync()
+    {
+ 
+        try
+        {
+            if (Id != 0)
+            {
+                if (servicioUsuario is null)
+                    servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+
+                NewUser = await servicioUsuario.ObtenerPorIdAsync(Id,true);
+            }
+            else 
+            {
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("EX: " + ex.GetType().FullName);
+            Console.WriteLine(ex.ToString());
+            Console.WriteLine("INNER: " + ex.InnerException?.GetType().FullName);
+            Console.WriteLine(ex.InnerException?.ToString());
+            throw;
+        }
+    }
+
+    protected void Cancel()
+    {
+        nav.NavigateTo("javascript:history.back()");
+        //nav.NavigateTo("/ListaUsuarios");
+    }
+
+    public void Dispose()
+    {
+        // 7. Desuscribirse para evitar fugas de memoria
+        ContextProvider.OnContextChanged -= OnContextChangedProxy;
+    }
+}
+
