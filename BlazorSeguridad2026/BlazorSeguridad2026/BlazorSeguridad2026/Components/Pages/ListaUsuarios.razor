@@ -62,7 +62,7 @@ else
 
 @code {
 
-    ServicioUsuarios servicioUsuarios;
+
 
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
@@ -98,6 +98,8 @@ else
             if (ContextProvider.IsValid())
             {  
                 await ContextProvider.ReadAllContext(false);
+                ServicioUsuarios? servicioUsuarios = null;
+                if (servicioUsuarios is null)
                 servicioUsuarios = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await servicioUsuarios.ObtenerTodosAsync(true);
                 if (list is null) return;

@@ -42,52 +42,52 @@ namespace BlazorSeguridad2026.Base.Genericos
             }
             _unitOfWorkFactory = uowFactory;       
         }
-         public async Task<IEnumerable<T>> ObtenerTodosAsync(bool reload)
+        public async Task<IEnumerable<T>> ObtenerTodosAsync(bool reload)
         {
-            if (uow == null)
-             uow = _unitOfWorkFactory.Create(_contextProvider);
+            //if (uow == null)
+            //    uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
+
             var repo = uow.GetRepository<T>(reload);
-            IEnumerable<T> allEntities = null;
+
             try
             {
-                allEntities = await repo.GetAllAsync(reload);
+                var allEntities = await repo.GetAllAsync(reload);
+                return allEntities?.ToList() ?? Enumerable.Empty<T>();
             }
             catch (Exception ex)
             {
-                return null;
+                // Aquí mejor loguear el error, no silenciarlo
+                // _logger.LogError(ex, "Error obteniendo entidades de {Tipo}", typeof(T).Name);
+                throw; // o lanza una excepción de dominio si quieres encapsular
             }
-            return allEntities.ToList();
         }
         public async Task<IEnumerable<T>> ObtenerFiltradosCadenaAsync(string filtro, bool reload)
         {
             var predicate = DynamicExpressionParser.ParseLambda<T, bool>(
                 ParsingConfig.Default,false,filtro );
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
             var filterEntities = await repo.GetFilterAsync(predicate,reload);
             return filterEntities.ToList();
         }
         public async Task<IEnumerable<T>> ObtenerFiltradosExpresionAsync(Expression<Func<T, bool>> predicate, bool reload)
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
             var filterEntities = await repo.GetFilterAsync(predicate,reload);
             return filterEntities.ToList();         
         }
         public async Task<T?> ObtenerPorIdAsync(int id, bool reload)
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
             var entity = await repo.GetByIdAsync(id,reload);
             return entity;
         }
         public async Task<T?> AñadirAsync(T data, bool reload)
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
             var addedData = await repo.Add(data,reload);
             var num = await uow.SaveChangesAsync();
@@ -96,8 +96,7 @@ namespace BlazorSeguridad2026.Base.Genericos
         }
         public async Task<T?> ActualizarAsync(T data, bool reload)
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
             var updatedData= await repo.Update(data,reload);
             var num = await uow.SaveChangesAsync();
@@ -106,8 +105,7 @@ namespace BlazorSeguridad2026.Base.Genericos
         }
         public async Task<T?> EliminarAsync(int id, bool reload)
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+            using var uow = _unitOfWorkFactory.Create(_contextProvider);
             var repo = uow.GetRepository<T>(reload);
             var entity = await repo.GetByIdAsync(id,reload);
             if (entity != null)

@@ -98,7 +98,7 @@
     bool displayValidationErrorMessages = false;
     bool displayUserAddedToDB = false;
 
-    ServicioUsuarios servicioUsuario;
+
 
 
 
@@ -122,6 +122,7 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
+        ServicioUsuarios? servicioUsuario = null;
         if (servicioUsuario is null)
          servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
         if (Id != 0)
@@ -148,6 +149,7 @@
         {
             if (Id != 0)
             {
+                ServicioUsuarios? servicioUsuario = null;
                 if (servicioUsuario is null)
                     servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 NewUser = await servicioUsuario.ObtenerPorIdAsync(Id,true);

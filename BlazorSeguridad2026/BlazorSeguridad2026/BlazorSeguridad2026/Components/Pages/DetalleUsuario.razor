@@ -103,7 +103,7 @@
     private string estadoServidor;
     bool _isValidContext;
     public Usuario? NewUser { get; set; }
-    private ServicioUsuarios? servicioUsuario;
+
     bool displayValidationErrorMessages;
     bool displayUserAddedToDB;
 
@@ -151,8 +151,9 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
+        ServicioUsuarios? servicioUsuario = null;
         if (servicioUsuario is null)
-        servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+           servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
         if (Id != 0)
             servicioUsuario.ActualizarAsync(NewUser,true);
         else
@@ -181,6 +182,8 @@
         {
             if (Id != 0)
             {
+                ServicioUsuarios? servicioUsuario = null;
+
                 if (servicioUsuario is null)
                     servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
 

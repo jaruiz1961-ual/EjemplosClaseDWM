@@ -126,6 +126,7 @@ else
             if (ContextProvider.IsValid())
             {
                 await ContextProvider.ReadAllContext(false);
+                if (scUsuario is null)
                 scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
                 var list = await scUsuario.ObtenerTodosAsync(true);
                 if (list is null) return;

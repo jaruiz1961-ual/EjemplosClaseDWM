@@ -161,30 +161,33 @@ namespace BlazorSeguridad2026.Base.Genericos
             if (!string.IsNullOrEmpty(_token))
             {
                 _httpClient.DefaultRequestHeaders.Authorization =
-         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _token);
             }
-            
-            // En acceso API, lo típico es usar PUT por id:
+
             var idProp = typeof(TEntity).GetProperty("Id");
             var id = idProp?.GetValue(entity);
-            if (id == null) throw new InvalidOperationException("Entidad sin propiedad Id.");
-            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}&reload{reload}";
-            var response = await _httpClient.GetAsync(url);
+            if (id == null)
+                throw new InvalidOperationException("Entidad sin propiedad Id.");
+
+            var url = $"/api/{_contexto}/{_resourceName}/{id}?tenantId={_tenantId}&reload={reload}";
+
+            var response = await _httpClient.PutAsJsonAsync(url, entity);
+
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-                // Aquí decides qué hacer: devolver lista vacía, lanzar excepción, redirigir a login, etc.
+                // manejar expiración de token (redirigir a login, etc.)
                 return null;
             }
 
-            // Opcional: controlar otros errores
             if (!response.IsSuccessStatusCode)
             {
-                // Manejar otros códigos (404, 500, etc.)
+                // log, excepción, etc.
                 return null;
             }
-            var resp = _httpClient.PutAsJsonAsync(url, entity).Result;
-            resp.EnsureSuccessStatusCode();
-            return entity;
+
+            // Si tu API devuelve la entidad actualizada, úsala:
+            var updated = await response.Content.ReadFromJsonAsync<TEntity>();
+            return updated ?? entity;
         }
 
         public async Task<TEntity?> Remove(TEntity entity, bool reload)
