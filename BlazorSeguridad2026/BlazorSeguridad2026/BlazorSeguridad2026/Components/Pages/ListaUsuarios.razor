@@ -1,5 +1,5 @@
 ﻿@page "/ListaUsuarios"
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode @(new InteractiveServerRenderMode(prerender: true))
 
 @using BlazorSeguridad2026.Base.Genericos
 @using BlazorSeguridad2026.Base.Seguridad
@@ -11,6 +11,7 @@
 
 @inject NavigationManager nav
 @implements IDisposable
+@inject PersistentComponentState PersistenceAppState
 
 
 
@@ -63,10 +64,10 @@ else
 @code {
 
 
-
+    [PersistentState]
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
-    string ContextoKey ="";
+    string ContextoKey ="Key";
 
     bool _isValidContext;
 
@@ -76,28 +77,39 @@ else
     {
         _onContextChangedHandler += async () =>
         {
-            await CargarAsync();
+            await ActualizarContextoAsync();
+            await CargarDatosAsync();
 
         };
-
-
         ContextProvider.OnContextChanged += _onContextChangedHandler;
+        CargarDatosAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
-            await CargarAsync();
-
+        {
+            await ActualizarContextoAsync();
+            await CargarDatosAsync();
+        }
     }
 
-    private async Task CargarAsync()
+    private async Task ActualizarContextoAsync()
+    {
+            if (ContextProvider.IsValid())
+            {  
+                await ContextProvider.ReadAllContext(false);
+
+            }        
+    }
+
+
+    private async Task CargarDatosAsync()
     {
         try
         {
             if (ContextProvider.IsValid())
             {  
-                await ContextProvider.ReadAllContext(false);
                 ServicioUsuarios? servicioUsuarios = null;
                 if (servicioUsuarios is null)
                 servicioUsuarios = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
