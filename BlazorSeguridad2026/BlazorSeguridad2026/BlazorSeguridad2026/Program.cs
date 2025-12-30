@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.OpenApi.Models;
-using BlazorSeguridad2026.Base.Culture;
+using BlazorSeguridad2026.Base.Cultures;
 
 //using static TenantInterop;
 

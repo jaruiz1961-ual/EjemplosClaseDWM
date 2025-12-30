@@ -12,7 +12,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 var apiUrl = builder.Configuration["ConnectionStrings:UrlApi"];
 
 
-
+builder.Services.AddBootstrapBlazor(); 
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();

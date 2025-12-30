@@ -9,6 +9,7 @@
 @using BlazorSeguridad2026.Data.Modelo
 @using BlazorSeguridad2026.Data.Servicios
 @using Microsoft.AspNetCore.Authorization
+@using BlazorSeguridad2026.Base.Cultures
 
 
 
@@ -23,7 +24,7 @@
 
 cliente: @estadoCliente
 servidor:@estadoServidor
-
+<CultureSelector/>
 
 @if (_isValidContext == false)
 {

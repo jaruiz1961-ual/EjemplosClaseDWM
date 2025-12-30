@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace BlazorSeguridad2026.Base.Culture
+namespace BlazorSeguridad2026.Base.Cultures
 {
     public static class SupportedCultures
     {
