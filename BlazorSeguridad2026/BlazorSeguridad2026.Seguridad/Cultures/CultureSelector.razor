@@ -2,6 +2,7 @@
 @using System.Globalization
 @using BootstrapBlazor.Components
 @inject NavigationManager Navigation
+@inject IContextProvider ContextProvider
 
 
 <Select TValue="CultureInfo"
@@ -24,6 +25,32 @@
         Culture = CultureInfo.CurrentCulture;
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await LoadUsersAsync();
+
+    }
+
+    private async Task LoadUsersAsync()
+    {
+        try
+        {
+            if (ContextProvider.IsValid())
+            {
+                await ContextProvider.ReadAllContext(true);
+                ContextProvider.SetClaveValor(ClavesEstado.Culture, Culture.DisplayName);
+                await ContextProvider.UpdateEstadoContext();
+            }
+        }
+        catch (Exception ex)
+        {
+
+            throw;
+        }
+    }
+
+
     private CultureInfo Culture
     {
         get
@@ -37,9 +64,17 @@
                 var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
                 var cultureEscaped = Uri.EscapeDataString(value.Name);
                 var uriEscaped = Uri.EscapeDataString(uri);
+                if (ContextProvider.IsValid())
+                {
+                    ContextProvider.ReadAllContext(true);
+                    ContextProvider.SetClaveValor(ClavesEstado.Culture,cultureEscaped);
+                    ContextProvider.UpdateEstadoContext();
+                }
 
                 Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
             }
         }
     }
     }
+    }
+    

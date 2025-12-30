@@ -26,8 +26,10 @@ namespace BlazorAppEFTenant.Components.EndPoints
         
         public static void LoginApis(this WebApplication app)
         {
-            app.MapGet("/Culture/Set", (string culture, string redirectUri, HttpContext httpContext) =>
+            app.MapGet("/Culture/Set", (string culture, string redirectUri, HttpContext httpContext
+                , IContextProvider ContextProvider) =>
             {
+   
                 if (!string.IsNullOrEmpty(culture))
                 {
                     httpContext.Response.Cookies.Append(
@@ -37,6 +39,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
                         {
                             Expires = DateTimeOffset.UtcNow.AddYears(1)
                         });
+
+                    // parece que no puedo utilizar localstorage en las minimal APIs !!!!!
+                    //ContextProvider.ReadAllContext(true);
+                    //ContextProvider.SetClaveValor(ClavesEstado.Culture, culture);
+                    //ContextProvider.UpdateEstadoContext();
                 }
 
                 var unescapedUrl = Uri.UnescapeDataString(redirectUri ?? "/");
@@ -49,7 +56,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
             app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
             {
-                ContextProvider.LogOut();
+                await ContextProvider.LogOut();
                 await context.SignOutAsync(IdentityConstants.ApplicationScheme);
                 context.Response.Redirect(returnUrl ?? "/");
             }).RequireAuthorization();

@@ -11,6 +11,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
 {
     public enum ClavesEstado
     {
+        Culture,
+        Theme,
         PaginaCliente,
         PaginaServidor,
         Otro
@@ -164,6 +166,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         private Dictionary<ClavesEstado, string> StringToDictionary (string estado)
         {
             Dictionary<ClavesEstado,string> diccionario = new Dictionary<ClavesEstado, string>();
+            if (estado is null) return diccionario;
             var parejas = estado.Split(';', StringSplitOptions.RemoveEmptyEntries);
             foreach (var se in parejas)
             {

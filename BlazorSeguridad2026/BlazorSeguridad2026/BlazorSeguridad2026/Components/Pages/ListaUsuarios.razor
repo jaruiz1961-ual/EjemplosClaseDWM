@@ -17,7 +17,11 @@
 
 <h3>Listado de usuarios  (Genérico)</h3>
 
-<CultureSelector />
+
+
+cliente: @estadoCliente
+servidor:@estadoServidor
+cultura:@estadoCultura
 
 @if (_isValidContext == false)
 {
@@ -68,6 +72,9 @@ else
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="Key";
+    private string estadoCliente = "";
+    private string estadoServidor;
+    private string estadoCultura;
 
     bool _isValidContext;
 
@@ -82,7 +89,7 @@ else
 
         };
         ContextProvider.OnContextChanged += _onContextChangedHandler;
-        CargarDatosAsync();
+        
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -98,7 +105,10 @@ else
     {
             if (ContextProvider.IsValid())
             {  
-                await ContextProvider.ReadAllContext(false);
+                await ContextProvider.ReadAllContext(true);
+            estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+            estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+            estadoCultura = ContextProvider.GetValor(ClavesEstado.Culture) ?? "Ninguno";
 
             }        
     }

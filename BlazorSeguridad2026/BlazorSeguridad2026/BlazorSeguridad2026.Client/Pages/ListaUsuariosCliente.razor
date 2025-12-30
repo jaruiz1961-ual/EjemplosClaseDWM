@@ -24,6 +24,7 @@
 
 cliente: @estadoCliente
 servidor:@estadoServidor
+cultura:@estadoCultura
 <CultureSelector/>
 
 @if (_isValidContext == false)
@@ -74,6 +75,7 @@ else
     private bool _isInitializing;
     private string estadoCliente = "";
     private string estadoServidor;
+    private string estadoCultura;
     bool _isValidContext;
     public List<Usuario>? usuarios { get; set; } = new();
     private ServicioUsuariosCliente? scUsuario;
@@ -99,6 +101,7 @@ else
         // 3. Leer estado actual
         estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
         estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCultura = estadoServidor = ContextProvider.GetValor(ClavesEstado.Culture) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
