@@ -8,16 +8,25 @@ using BlazorSeguridad2026.Base.Seguridad;
 using BlazorSeguridad2026.Components;
 using BlazorSeguridad2026.Components.Account;
 using BlazorSeguridad2026.Data.Modelo;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.OpenApi.Models;
+using BlazorSeguridad2026.Base.Culture;
 
-using static TenantInterop;
+//using static TenantInterop;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+
+
+
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
 // CORS
@@ -151,7 +160,7 @@ builder.Services.AddHttpClient(ApiName, (sp, client) =>
     client.BaseAddress = new Uri(UrlApi);
 });
 
-
+//http minimal APIs y Blazor
 
 
 
@@ -244,21 +253,36 @@ builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 
 
-
+builder.Services.AddRazorPages();
 
 // Blazor Server
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
 {
     options.DetailedErrors = true;
 });
+builder.Services.AddLocalization();
 
 builder.Services.AddAntiforgery();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddBootstrapBlazor();
+
+
 var app = builder.Build();
 
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(SupportedCultures.DefaultCulture),
+    SupportedCultures = SupportedCultures.Cultures,
+    SupportedUICultures = SupportedCultures.Cultures
+};
+
+
+
+app.UseRequestLocalization(localizationOptions);
+
 // Service locator (para JS/TenantInterop)
-ServiceLocator.Services = app.Services;
+//ServiceLocator.Services = app.Services;
 
 // Migrar/crear bases de datos usando el ServiceProvider real
 using (var scope = app.Services.CreateScope())
@@ -293,6 +317,7 @@ app.UseHttpsRedirection();
 
 app.UseCors(MyAllowSpecificOrigins);
 
+app.UseStaticFiles();
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();

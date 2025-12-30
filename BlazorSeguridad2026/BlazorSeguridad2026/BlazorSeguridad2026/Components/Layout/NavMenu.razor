@@ -8,7 +8,7 @@
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 
-
+//es fundamental para que no entre en un bucle de peticiones
 @functions {
     string GetAntiforgeryToken()
     {
@@ -82,6 +82,9 @@
 </div>
     </Authorized>
 </AuthorizeView>
+
+
+<CultureSelector></CultureSelector>
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">

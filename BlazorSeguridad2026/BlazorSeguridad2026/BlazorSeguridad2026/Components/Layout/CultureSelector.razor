@@ -1,0 +1,45 @@
+﻿@using BlazorSeguridad2026.Base.Culture
+@using System.Globalization
+@using BootstrapBlazor.Components
+@inject NavigationManager Navigation
+
+
+<Select TValue="CultureInfo"
+        Items="Culturas"
+        @bind-Value="Culture"
+        Class="w-auto">
+</Select>
+
+@code {
+
+
+    private List<SelectedItem> Culturas { get; } = 
+    [
+        new SelectedItem(@SupportedCultures.es_ES, "Español"),
+        new SelectedItem(@SupportedCultures.it_IT, "Italiano")
+    ];
+
+    protected override void OnInitialized()
+    {
+        Culture = CultureInfo.CurrentCulture;
+    }
+
+    private CultureInfo Culture
+    {
+        get
+        {
+            return CultureInfo.CurrentCulture;
+        }
+        set
+        {
+            if (CultureInfo.CurrentCulture != value)
+            {
+                var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+                var cultureEscaped = Uri.EscapeDataString(value.Name);
+                var uriEscaped = Uri.EscapeDataString(uri);
+
+                Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
+            }
+        }
+    }
+    }

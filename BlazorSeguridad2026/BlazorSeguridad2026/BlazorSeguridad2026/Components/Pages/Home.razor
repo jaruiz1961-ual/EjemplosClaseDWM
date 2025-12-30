@@ -1,25 +1,3 @@
 ﻿@page "/"
 
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
-@inject IContextProvider ContextProvider
 
-
-<PageTitle>Home</PageTitle>
-
-<AuthorizeView>
-    <Authorized Context="auth">
-        <div class="nav-item px-3 text-muted small">
-            Usuario: @auth.User.Identity?.Name
-        </div>
-        @* Ejemplo simple: comprobar si es Admin *@
-        @if (auth.User.IsInRole("Admin"))
-        {
-            <div class="nav-item px-3 text-muted small">
-                Rol: Admin
-            </div>
-        }
-
-    </Authorized>
-</AuthorizeView>
-
-    

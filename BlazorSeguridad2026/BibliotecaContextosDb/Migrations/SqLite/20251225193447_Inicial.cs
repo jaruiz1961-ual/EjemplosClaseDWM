@@ -32,7 +32,7 @@ namespace BibliotecaContextosDb.Migrations.SqLite
 
             migrationBuilder.InsertData(
                 table: "Usuario",
-                columns: new[] { "Id", "Codigo", "Contexto", "Password", "TenantId", "UserName", "email" },
+                columns: new[] { "Id", "Codigo", "Contexto", "Password", "TenantId", "UserName", "Email" },
                 values: new object[,]
                 {
                     { 1, "0001", "SqLite", "abc 11", 0, "Usuario1", null },

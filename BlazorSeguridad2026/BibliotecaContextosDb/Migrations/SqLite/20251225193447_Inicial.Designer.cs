@@ -45,7 +45,7 @@ namespace BibliotecaContextosDb.Migrations.SqLite
                         .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("email")
+                    b.Property<string>("Email")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

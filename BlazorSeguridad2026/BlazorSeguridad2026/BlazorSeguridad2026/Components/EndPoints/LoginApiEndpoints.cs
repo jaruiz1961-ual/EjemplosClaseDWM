@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
@@ -19,12 +20,33 @@ using static System.Net.WebRequestMethods;
 
 namespace BlazorAppEFTenant.Components.EndPoints
 {
-
+    public record SetCultureRequest(string Culture, string RedirectUri);
     public static class LoginApiEndpoints
     {
-
+        
         public static void LoginApis(this WebApplication app)
         {
+            app.MapGet("/Culture/Set", (string culture, string redirectUri, HttpContext httpContext) =>
+            {
+                if (!string.IsNullOrEmpty(culture))
+                {
+                    httpContext.Response.Cookies.Append(
+                        CookieRequestCultureProvider.DefaultCookieName,
+                        CookieRequestCultureProvider.MakeCookieValue(new RequestCulture(culture)),
+                        new CookieOptions
+                        {
+                            Expires = DateTimeOffset.UtcNow.AddYears(1)
+                        });
+                }
+
+                var unescapedUrl = Uri.UnescapeDataString(redirectUri ?? "/");
+                return Results.LocalRedirect(unescapedUrl);
+            });
+
+
+
+
+
             app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
             {
                 ContextProvider.LogOut();

@@ -19,18 +19,45 @@ namespace BlazorSeguridad2026.Data.Modelo
 
         public string Contexto { get; set; }
         public string Password { get; set; }
-        public string? email { get; set; }
+        public string? Email { get; set; }
 
+
+        public void UpdateFromModel(UserModel source)
+        {
+            // Copias solo los campos actualizables
+            UserName = source.UserName;
+            Password = source.Password;
+            Contexto = source.Contexto;
+            Email = source.Email;
+            Codigo = source.Codigo;
+
+            // No tocas Id ni TenantId aquí
+        }
         public void UpdateFrom(Usuario source)
         {
             // Copias solo los campos actualizables
             UserName = source.UserName;
             Password = source.Password;
             Contexto = source.Contexto;
-            email = source.email;
+            Email = source.Email;
             Codigo = source.Codigo;
 
             // No tocas Id ni TenantId aquí
         }
+        public UserModel SaveToModel()
+        {
+            return new UserModel
+            {
+                UserName = this.UserName,
+                Password = this.Password,
+                Contexto = this.Contexto,
+                Email = this.Email??"",
+                Codigo = this.Codigo,
+                TenantId = this.TenantId??0
+            };
+
+        }
+
+   
     }
 }

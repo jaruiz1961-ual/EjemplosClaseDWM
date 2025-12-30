@@ -35,5 +35,20 @@
 		<PackageReference Include="Microsoft.Extensions.Http" Version="10.0" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
 	</ItemGroup>
+		<ItemGroup>
+		  <Compile Update="Resources\UsuarioResources.Designer.cs">
+		    <DesignTime>True</DesignTime>
+		    <AutoGen>True</AutoGen>
+		    <DependentUpon>UsuarioResources.resx</DependentUpon>
+		  </Compile>
+		</ItemGroup>
+		<ItemGroup>
+		  <EmbeddedResource Update="Resources\UsuarioResources.resx">
+		    <Generator>PublicResXFileCodeGenerator</Generator>
+		    <LastGenOutput>UsuarioResources.Designer.cs</LastGenOutput>
+		    <CustomToolNamespace>BibliotecaContextosDb.Resources</CustomToolNamespace>
+		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		  </EmbeddedResource>
+		</ItemGroup>
 
 </Project>

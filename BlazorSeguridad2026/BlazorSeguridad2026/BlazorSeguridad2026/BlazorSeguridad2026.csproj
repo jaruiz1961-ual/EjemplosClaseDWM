@@ -18,6 +18,8 @@
     <ProjectReference Include="..\..\BlazorSeguridad2026.Seguridad\BlazorSeguridad2026.Base.csproj" />
     <ProjectReference Include="..\BlazorSeguridad2026.Client\BlazorSeguridad2026.Client.csproj" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+    <PackageReference Include="BootstrapBlazor" Version="10.1.4" />
+    <PackageReference Include="BootstrapBlazor.FontAwesome" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.0" />
