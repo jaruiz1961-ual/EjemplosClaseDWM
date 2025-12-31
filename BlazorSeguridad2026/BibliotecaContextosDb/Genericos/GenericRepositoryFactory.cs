@@ -48,7 +48,7 @@ namespace BlazorSeguridad2026.Base.Genericos
                 return new GenericRepositoryAsync<TEntity>(httpClient, cp, resource);
             }
 
-            if (mode == "ef")
+            else //if (mode == "ef")
             {
                 if (context is null)
                     throw new ArgumentNullException(nameof(context), "Para EF se requiere un DbContext.");

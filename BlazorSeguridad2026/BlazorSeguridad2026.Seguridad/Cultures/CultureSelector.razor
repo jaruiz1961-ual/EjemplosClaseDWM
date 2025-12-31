@@ -15,11 +15,7 @@
 @code {
 
     private bool _suppressCultureChange;
-    private List<SelectedItem> Culturas { get; } = 
-    [
-    new SelectedItem(@SupportedCultures.es_ES, "Español"),
-        new SelectedItem(@SupportedCultures.it_IT, "Italiano")
-    ];
+    private List<SelectedItem> Culturas;
 
     private CultureInfo _culture = CultureInfo.CurrentCulture;
     protected override void OnParametersSet()
@@ -34,6 +30,14 @@
             _suppressCultureChange = true;
             _culture = current;
         }
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        var cs = SupportedCultures.CultureCodes;
+        Culturas = cs
+            .Select(c => new SelectedItem(c.Item1, c.Item2))
+            .ToList();
+        await base.OnInitializedAsync();
     }
 
 

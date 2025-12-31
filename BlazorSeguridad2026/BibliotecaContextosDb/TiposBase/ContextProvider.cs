@@ -132,8 +132,9 @@ namespace BlazorSeguridad2026.Base.Seguridad
         {
             if (!_AppState.TenantId.HasValue) return false;
             if (string.IsNullOrEmpty(_AppState.DbKey)) return false;
-            if (string.IsNullOrEmpty(_AppState.ConnectionMode)) return false;
 
+            if (string.IsNullOrEmpty(_AppState.ConnectionMode) || _AppState.ConnectionMode.Equals("ef", StringComparison.OrdinalIgnoreCase)) return true;
+            else
             if (_AppState.ConnectionMode.Equals("api", StringComparison.OrdinalIgnoreCase))
             {
                 if (string.IsNullOrEmpty(_AppState.Token)) return false;

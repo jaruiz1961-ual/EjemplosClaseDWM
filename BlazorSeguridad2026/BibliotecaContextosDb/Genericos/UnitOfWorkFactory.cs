@@ -34,14 +34,14 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         public IUnitOfWorkAsync Create(IContextProvider cp)
         {
-            var mode = cp._AppState.ConnectionMode.ToLowerInvariant();
+            var mode = cp._AppState.ConnectionMode??"Ef".ToLowerInvariant();
 
             if (mode == "api")
             {
                 return new UnitOfWorkAsync(cp, _provider);
             }
 
-            if (mode == "ef")
+            else if (mode == "ef")
             {
                 var key = cp._AppState.DbKey.ToLowerInvariant();
 

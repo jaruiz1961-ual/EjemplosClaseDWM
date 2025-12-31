@@ -11,21 +11,21 @@ namespace BlazorSeguridad2026.Base.Seguridad
     public class AppState 
     {
         public int? TenantId { get; set; } = 0;
-        public string DbKey { get; set; }
+        public string DbKey { get; set; } = "SqlServer";
 
-        public string ConnectionMode { get; set; }
-        public string ApiName { get; set; }
+        public string ConnectionMode { get; set; } = "Ef";
+        public string ApiName { get; set; } = "ApiRest";
         public Uri DirBase { get; set; }
 
         public string Token { get; set; }
         public string Status { get; set; }
 
-        public string Culture { get; set; }
+        public string Culture { get; set; } = "es-ES";
         public bool isValid { get
             {
                 if (string.IsNullOrEmpty(TenantId.ToString())) return false;
                 if (string.IsNullOrEmpty(DbKey)) return false;
-                if (string.IsNullOrEmpty(ConnectionMode)) return true;
+                if (string.IsNullOrEmpty(ConnectionMode)) return false;
                 if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(ApiName)) return false;
                 if (ConnectionMode.ToLower() == "api" && string.IsNullOrEmpty(DirBase.ToString())) return false;
                 return true;
