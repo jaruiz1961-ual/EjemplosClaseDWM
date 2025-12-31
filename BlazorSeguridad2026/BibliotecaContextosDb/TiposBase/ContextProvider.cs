@@ -287,16 +287,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         public async Task LogOutAsync()
         {
-            await SetAppStateAsync(
-                null,
-                null,
-                null,
-                null,
-                null,
-                false,
-                null,
-                null,
-                null);
+            await _localStorage.ClearAsync();
         }
     }
 }
