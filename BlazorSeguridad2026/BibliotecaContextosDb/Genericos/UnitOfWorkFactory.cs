@@ -34,7 +34,7 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         public IUnitOfWorkAsync Create(IContextProvider cp)
         {
-            var mode = cp._AppState.ConnectionMode??"Ef".ToLowerInvariant();
+            var mode = cp.AppState.ConnectionMode??"Ef".ToLowerInvariant();
 
             if (mode == "api")
             {
@@ -43,18 +43,18 @@ namespace BlazorSeguridad2026.Base.Genericos
 
             else if (mode == "ef")
             {
-                var key = cp._AppState.DbKey.ToLowerInvariant();
+                var key = cp.AppState.DbKey.ToLowerInvariant();
 
                 if (!_map.TryCreate(key, out var dbContext))
-                    throw new NotSupportedException($"Contexto para '{cp._AppState.DbKey}' no soportado.");
+                    throw new NotSupportedException($"Contexto para '{cp.AppState.DbKey}' no soportado.");
 
                 if (dbContext is BaseDbContext baseCtx)
-                    baseCtx.TenantId = cp._AppState.TenantId;
+                    baseCtx.TenantId = cp.AppState.TenantId;
 
                 return new UnitOfWorkEfAsync<DbContext>(dbContext, _provider, cp);
             }
 
-            throw new NotSupportedException($"Contexto para '{cp._AppState.ConnectionMode}' no soportado.");
+            throw new NotSupportedException($"Contexto para '{cp.AppState.ConnectionMode}' no soportado.");
         }
     
         //            switch (cp._AppState.DbKey.ToLower())

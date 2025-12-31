@@ -19,7 +19,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
     }
     public class RoleServiceMio : IRoleService
     {
-        IContextProvider _contextProvider;
+        ContextProvider _contextProvider;
         private readonly IUnitOfWorkFactory _unitOfWorkFactory;
         private IUnitOfWorkAsync uow;
         bool reload = true;
@@ -30,12 +30,12 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         public RoleServiceMio(RoleManager<ApplicationRole> roleManager, IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = contextKeyProvider.Copia();
-            _contextProvider._AppState.ApplyTenantFilter = true;
-            _contextProvider._AppState.DbKey = "Application";
-            if (EsWasm) _contextProvider._AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
-            else _contextProvider._AppState.ConnectionMode = "Ef";
-            _contextProvider._AppState.DbKey = "Application"; // Establece el contexto adecuado para la base de datos de usuarios
+            _contextProvider =  contextKeyProvider.Copia();
+            _contextProvider.AppState.ApplyTenantFilter = true;
+            _contextProvider.AppState.DbKey = "Application";
+            if (EsWasm) _contextProvider.AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
+            else _contextProvider.AppState.ConnectionMode = "Ef";
+            _contextProvider.AppState.DbKey = "Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
    
 

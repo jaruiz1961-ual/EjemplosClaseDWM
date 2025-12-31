@@ -59,7 +59,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-       // await Task.Delay(500);   no se peuden poner await en la inicializacion 
+        // await Task.Delay(500);   no se peuden poner await en la inicializacion 
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         var summaries = new[]
@@ -80,6 +80,7 @@ else
     private bool _isInitializing;
     private string estadoCliente = "";
     private string estadoServidor = "";
+    IContextProvider localContext;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -93,10 +94,10 @@ else
         ContextProvider.OnContextChanged += HandleContextChanged;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(true);
+        localContext = await ContextProvider.CreateReadAll();
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
+        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
         var valores = estadoCliente.Split('=');
         int contador = int.Parse(valores[1]);
         if (contador >=5)
@@ -107,8 +108,8 @@ else
         // 4. Persistir de nuevo en el contexto
 
         // Después de calcular estadoServidor en OnAfterRenderAsync
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor);
-        await ContextProvider.UpdateEstadoContext();
+        localContext.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor);
+        await localContext.UpdateEstadoContext();
 
 
 
@@ -122,8 +123,8 @@ else
     private void HandleContextChanged()
     {
         // 6. Reaccionar a cambios posteriores de contexto
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
+        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente);
+        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor);
         InvokeAsync(StateHasChanged);
     }
 

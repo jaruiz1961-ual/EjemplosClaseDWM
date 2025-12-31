@@ -38,7 +38,7 @@ namespace BlazorSeguridad2026.Base.Genericos
             _contextProvider = contextKeyProvider;    
             if (isApi)
             {
-                _contextProvider._AppState.ConnectionMode = "Api";
+                _contextProvider.AppState.ConnectionMode = "Api";
             }
             _unitOfWorkFactory = uowFactory;       
         }

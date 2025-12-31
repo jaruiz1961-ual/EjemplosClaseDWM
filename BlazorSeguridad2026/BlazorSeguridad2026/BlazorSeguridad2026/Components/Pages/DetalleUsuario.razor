@@ -24,9 +24,9 @@
 <p>Prueba recurso: @UsuarioResources.User_Codigo_Label</p>
 
 
-<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+<p>TenantId <strong>@ContextProvider.AppState.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.AppState.DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.AppState.ApiName</strong>:</p>
 
 <CultureSelector></CultureSelector>
 
@@ -114,6 +114,7 @@
 
     bool displayValidationErrorMessages;
     bool displayUserAddedToDB;
+    IContextProvider localContext;
 
     private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
 
@@ -130,11 +131,11 @@
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(true);
+        localContext = await ContextProvider.CreateReadAll(); 
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
@@ -161,7 +162,7 @@
         displayUserAddedToDB = true;
         ServicioUsuarios? servicioUsuario = null;
         if (servicioUsuario is null)
-            servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+            servicioUsuario = new ServicioUsuarios(localContext, UnitOfWorkFactory);
         newUser.UpdateFromModel(newUserModel);
         if (Id != 0)
             servicioUsuario.ActualizarAsync(newUser,true);
@@ -194,7 +195,7 @@
                 ServicioUsuarios? servicioUsuario = null;
 
                 if (servicioUsuario is null)
-                    servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                    servicioUsuario = new ServicioUsuarios(localContext, UnitOfWorkFactory);
 
                 newUser = await servicioUsuario.ObtenerPorIdAsync(Id,true);
                 newUserModel = newUser.SaveToModel();

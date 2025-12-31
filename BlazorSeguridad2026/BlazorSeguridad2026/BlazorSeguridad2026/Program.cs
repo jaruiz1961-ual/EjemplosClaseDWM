@@ -137,21 +137,20 @@ builder.Services.AddBlazoredLocalStorage();
 builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
-    var cp = new ContextProvider(localStorage)
+
+    var initialState = new AppState
     {
-        _AppState = new AppState
-        {
-            TenantId = int.Parse(TenantId),
-            DbKey = DataProvider,
-            ConnectionMode = ConnectionMode,
-            ApiName = ApiName,
-            DirBase = new Uri(UrlApi),
-            Token = null
-        }
+        TenantId = int.Parse(TenantId),
+        DbKey = DataProvider,
+        ConnectionMode = ConnectionMode,
+        ApiName = ApiName,
+        DirBase = new Uri(UrlApi),
+        Token = null
     };
 
-    return cp;
+    return new ContextProvider(localStorage, initialState);
 });
+
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 
 // HttpClient hacia la API

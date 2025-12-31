@@ -59,7 +59,30 @@ builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
 
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<IContextProvider, ContextProvider>();
+// Configuración
+IConfiguration configuration = builder.Configuration;
+var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
+var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
+var ConnectionMode = "Api";
+var DataProvider = configuration["DataProvider"] ?? "SqlServer";
+var TenantId = configuration["TenantId"] ?? "0";
+
+builder.Services.AddScoped<ContextProvider>(sp =>
+{
+    var localStorage = sp.GetRequiredService<ILocalStorageService>();
+
+    var initialState = new AppState
+    {
+        TenantId = int.Parse(TenantId),
+        DbKey = DataProvider,
+        ConnectionMode = ConnectionMode,
+        ApiName = ApiName,
+        DirBase = new Uri(UrlApi),
+        Token = null
+    };
+
+    return new ContextProvider(localStorage, initialState);
+});
 
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 

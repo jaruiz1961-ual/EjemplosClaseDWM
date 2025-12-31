@@ -38,12 +38,12 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         public IGenericRepositoryAsync<TEntity> Create(IContextProvider cp, DbContext? context)
         {
-            var mode = cp._AppState.ConnectionMode?.ToLowerInvariant();
+            var mode = cp.AppState.ConnectionMode?.ToLowerInvariant();
 
             if (mode == "api")
             {
                 var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
-                var httpClient = httpClientFactory.CreateClient(cp._AppState.ApiName);
+                var httpClient = httpClientFactory.CreateClient(cp.AppState.ApiName);
                 var resource = typeof(TEntity).Name.ToLower() + "s";
                 return new GenericRepositoryAsync<TEntity>(httpClient, cp, resource);
             }
@@ -53,15 +53,15 @@ namespace BlazorSeguridad2026.Base.Genericos
                 if (context is null)
                     throw new ArgumentNullException(nameof(context), "Para EF se requiere un DbContext.");
 
-                var key = cp._AppState.DbKey?.ToLowerInvariant() ?? string.Empty;
+                var key = cp.AppState.DbKey?.ToLowerInvariant() ?? string.Empty;
 
                 if (!_strategies.TryGetValue(key, out var strategy))
-                    throw new NotSupportedException($"Contexto '{cp._AppState.DbKey}' no soportado.");
+                    throw new NotSupportedException($"Contexto '{cp.AppState.DbKey}' no soportado.");
 
                 return strategy.Create<TEntity>(context, cp);
             }
 
-            throw new NotSupportedException($"Tipo de acceso '{cp._AppState.ConnectionMode}' no soportado.");
+            throw new NotSupportedException($"Tipo de acceso '{cp.AppState.ConnectionMode}' no soportado.");
         }
     }
 

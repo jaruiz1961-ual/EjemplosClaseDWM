@@ -19,12 +19,12 @@
 
 <PageTitle> Detalle Cliente</PageTitle>
 
-<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
-<p>Mode <strong>@ContextProvider._AppState.ConnectionMode</strong>:</p>
-@if (@ContextProvider._AppState.ConnectionMode != "Ef")
+<p>TenantId <strong>@ContextProvider.AppState.TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.AppState.DbKey</strong>:</p>
+<p>Mode <strong>@ContextProvider.AppState.ConnectionMode</strong>:</p>
+@if (@ContextProvider.AppState.ConnectionMode != "Ef")
 {
-    <p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+    <p>ApiName <strong>@ContextProvider.AppState.ApiName</strong>:</p>
 }
 
 <div class="container">
@@ -113,6 +113,7 @@
     private ServicioUsuariosCliente? scUsuario;
     bool displayValidationErrorMessages;
     bool displayUserAddedToDB;
+    IContextProvider? localContext;
 
     // proxy síncrono para el evento
     private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
@@ -130,11 +131,11 @@
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(true);
+        localContext = await ContextProvider.CreateReadAll();
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
@@ -158,7 +159,7 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        if (scUsuario is null) scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+        if (scUsuario is null) scUsuario = new ServicioUsuariosCliente(localContext, UnitOfWorkFactory);
 
         if (Id != 0)
             scUsuario.ActualizarAsync(NewUser, true);
@@ -189,7 +190,7 @@
             if (Id != 0)
             {
                 if (scUsuario is null) 
-                scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+                    scUsuario = new ServicioUsuariosCliente(localContext, UnitOfWorkFactory);
                 NewUser = await scUsuario.ObtenerPorIdAsync(Id, true);
             }
             else 

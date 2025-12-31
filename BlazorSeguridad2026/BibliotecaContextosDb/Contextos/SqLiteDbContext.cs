@@ -72,7 +72,7 @@ public class SqLiteDbContext : DbContext
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
+            TenantId = _tenantInterceptor.ContextProvider.AppState.TenantId;
           
         }
 #endif

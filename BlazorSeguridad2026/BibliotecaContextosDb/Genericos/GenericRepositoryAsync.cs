@@ -43,11 +43,11 @@ namespace BlazorSeguridad2026.Base.Genericos
         {
             _httpClient = httpClient;
             _resourceName = resourceName.ToLower();
-            _contexto = cp._AppState.DbKey;
-            _tenantId = cp._AppState.TenantId ?? 0;
-            _token = cp._AppState.Token;
+            _contexto = cp.AppState.DbKey;
+            _tenantId = cp.AppState.TenantId ?? 0;
+            _token = cp.AppState.Token;
             if (httpClient.BaseAddress == null)
-                _httpClient.BaseAddress = cp._AppState.DirBase;
+                _httpClient.BaseAddress = cp.AppState.DirBase;
         }
 
         // Métodos de la interfaz base

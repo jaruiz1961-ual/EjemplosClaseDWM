@@ -36,15 +36,17 @@ namespace BlazorSeguridad2026.Base.Seguridad
         public UserServiceMio(UserManager<ApplicationUser> userManager,IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
             _contextProvider = contextKeyProvider.Copia();
-            _contextProvider._AppState.ApplyTenantFilter = true;
-            _contextProvider._AppState.DbKey = "Application";
-            if (EsWasm) _contextProvider._AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
-            else _contextProvider._AppState.ConnectionMode = "Ef";
-            _contextProvider._AppState.DbKey="Application"; // Establece el contexto adecuado para la base de datos de usuarios
+            _contextProvider.AppState.ApplyTenantFilter = true;
+            _contextProvider.AppState.DbKey = "Application";
+            if (EsWasm) _contextProvider.AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
+            else _contextProvider.AppState.ConnectionMode = "Ef";
+            _contextProvider.AppState.DbKey="Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
             _userManager = userManager;
 
         }
+
+
 
         public async Task<List<ApplicationUser>> GetAllAsync()
         {

@@ -25,8 +25,8 @@ namespace BibliotecaContextosDb.Genericos
             where TEntity : class, IEntity
         {
             var appCtx = (ApplicationBaseDbContext)ctx;
-            appCtx.UseFilter = cp._AppState.ApplyTenantFilter;
-            appCtx.TenantId = cp._AppState.TenantId; // si antes lo ponías aquí
+            appCtx.UseFilter = cp.AppState.ApplyTenantFilter;
+            appCtx.TenantId = cp.AppState.TenantId; // si antes lo ponías aquí
             return new GenericRepositoryEFAsync<TEntity, ApplicationBaseDbContext>(appCtx);
         }
     }
@@ -40,7 +40,7 @@ namespace BibliotecaContextosDb.Genericos
         {
             var sqlCtx = (SqlServerDbContext)ctx;
       
-            sqlCtx.TenantId = cp._AppState.TenantId; // si antes lo ponías aquí
+            sqlCtx.TenantId = cp.AppState.TenantId; // si antes lo ponías aquí
             return new GenericRepositoryEFAsync<TEntity, SqlServerDbContext>(sqlCtx);
         }
     }
@@ -53,7 +53,7 @@ namespace BibliotecaContextosDb.Genericos
             where TEntity : class, IEntity
         {
             var sqLiteCtx = (SqLiteDbContext)ctx;
-            sqLiteCtx.TenantId = cp._AppState.TenantId; // si antes lo ponías aquí
+            sqLiteCtx.TenantId = cp.AppState.TenantId; // si antes lo ponías aquí
             return new GenericRepositoryEFAsync<TEntity, SqLiteDbContext>(sqLiteCtx);
         }
     }
@@ -66,7 +66,7 @@ namespace BibliotecaContextosDb.Genericos
             where TEntity : class, IEntity
         {
             var inMemCtx = (InMemoryBaseDbContext)ctx;
-            inMemCtx.TenantId = cp._AppState.TenantId; // si antes lo ponías aquí
+            inMemCtx.TenantId = cp.AppState.TenantId; // si antes lo ponías aquí
             return new GenericRepositoryEFAsync<TEntity, InMemoryBaseDbContext>(inMemCtx);
         }
     }

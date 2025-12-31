@@ -40,6 +40,7 @@ servidor:@estadoServidor
     private bool _isInitializing;
     private string estadoCliente = "";
     private string estadoServidor;
+    IContextProvider? localContext;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -53,13 +54,13 @@ servidor:@estadoServidor
         ContextProvider.OnContextChanged += HandleContextChanged;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(true);
+        localContext = await ContextProvider.CreateReadAll(); 
 
         // 3. Leer estado actual
         estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
+        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente);
 
         _initialized = true;
         _isInitializing = false;
@@ -71,8 +72,8 @@ servidor:@estadoServidor
     private void HandleContextChanged()
     {
         // 6. Reaccionar a cambios posteriores de contexto
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
+        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente);
+        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor);
         InvokeAsync(StateHasChanged);
     }
 

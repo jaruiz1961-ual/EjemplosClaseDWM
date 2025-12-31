@@ -84,7 +84,7 @@
 </AuthorizeView>
 
 
-<CultureSelector></CultureSelector>
+@* <CultureSelector></CultureSelector> *@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
@@ -169,20 +169,20 @@
 
     private async Task Actualizar()
     {
-        ContextProvider._AppState.TenantId = SelectedTenantId;
-        ContextProvider._AppState.DbKey = SelectedDbKey;
-        await ContextProvider.SaveAllContextAsync(ContextProvider);
-        // Opcional: recargar toda la página
-        // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        // await ContextProvider.ReadAllContext(true);
+        // ContextProvider.AppState.TenantId = SelectedTenantId;
+        // ContextProvider.AppState.DbKey = SelectedDbKey;
+        // await ContextProvider.SaveAllContextAsync(ContextProvider);
+
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
-        {
-            await ContextProvider.ReadAllContext(true);
-            SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-            SelectedDbKey = ContextProvider._AppState.DbKey;
-        }
+        // if (firstRender)
+        // {
+        //     await ContextProvider.ReadAllContext(true);
+        //     SelectedTenantId = ContextProvider.AppState.TenantId ?? 0;
+        //     SelectedDbKey = ContextProvider.AppState.DbKey;
+        // }
 
     }
 
@@ -190,10 +190,10 @@
 
     protected override void OnInitialized()
     {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        //currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
         // NavigationManager.LocationChanged += OnLocationChanged;
-        SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-        SelectedDbKey = ContextProvider._AppState.DbKey ?? "InMemory";
+        // SelectedTenantId = ContextProvider.AppState.TenantId ?? 0;
+        // SelectedDbKey = ContextProvider.AppState.DbKey ?? "InMemory";
     }
 
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
