@@ -113,7 +113,7 @@
     private ServicioUsuariosCliente? scUsuario;
     bool displayValidationErrorMessages;
     bool displayUserAddedToDB;
-    IContextProvider? localContext;
+
 
     // proxy síncrono para el evento
     private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
@@ -131,16 +131,16 @@
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        localContext = await ContextProvider.CreateReadAll();
+        await ContextProvider.ReadContextAync();
 
         // 3. Leer estado actual
-        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
 
-        await ContextProvider.UpdateEstadoContext();
+        await ContextProvider.SetAppStateAsync();
 
         _initialized = true;
         _isInitializing = false;
@@ -159,7 +159,7 @@
     {
         displayValidationErrorMessages = false;
         displayUserAddedToDB = true;
-        if (scUsuario is null) scUsuario = new ServicioUsuariosCliente(localContext, UnitOfWorkFactory);
+        if (scUsuario is null) scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
 
         if (Id != 0)
             scUsuario.ActualizarAsync(NewUser, true);
@@ -190,7 +190,7 @@
             if (Id != 0)
             {
                 if (scUsuario is null) 
-                    scUsuario = new ServicioUsuariosCliente(localContext, UnitOfWorkFactory);
+                    scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
                 NewUser = await scUsuario.ObtenerPorIdAsync(Id, true);
             }
             else 

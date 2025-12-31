@@ -30,7 +30,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         public RoleServiceMio(RoleManager<ApplicationRole> roleManager, IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider =  contextKeyProvider.Copia();
+            _contextProvider =  contextKeyProvider.CopyContext();
             _contextProvider.AppState.ApplyTenantFilter = true;
             _contextProvider.AppState.DbKey = "Application";
             if (EsWasm) _contextProvider.AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM

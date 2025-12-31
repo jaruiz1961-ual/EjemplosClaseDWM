@@ -53,7 +53,7 @@ else
 
         // 4. Persistir de nuevo en el contexto
         ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor,estadoServidor);
-        await ContextProvider.UpdateEstadoContext();
+        await ContextProvider.SetAppStateAsync();
     }
 
 
@@ -80,7 +80,7 @@ else
     private bool _isInitializing;
     private string estadoCliente = "";
     private string estadoServidor = "";
-    IContextProvider localContext;
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -94,10 +94,10 @@ else
         ContextProvider.OnContextChanged += HandleContextChanged;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        localContext = await ContextProvider.CreateReadAll();
+        await ContextProvider.ReadContextAync();
 
         // 3. Leer estado actual
-        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
         var valores = estadoCliente.Split('=');
         int contador = int.Parse(valores[1]);
         if (contador >=5)
@@ -108,8 +108,8 @@ else
         // 4. Persistir de nuevo en el contexto
 
         // Después de calcular estadoServidor en OnAfterRenderAsync
-        localContext.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor);
-        await localContext.UpdateEstadoContext();
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor);
+        await ContextProvider.SetAppStateAsync();
 
 
 
@@ -123,8 +123,8 @@ else
     private void HandleContextChanged()
     {
         // 6. Reaccionar a cambios posteriores de contexto
-        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente);
-        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor);
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
         InvokeAsync(StateHasChanged);
     }
 

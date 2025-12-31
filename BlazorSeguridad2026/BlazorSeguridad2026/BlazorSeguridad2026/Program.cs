@@ -148,8 +148,14 @@ builder.Services.AddScoped<ContextProvider>(sp =>
         Token = null
     };
 
-    return new ContextProvider(localStorage, initialState);
+    var cp = new ContextProvider(localStorage)
+    {
+        AppState = initialState
+    };
+
+    return cp;
 });
+
 
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 

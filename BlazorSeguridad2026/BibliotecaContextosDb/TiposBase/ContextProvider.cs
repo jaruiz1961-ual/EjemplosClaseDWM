@@ -45,7 +45,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         event Action? OnContextChanged;
 
-
+        Task ReadContextAync();
         string[] GetApiNames();
         string[] GetConnectionModes();
         string[] GetContextDbKeys();
@@ -53,11 +53,11 @@ namespace BlazorSeguridad2026.Base.Seguridad
         int[] GetTenantIds();
         string? GetValor(ClavesEstado clave);
         bool IsValid();
-        Task LogOut();
+        Task LogOutAsync();
 
-        ContextProvider Copia();
-        Task<IContextProvider> CreateReadAll();
-        Task SaveAllContext(
+        ContextProvider CopyContext();
+        Task<IContextProvider> GetContextAync();
+        Task SetAppStateAsync(
             int? tenantId,
             string contextDbKey,
             string apiName,
@@ -67,28 +67,20 @@ namespace BlazorSeguridad2026.Base.Seguridad
             string? token = null,
             string? estado = null,
             string? culture = null);
-        Task SaveAllContextAsync(IContextProvider? cp);
-        Task SetAllContext(
-            int? tenantId,
-            string? contextDbKey,
-            string? apiName,
-            Uri? dirBase,
-            string? connectionMode,
-            bool filter,
-            string? token,
-            string? estado,
-            string? culture);
+        Task SetAppStateAsync(IContextProvider? cp);
+
+        Task SetAppStateAsync();
+
         void SetClaveValor(ClavesEstado clave, string valor);
-        Task SetCultureName(string culture);
-        Task UpdateEstadoContext();
-        Task UpdateContextFromToken(string token);
+        Task SetCultureNameAsync(string culture);
+        Task SetFromTokenApiAsync(string token);
 
         bool ApplyTenantFilter { get; set; }
     }
 
     public class ContextProvider : IContextProvider
     {
-        public AppState AppState { get; private set; } = new AppState();
+        public AppState AppState { get;  set; } = new AppState();
 
         private readonly ILocalStorageService _localStorage;
 
@@ -108,10 +100,10 @@ namespace BlazorSeguridad2026.Base.Seguridad
             set => AppState.ApplyTenantFilter = value;
         }
 
-        public ContextProvider(ILocalStorageService localStorage, AppState initialState)
+        public ContextProvider(ILocalStorageService localStorage)
         {
             _localStorage = localStorage;
-            AppState = initialState ?? new AppState();
+
         }
 
         /// <summary>
@@ -137,9 +129,14 @@ namespace BlazorSeguridad2026.Base.Seguridad
             return true;
         }
 
-        public async Task<IContextProvider> CreateReadAll()
+        public async Task ReadContextAync()
         {
-            ContextProvider cp = new ContextProvider(_localStorage,this.AppState)
+            var appState = await _localStorage.GetItemAsync<AppState>("appstate");
+            this.AppState = appState ?? AppState;                      
+        }
+        public async Task<IContextProvider> GetContextAync()
+        {
+            ContextProvider cp = new ContextProvider(_localStorage)
             {
                 AppState = new AppState
                 {
@@ -165,7 +162,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
             }
             return cp;
         }
-        public ContextProvider Copia()
+        public ContextProvider CopyContext()
         {
             var copyState = new AppState
             {
@@ -180,7 +177,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
                 Culture = AppState.Culture
             };
 
-            var cp = new ContextProvider(_localStorage, copyState);
+            var cp = new ContextProvider(_localStorage);
+            cp.AppState = copyState;
             return cp;
         }
 
@@ -208,7 +206,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         /// <summary>
         /// Login / cambio de contexto principal y persistencia completa (sin reemplazar AppState).
         /// </summary>
-        public async Task SetAllContext(
+        public async Task SetAppStateAsync(
             int? tenantId,
             string? contextDbKey,
             string? apiName,
@@ -236,7 +234,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         /// <summary>
         /// Actualiza solo el token y campos ligados al token.
         /// </summary>
-        public async Task UpdateContextFromToken(string token)
+        public async Task SetFromTokenApiAsync(string token)
         {
             AppState.Token = token;
             var dict = TokenService.GetClaims(token);
@@ -265,61 +263,31 @@ namespace BlazorSeguridad2026.Base.Seguridad
             return diccionario.TryGetValue(clave, out var valor) ? valor : null;
         }
 
-        public async Task UpdateEstadoContext()
+        public async Task SetAppStateAsync()
         {
             await _localStorage.SetItemAsync("appstate", AppState);
             OnContextChanged?.Invoke();
         }
 
-        public async Task SaveAllContextAsync(IContextProvider? cp)
+        public async Task SetAppStateAsync(IContextProvider? cp)
         {
             var state = cp?.AppState ?? AppState;
             await _localStorage.SetItemAsync("appstate", state);
             OnContextChanged?.Invoke();
         }
 
-        public async Task SetCultureName(string culture)
+        public async Task SetCultureNameAsync(string culture)
         {
             AppState.Culture = culture;
             await _localStorage.SetItemAsync("appstate", AppState);
             OnContextChanged?.Invoke();
         }
 
-        /// <summary>
-        /// Cambia todo el contexto y persiste, reemplazando AppState.
-        /// Úsalo solo si quieres sobrescribir completamente el estado.
-        /// </summary>
-        public async Task SaveAllContext(
-            int? tenantId,
-            string contextDbKey,
-            string apiName,
-            Uri dirBase,
-            string connectionMode,
-            bool filter,
-            string? token = null,
-            string? estado = null,
-            string? culture = null)
-        {
-            AppState = new AppState
-            {
-                TenantId = tenantId,
-                DbKey = contextDbKey,
-                ConnectionMode = connectionMode,
-                ApiName = apiName,
-                DirBase = dirBase,
-                Token = token ?? string.Empty,
-                Status = estado ?? string.Empty,
-                ApplyTenantFilter = filter,
-                Culture = culture ?? CultureInfo.CurrentCulture.Name
-            };
+        
 
-            await _localStorage.SetItemAsync("appstate", AppState);
-            OnContextChanged?.Invoke();
-        }
-
-        public async Task LogOut()
+        public async Task LogOutAsync()
         {
-            await SetAllContext(
+            await SetAppStateAsync(
                 null,
                 null,
                 null,

@@ -79,7 +79,7 @@ else
     bool _isValidContext;
     public List<Usuario>? usuarios { get; set; } = new();
     private ServicioUsuariosCliente? scUsuario;
-    IContextProvider? localContext;
+
 
     // proxy síncrono para el evento
     private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
@@ -97,17 +97,17 @@ else
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        localContext = await ContextProvider.CreateReadAll(); 
+        await ContextProvider.ReadContextAync(); 
 
         // 3. Leer estado actual
-        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-        estadoCultura = estadoServidor = localContext.GetCultureName() ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCultura = estadoServidor = ContextProvider.GetCultureName() ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
 
-        await localContext.UpdateEstadoContext();
+        await ContextProvider.SetAppStateAsync();
 
         _initialized = true;
         _isInitializing = false;
@@ -130,9 +130,9 @@ else
         {
             if (ContextProvider.IsValid())
             {
-                localContext = await ContextProvider.CreateReadAll(); 
+                await ContextProvider.ReadContextAync(); 
                 if (scUsuario is null)
-                scUsuario = new ServicioUsuariosCliente(localContext, UnitOfWorkFactory);
+                    scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
                 var list = await scUsuario.ObtenerTodosAsync(true);
                 if (list is null) return;
                 usuarios = list.ToList();
@@ -154,13 +154,13 @@ else
 
         currentCount++;
         // 4. Persistir de nuevo en el contexto
-        localContext.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
         if (scUsuario != null)
         {
             var list = await scUsuario.ObtenerTodosAsync(false);
             if (list is null) return;
             usuarios = list.ToList();
-            await localContext.UpdateEstadoContext();
+            await ContextProvider.SetAppStateAsync();
         }
     }
   

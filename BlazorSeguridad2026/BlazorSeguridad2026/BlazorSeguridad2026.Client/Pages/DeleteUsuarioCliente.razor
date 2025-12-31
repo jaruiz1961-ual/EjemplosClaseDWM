@@ -112,7 +112,7 @@
 
     bool displayValidationErrorMessages;
     bool displayUserAddedToDB;
-    IContextProvider? localContext;
+
 
     // proxy síncrono para el evento
     private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
@@ -130,16 +130,16 @@
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        localContext = await ContextProvider.CreateReadAll(); 
+        await ContextProvider.ReadContextAync(); 
 
         // 3. Leer estado actual
-        estadoCliente = localContext.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = localContext.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
 
-        await localContext.UpdateEstadoContext();
+        await ContextProvider.SetAppStateAsync();
 
         _initialized = true;
         _isInitializing = false;
@@ -190,7 +190,7 @@
             else 
             {
                 NewUser = new Usuario();
-                NewUser.TenantId = localContext.AppState.TenantId;
+                NewUser.TenantId = ContextProvider.AppState.TenantId;
             }
             StateHasChanged();
         }

@@ -62,7 +62,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 var token = await response.Content.ReadAsStringAsync();
-                await ContextProvider.UpdateContextFromToken(token);
+                await ContextProvider.SetFromTokenApiAsync(token);
 
                 _initialized = true;
                 isLoading = false;

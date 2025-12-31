@@ -82,7 +82,7 @@ else
     bool _isValidContext;
 
     private Action? _onContextChangedHandler;
-    IContextProvider localContext;
+  
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,7 +109,7 @@ else
     {
             if (ContextProvider.IsValid())
             {  
-             localContext =   await ContextProvider.CreateReadAll();
+             await ContextProvider.ReadContextAync();
             estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
             estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
             estadoCultura = ContextProvider.GetCultureName();
@@ -126,7 +126,7 @@ else
             {  
                 ServicioUsuarios? servicioUsuarios = null;
                 if (servicioUsuarios is null)
-                servicioUsuarios = new ServicioUsuarios(localContext, UnitOfWorkFactory);
+                    servicioUsuarios = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await servicioUsuarios.ObtenerTodosAsync(true);
                 if (list is null) return;
                 usuarios = list.ToList();

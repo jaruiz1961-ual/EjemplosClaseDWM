@@ -205,7 +205,7 @@
     private string? editEmail;
     private int? editTenantId;
     private string? editKeyDb;
-    IContextProvider localContext;
+ 
 
     private class NewUserModel
     {
@@ -245,16 +245,16 @@
         {
             if (ContextProvider.IsValid())
             {
-                localContext = await ContextProvider.CreateReadAll(); 
+                var cp = ContextProvider.CopyContext(); 
            
                 // cp._AppState.DbKey = "Application";
                 // cp._AppState.ConnectionMode = "Api";
-                userService = new UserServiceMio(UserManager, localContext, UnitOfWorkFactory);
+                userService = new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
                 var list = await userService.GetAllAsync();
                 if (list is null) return;           
                 users = list.ToList();
-                newUserModel.TenantId = localContext.AppState.TenantId;
-                newUserModel.DbKey = localContext.AppState.DbKey;
+                newUserModel.TenantId = cp.AppState.TenantId;
+                newUserModel.DbKey = cp.AppState.DbKey;
                 _isValidContext = true;
             }
             else _isValidContext = false;
@@ -273,8 +273,8 @@
         selectedUserId = u.Id;
 
         editEmail = u.Email;
-        editTenantId = localContext.AppState.TenantId;
-        editKeyDb = localContext.AppState.DbKey;
+        editTenantId = ContextProvider.AppState.TenantId;
+        editKeyDb = ContextProvider.AppState.DbKey;
 
         error = success = null;
     }

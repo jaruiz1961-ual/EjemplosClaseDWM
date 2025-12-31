@@ -231,7 +231,7 @@
         {
             if (ContextProvider.IsValid())
             {
-                var cp = await ContextProvider.CreateReadAll();  
+                var cp = ContextProvider.CopyContext();  
                 // cp._AppState.DbKey = "Application";
                 // cp._AppState.ConnectionMode = "Api";
                 var user = new RoleServiceMio(RoleManager, cp, UnitOfWorkFactory);

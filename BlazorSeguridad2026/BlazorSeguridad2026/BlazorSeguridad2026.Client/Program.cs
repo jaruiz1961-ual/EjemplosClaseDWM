@@ -67,7 +67,7 @@ var ConnectionMode = "Api";
 var DataProvider = configuration["DataProvider"] ?? "SqlServer";
 var TenantId = configuration["TenantId"] ?? "0";
 
-builder.Services.AddScoped<ContextProvider>(sp =>
+builder.Services.AddScoped<IContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
 
@@ -81,8 +81,19 @@ builder.Services.AddScoped<ContextProvider>(sp =>
         Token = null
     };
 
-    return new ContextProvider(localStorage, initialState);
+    var cp = new ContextProvider(localStorage)
+    {
+        AppState = initialState
+    };
+
+    return cp;
 });
+
+// (Opcional) si quieres también el tipo concreto:
+builder.Services.AddScoped<ContextProvider>(sp =>
+    (ContextProvider)sp.GetRequiredService<IContextProvider>());
+
+
 
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 

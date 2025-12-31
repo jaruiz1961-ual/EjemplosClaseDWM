@@ -34,7 +34,7 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         public IUnitOfWorkAsync Create(IContextProvider cp)
         {
-            var mode = cp.AppState.ConnectionMode??"Ef".ToLowerInvariant();
+            var mode = (cp.AppState.ConnectionMode??"Ef").ToLowerInvariant();
 
             if (mode == "api")
             {

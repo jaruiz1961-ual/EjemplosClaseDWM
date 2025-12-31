@@ -169,20 +169,20 @@
 
     private async Task Actualizar()
     {
-        // await ContextProvider.ReadAllContext(true);
-        // ContextProvider.AppState.TenantId = SelectedTenantId;
-        // ContextProvider.AppState.DbKey = SelectedDbKey;
-        // await ContextProvider.SaveAllContextAsync(ContextProvider);
+
+        ContextProvider.AppState.TenantId = SelectedTenantId;
+        ContextProvider.AppState.DbKey = SelectedDbKey;
+        await ContextProvider.SetAppStateAsync(ContextProvider);
 
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // if (firstRender)
-        // {
-        //     await ContextProvider.ReadAllContext(true);
-        //     SelectedTenantId = ContextProvider.AppState.TenantId ?? 0;
-        //     SelectedDbKey = ContextProvider.AppState.DbKey;
-        // }
+        if (firstRender)
+        {
+            await ContextProvider.ReadContextAync();
+            SelectedTenantId = ContextProvider.AppState.TenantId ?? 0;
+            SelectedDbKey = ContextProvider.AppState.DbKey;
+        }
 
     }
 
