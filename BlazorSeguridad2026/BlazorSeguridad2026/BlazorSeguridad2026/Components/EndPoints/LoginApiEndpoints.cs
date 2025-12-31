@@ -52,14 +52,15 @@ namespace BlazorAppEFTenant.Components.EndPoints
 
 
 
+            //// no puedo llamar en las apis a localresources ni nada pareceido
 
-
-            app.MapGet("/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
-            {
-                await ContextProvider.LogOut();
-                await context.SignOutAsync(IdentityConstants.ApplicationScheme);
-                context.Response.Redirect(returnUrl ?? "/");
-            }).RequireAuthorization();
+            //app.MapGet("/Account/Logout", async (HttpContext context, string? returnUrl, IContextProvider ContextProvider) =>
+            //{
+               
+            //    await context.SignOutAsync(IdentityConstants.ApplicationScheme);
+            //    context.Response.Redirect(returnUrl ?? "/Logout");
+              
+            //}).RequireAuthorization();
 
 
             app.MapPost("/api/auth/token", async (

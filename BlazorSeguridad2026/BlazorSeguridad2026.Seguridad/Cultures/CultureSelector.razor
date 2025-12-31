@@ -7,74 +7,65 @@
 
 <Select TValue="CultureInfo"
         Items="Culturas"
-        @bind-Value="Culture"
+        Value="_culture"
+        OnSelectedItemChanged="OnCultureChanged"
         Class="w-auto">
 </Select>
 
 @code {
 
-
+    private bool _suppressCultureChange;
     private List<SelectedItem> Culturas { get; } = 
     [
-        new SelectedItem(@SupportedCultures.es_ES, "Español"),
+    new SelectedItem(@SupportedCultures.es_ES, "Español"),
         new SelectedItem(@SupportedCultures.it_IT, "Italiano")
     ];
 
-    protected override void OnInitialized()
+    private CultureInfo _culture = CultureInfo.CurrentCulture;
+    protected override void OnParametersSet()
     {
-        Culture = CultureInfo.CurrentCulture;
-    }
+        // Cada vez que se renderiza en una nueva página,
+        // sincroniza el valor desde la cultura actual, pero
+        // sin disparar la lógica de cambio.
+        var current = CultureInfo.CurrentCulture;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-            await LoadUsersAsync();
-
-    }
-
-    private async Task LoadUsersAsync()
-    {
-        try
+        if (_culture.Name != current.Name)
         {
-            if (ContextProvider.IsValid())
-            {
-                await ContextProvider.ReadAllContext(true);
-                ContextProvider.SetClaveValor(ClavesEstado.Culture, Culture.DisplayName);
-                await ContextProvider.UpdateEstadoContext();
-            }
-        }
-        catch (Exception ex)
-        {
-
-            throw;
+            _suppressCultureChange = true;
+            _culture = current;
         }
     }
 
 
-    private CultureInfo Culture
-    {
-        get
-        {
-            return CultureInfo.CurrentCulture;
-        }
-        set
-        {
-            if (CultureInfo.CurrentCulture != value)
-            {
-                var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
-                var cultureEscaped = Uri.EscapeDataString(value.Name);
-                var uriEscaped = Uri.EscapeDataString(uri);
-                if (ContextProvider.IsValid())
-                {
-                    ContextProvider.ReadAllContext(true);
-                    ContextProvider.SetClaveValor(ClavesEstado.Culture,cultureEscaped);
-                    ContextProvider.UpdateEstadoContext();
-                }
 
-                Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
-            }
+    private async Task OnCultureChanged(SelectedItem item)
+    {
+
+        if (_suppressCultureChange)
+        {
+            _suppressCultureChange = false;
+            return;
+        }
+        var newCulture = new CultureInfo(item.Value);
+
+        if (_culture?.Name == newCulture.Name)
+            return;
+
+        _culture = newCulture;
+
+        var uri = new Uri(Navigation.Uri).GetComponents(UriComponents.PathAndQuery, UriFormat.Unescaped);
+        var cultureEscaped = Uri.EscapeDataString(_culture.Name);
+        var uriEscaped = Uri.EscapeDataString(uri);
+
+        if (ContextProvider.IsValid())
+        {
+            Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
+            await ContextProvider.ReadAllContext(true);
+            await ContextProvider.SetCultureName(_culture.Name);
+            await ContextProvider.UpdateEstadoContext();
         }
     }
-    }
-    }
+}
+    
+    
     

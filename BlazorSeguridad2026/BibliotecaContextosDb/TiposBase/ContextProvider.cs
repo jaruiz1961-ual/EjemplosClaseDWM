@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
 {
     public enum ClavesEstado
     {
-        Culture,
+
         Theme,
         PaginaCliente,
         PaginaServidor,
@@ -50,15 +51,17 @@ namespace BlazorSeguridad2026.Base.Seguridad
         string[] GetApiNames();
         string[] GetConnectionModes();
         string[] GetContextDbKeys();
+        string GetCultureName();
         int[] GetTenantIds();
         string? GetValor(ClavesEstado clave);
         bool IsValid();
         Task LogOut();
         Task<IContextProvider> ReadAllContext(bool force);
-        Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, bool filter, string? token = null, string? estado = null);
+        Task SaveAllContext(int? tenantId, string contextDbKey, string apiName, Uri dirBase, string conectionMode, bool filter, string? token = null, string? estado = null,string culture = null);
         Task SaveAllContextAsync(IContextProvider? cp);
-        Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, bool filter,string? token, string? estado);
+        Task SetAllContext(int? tenantId, string? contextDbKey, string? apiName, Uri? dirBase, string? conectionMode, bool filter,string? token, string? estado, string culture);
         void SetClaveValor(ClavesEstado clave, string valor);
+        Task SetCultureName(string culture);
         Task UpdateEstadoContext();
         Task UpdateContextFromToken(string token);
 
@@ -82,6 +85,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         public string[] GetApiNames() => new[] { "ApiRest", "" };
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
+        public string GetCultureName() => _AppState.Culture ?? CultureInfo.CurrentCulture.Name;
 
         public bool ApplyTenantFilter { get; set;  } = true; 
 
@@ -112,6 +116,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
                 _AppState.Token = appState.Token;
                 _AppState.Status = appState.Status ?? string.Empty;
                 _AppState.ApplyTenantFilter = appState.ApplyTenantFilter;
+                _AppState.Culture = appState.Culture;
             }
             else
             {
@@ -152,7 +157,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
                     DirBase = _AppState.DirBase,
                     Token = _AppState.Token,
                     Status = _AppState.Status,
-                    ApplyTenantFilter = _AppState.ApplyTenantFilter
+                    ApplyTenantFilter = _AppState.ApplyTenantFilter,
+                    Culture = _AppState.Culture
                 }
             };
             return cp;
@@ -190,7 +196,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
             string? conectionMode,
              bool filter,
             string? token,
-            string? estado
+            string? estado,
+            string culture 
            )
         {
             _AppState.TenantId = tenantId;
@@ -201,9 +208,11 @@ namespace BlazorSeguridad2026.Base.Seguridad
             _AppState.Token = token;
             _AppState.Status = estado ?? string.Empty;
             _AppState.ApplyTenantFilter = filter;
+            _AppState.Culture = culture;
+            _AppState.TenantId = tenantId;
 
-      
-            
+
+
 
             await _localStorage.SetItemAsync("appstate", _AppState);
             OnContextChanged?.Invoke();
@@ -269,6 +278,13 @@ namespace BlazorSeguridad2026.Base.Seguridad
             OnContextChanged?.Invoke();
         }
 
+        public async Task SetCultureName(string culture)
+        {
+            _AppState.Culture = culture;
+            await _localStorage.SetItemAsync("appstate", _AppState);
+            OnContextChanged?.Invoke();
+        }
+
         /// <summary>
         /// Otra forma de cambiar contexto y persistir.
         /// </summary>
@@ -280,7 +296,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
             string conectionMode,
              bool filter,
             string? token = null,
-            string? estado = null
+            string? estado = null,
+            string? culture = null
            )
         {
             _AppState = new AppState
@@ -292,7 +309,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
                 DirBase = dirBase,
                 Token = token ?? string.Empty,
                 Status = estado ?? string.Empty,
-                ApplyTenantFilter = filter
+                ApplyTenantFilter = filter,
+                Culture = culture ?? CultureInfo.CurrentCulture.Name
             };
 
             
@@ -310,6 +328,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
                 null,
                 null,
                 false,
+                null,
                 null,
                 null);
         }

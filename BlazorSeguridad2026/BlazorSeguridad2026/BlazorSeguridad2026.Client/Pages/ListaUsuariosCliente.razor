@@ -101,7 +101,7 @@ else
         // 3. Leer estado actual
         estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
         estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-        estadoCultura = estadoServidor = ContextProvider.GetValor(ClavesEstado.Culture) ?? "Ninguno";
+        estadoCultura = estadoServidor = ContextProvider.GetCultureName() ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto

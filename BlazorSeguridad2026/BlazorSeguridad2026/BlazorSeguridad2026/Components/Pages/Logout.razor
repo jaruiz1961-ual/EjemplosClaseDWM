@@ -1,5 +1,6 @@
-﻿@page "/Account/Logout"
+﻿@page "/Logout"
 @using Microsoft.AspNetCore.Identity
+@rendermode @(new InteractiveServerRenderMode(prerender: true))
 
 
 @inject SignInManager<ApplicationUser> SignInManager
@@ -11,16 +12,21 @@
 @code {
     [Parameter] public string? ReturnUrl { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
+    {
+        SignInManager.SignOutAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool first)
     {
         // TUS TAREAS PERSONALIZADAS
-
-        ContextProvider.LogOut();
-        await SignInManager.SignOutAsync();
-
+        if (first)
+        {
+            await ContextProvider.LogOut();        
         if (!string.IsNullOrWhiteSpace(ReturnUrl))
             Nav.NavigateTo(ReturnUrl, forceLoad: true);
         else
-            Nav.NavigateTo("/", forceLoad: true);
+            Nav.NavigateTo("/Account/Login", forceLoad: true);
+        }
     }
 }

@@ -19,6 +19,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         public string Token { get; set; }
         public string Status { get; set; }
+
+        public string Culture { get; set; }
         public bool isValid { get
             {
                 if (string.IsNullOrEmpty(TenantId.ToString())) return false;
