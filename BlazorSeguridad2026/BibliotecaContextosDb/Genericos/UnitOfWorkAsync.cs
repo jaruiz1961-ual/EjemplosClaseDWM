@@ -45,7 +45,7 @@ namespace BlazorSeguridad2026.Base.Genericos
                 // Resolvemos la factoría específica para TEntity
                 var factory = _provider.GetRequiredService<IGenericRepositoryFactoryAsync<TEntity>>();
                 // Para API se crea el repositorio pasando DbContext null
-                 repo = factory.Create(_cp,null);
+                 repo = factory.Create(_cp);
                 _repositories[type] = repo;
             }
 

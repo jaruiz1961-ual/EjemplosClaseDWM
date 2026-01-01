@@ -254,7 +254,7 @@ builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(Gene
 // Factoría genérica y UoW
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
-builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
+builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkEfFactory>();
 
 
 

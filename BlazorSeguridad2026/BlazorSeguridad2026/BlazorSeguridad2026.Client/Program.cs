@@ -32,29 +32,29 @@ builder.Services.AddHttpClient("ApiRest", client =>
     client.BaseAddress = new Uri(apiUrl);
 });
 
-builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
-{
-    var map = new Dictionary<string, Func<DbContext>>
-    {
-        ["application"] = () =>
-            sp.GetRequiredService<IDbContextFactory<ApplicationBaseDbContext>>()
-              .CreateDbContext(),
+//builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
+//{
+//    var map = new Dictionary<string, Func<DbContext>>
+//    {
+//        ["application"] = () =>
+//            sp.GetRequiredService<IDbContextFactory<ApplicationBaseDbContext>>()
+//              .CreateDbContext(),
 
-        ["sqlserver"] = () =>
-            sp.GetRequiredService<IDbContextFactory<SqlServerDbContext>>()
-              .CreateDbContext(),
+//        ["sqlserver"] = () =>
+//            sp.GetRequiredService<IDbContextFactory<SqlServerDbContext>>()
+//              .CreateDbContext(),
 
-        ["sqlite"] = () =>
-            sp.GetRequiredService<IDbContextFactory<SqLiteDbContext>>()
-              .CreateDbContext(),
+//        ["sqlite"] = () =>
+//            sp.GetRequiredService<IDbContextFactory<SqLiteDbContext>>()
+//              .CreateDbContext(),
 
-        ["inmemory"] = () =>
-            sp.GetRequiredService<IDbContextFactory<InMemoryBaseDbContext>>()
-              .CreateDbContext()
-    };
+//        ["inmemory"] = () =>
+//            sp.GetRequiredService<IDbContextFactory<InMemoryBaseDbContext>>()
+//              .CreateDbContext()
+//    };
 
-    return new MultiDbContextFactory(map);
-});
+//    return new MultiDbContextFactory(map);
+//});
 
 
 builder.Services.AddBlazoredLocalStorage();

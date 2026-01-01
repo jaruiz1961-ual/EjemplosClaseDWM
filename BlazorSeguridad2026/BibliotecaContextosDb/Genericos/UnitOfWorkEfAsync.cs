@@ -44,20 +44,20 @@ namespace BlazorSeguridad2026.Base.Genericos
         private string _errorMessage = string.Empty;
         private Task<IDbContextTransaction>? _dbContextTransaction;
 
-        public new IGenericRepositoryAsync<TEntity> GetRepository<TEntity>(bool reload)  where TEntity : class, IEntity
+        public new IGenericRepositoryEfAsync<TEntity> GetRepository<TEntity>(bool reload)  where TEntity : class, IEntity
         {
             var type = typeof(TEntity);
             //comprobamos si el repositorio no existe en el diccionario o si es necesario recargarlo
             if (reload || !_repositories.TryGetValue(type, out var repo))
             {
                 // Resolvemos la factoría específica para TEntity
-                var factory = _provider.GetRequiredService<IGenericRepositoryFactoryAsync<TEntity>>();
+                var factory = _provider.GetRequiredService<IGenericRepositoryEfFactory<TEntity>>();
                 // Para API se crea el repositorio pasando DbContext null
                 repo = factory.Create(_cp, Context);
                 _repositories[type] = repo;
             }
 
-            return (IGenericRepositoryAsync<TEntity>)repo!;
+            return (IGenericRepositoryEfAsync<TEntity>)repo!;
         }
         public new async Task<int> SaveChangesAsync()
         {

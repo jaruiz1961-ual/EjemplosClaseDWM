@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 
 namespace BlazorSeguridad2026.Base.Genericos
 {
-    public interface IGenericRepositoryEfAsync<TEntity, TContext> : IGenericRepositoryAsync<TEntity>
+    public interface IGenericRepositoryEfAsync<TEntity> : IGenericRepositoryAsync<TEntity>
     where TEntity : class
 
     {
-        TContext Context { get; }
+        DbContext Context { get; }
     }
-    public class GenericRepositoryEFAsync<TEntity, TContext> : IGenericRepositoryEfAsync<TEntity, TContext>, IGenericRepositoryAsync<TEntity>
+    public class GenericRepositoryEFAsync<TEntity, TContext> : IGenericRepositoryAsync<TEntity>
     where TEntity : class
     where TContext : DbContext
     {

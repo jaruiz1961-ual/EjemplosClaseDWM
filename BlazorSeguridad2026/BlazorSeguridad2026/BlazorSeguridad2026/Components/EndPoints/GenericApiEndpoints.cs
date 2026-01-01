@@ -36,7 +36,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     cp.AppState.TenantId = tenantId;
                     cp.AppState.ConnectionMode = "Ef";
 
-                    var service = new GenericDataService<T>(cp, uowFactory);
+                    var service = new GenericEFDataService<T>(cp, uowFactory);
                     try
                     {
                         var usuarios = await service.ObtenerTodosAsync(reload);
@@ -93,7 +93,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp.AppState.DbKey = contexto;
                 cp.AppState.TenantId = tenantId;
                 cp.AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var service = new GenericEFDataService<T>(cp, uowFactory);
                 try
                 {
                     var usuario = await service.ObtenerPorIdAsync(id, reload);
@@ -125,7 +125,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp.AppState.DbKey = contexto;
                 cp.AppState.TenantId = tenantId;
                 cp.AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var service = new GenericEFDataService<T>(cp, uowFactory);
                 try
                 {
                     await service.AñadirAsync(usuario,reload);
@@ -158,7 +158,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp.AppState.DbKey = contexto;
                 cp.AppState.TenantId = tenantId;
                 cp.AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var service = new GenericEFDataService<T>(cp, uowFactory);
                 try
                 {
                     var actual = await service.ObtenerPorIdAsync(id,reload);
@@ -198,7 +198,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 cp.AppState.DbKey = contexto;
                 cp.AppState.TenantId = tenantId;
                 cp.AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var service = new GenericEFDataService<T>(cp, uowFactory);
                 var usuario = await service.ObtenerPorIdAsync(id,reload);
                 if (usuario is null)
                     return Results.NotFound();
