@@ -38,9 +38,9 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         public IGenericRepositoryAsync<TEntity> Create(IContextProvider cp, DbContext? context)
         {
-            var mode = cp._AppState.ConnectionMode?.ToLowerInvariant();
+            var mode = (cp._AppState.ConnectionMode??"Ef").ToLowerInvariant();
 
-            if (mode == "api")
+            if (mode == "api" || context is null)
             {
                 var httpClientFactory = _provider.GetRequiredService<IHttpClientFactory>();
                 var httpClient = httpClientFactory.CreateClient(cp._AppState.ApiName);

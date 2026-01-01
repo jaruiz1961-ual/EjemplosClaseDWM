@@ -13,7 +13,16 @@ namespace BlazorSeguridad2026.Base.Seguridad
         public int? TenantId { get; set; } = 0;
         public string DbKey { get; set; }
 
-        public string ConnectionMode { get; set; }
+        public string ConnectionMode
+        {
+            get { return cm; }
+            set
+            {
+                 cm = value;
+            }
+        }
+
+        private string cm;
         public string ApiName { get; set; }
         public Uri DirBase { get; set; }
 

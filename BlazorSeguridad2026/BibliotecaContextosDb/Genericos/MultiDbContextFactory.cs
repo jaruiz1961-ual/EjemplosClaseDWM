@@ -22,13 +22,16 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         public bool TryCreate(string key, out DbContext context)
         {
+
+            context = null;
+            if (_map is null) return true;
+
             if (_map.TryGetValue(key.ToLowerInvariant(), out var factory))
             {
                 context = factory();
                 return true;
             }
 
-            context = null!;
             return false;
         }
     }

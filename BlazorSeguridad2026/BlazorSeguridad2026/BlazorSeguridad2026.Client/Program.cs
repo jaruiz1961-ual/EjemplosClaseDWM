@@ -34,32 +34,59 @@ builder.Services.AddHttpClient("ApiRest", client =>
 
 builder.Services.AddScoped<IMultiDbContextFactory>(sp =>
 {
-    var map = new Dictionary<string, Func<DbContext>>
-    {
-        ["application"] = () =>
-            sp.GetRequiredService<IDbContextFactory<ApplicationBaseDbContext>>()
-              .CreateDbContext(),
+    //var map = new Dictionary<string, Func<DbContext>>
+    //{
+    //    ["application"] = () =>
+    //        sp.GetRequiredService<IDbContextFactory<ApplicationBaseDbContext>>()
+    //          .CreateDbContext(),
 
-        ["sqlserver"] = () =>
-            sp.GetRequiredService<IDbContextFactory<SqlServerDbContext>>()
-              .CreateDbContext(),
+    //    ["sqlserver"] = () =>
+    //        sp.GetRequiredService<IDbContextFactory<SqlServerDbContext>>()
+    //          .CreateDbContext(),
 
-        ["sqlite"] = () =>
-            sp.GetRequiredService<IDbContextFactory<SqLiteDbContext>>()
-              .CreateDbContext(),
+    //    ["sqlite"] = () =>
+    //        sp.GetRequiredService<IDbContextFactory<SqLiteDbContext>>()
+    //          .CreateDbContext(),
 
-        ["inmemory"] = () =>
-            sp.GetRequiredService<IDbContextFactory<InMemoryBaseDbContext>>()
-              .CreateDbContext()
-    };
+    //    ["inmemory"] = () =>
+    //        sp.GetRequiredService<IDbContextFactory<InMemoryBaseDbContext>>()
+    //          .CreateDbContext()
+    //};
 
-    return new MultiDbContextFactory(map);
+    return new MultiDbContextFactory(null);
 });
 
 
 builder.Services.AddBlazoredLocalStorage();
 
-builder.Services.AddScoped<IContextProvider, ContextProvider>();
+// Configuración
+IConfiguration configuration = builder.Configuration;
+var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
+var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
+var ConnectionMode = "Api";
+var DataProvider = configuration["DataProvider"] ?? "SqlServer";
+var TenantId = configuration["TenantId"] ?? "0";
+
+// ContextProvider multitenant
+builder.Services.AddScoped<ContextProvider>(sp =>
+{
+    var localStorage = sp.GetRequiredService<ILocalStorageService>();
+
+    var initialState = new AppState
+    {
+        TenantId = int.Parse(TenantId),
+        DbKey = DataProvider,
+        ConnectionMode = ConnectionMode,
+        ApiName = ApiName,
+        DirBase = new Uri(UrlApi)
+    };
+
+    var cp = new ContextProvider(localStorage);
+    cp._AppState = initialState;
+
+    return cp;
+});
+builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
 
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 

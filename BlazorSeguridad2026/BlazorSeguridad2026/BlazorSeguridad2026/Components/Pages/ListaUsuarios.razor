@@ -9,9 +9,12 @@
 @inject IUnitOfWorkFactory UnitOfWorkFactory 
 @inject IContextProvider ContextProvider 
 
-@inject NavigationManager nav
+
+
+
+
 @implements IDisposable
-@inject PersistentComponentState PersistenceAppState
+
 
 
 
@@ -68,7 +71,7 @@ else
 @code {
 
 
-    [PersistentState]
+
     public List<Usuario>? usuarios { get; set; } = new List<Usuario>();
     int TenantId;
     string ContextoKey ="Key";
@@ -82,6 +85,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+       
         _onContextChangedHandler += async () =>
         {
             await ActualizarContextoAsync();
@@ -91,6 +95,7 @@ else
         ContextProvider.OnContextChanged += _onContextChangedHandler;
         
     }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -103,14 +108,15 @@ else
 
     private async Task ActualizarContextoAsync()
     {
-            if (ContextProvider.IsValid())
-            {  
-                await ContextProvider.ReadAllContext(true);
+        if (ContextProvider.IsValid())
+        {
+ 
+            await ContextProvider.ReadAllContext(true);
             estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
             estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
             estadoCultura = ContextProvider.GetCultureName();
-
-            }        
+        }
+   
     }
 
 
@@ -120,9 +126,7 @@ else
         {
             if (ContextProvider.IsValid())
             {  
-                ServicioUsuarios? servicioUsuarios = null;
-                if (servicioUsuarios is null)
-                servicioUsuarios = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
+                var servicioUsuarios = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
                 var list = await servicioUsuarios.ObtenerTodosAsync(true);
                 if (list is null) return;
                 usuarios = list.ToList();

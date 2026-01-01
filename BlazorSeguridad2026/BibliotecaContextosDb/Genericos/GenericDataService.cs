@@ -33,7 +33,7 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         private readonly IContextProvider _contextProvider;
         private readonly string? _apiName;
-        public GenericDataService(IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory, bool isApi=false)
+        public GenericDataService(IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory, bool isApi)
         {
             _contextProvider = contextKeyProvider;    
             if (isApi)

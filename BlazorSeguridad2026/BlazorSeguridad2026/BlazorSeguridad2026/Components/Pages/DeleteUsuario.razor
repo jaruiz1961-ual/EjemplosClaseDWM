@@ -99,19 +99,15 @@
     bool displayUserAddedToDB = false;
 
 
-
-
-
-
     protected override async Task OnInitializedAsync()
     {
-
+        
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-
+            await ContextProvider.ReadAllContext(false);
             await CargarAsync();
             StateHasChanged();
         }

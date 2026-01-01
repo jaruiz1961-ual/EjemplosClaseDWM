@@ -22,7 +22,7 @@
         // TUS TAREAS PERSONALIZADAS
         if (first)
         {
-            await ContextProvider.LogOut();        
+            await ContextProvider.LogOutAsync();        
         if (!string.IsNullOrWhiteSpace(ReturnUrl))
             Nav.NavigateTo(ReturnUrl, forceLoad: true);
         else

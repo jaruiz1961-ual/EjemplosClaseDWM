@@ -13,7 +13,7 @@ namespace BlazorSeguridad2026.Data.Servicios
 {
     public class ServicioUsuarios : GenericDataService<Usuario>, IGenericDataService<Usuario>
     {
-        public ServicioUsuarios(IContextProvider cp,IUnitOfWorkFactory uowFactory):base(cp, uowFactory)
+        public ServicioUsuarios(IContextProvider cp,IUnitOfWorkFactory uowFactory):base(cp, uowFactory,false)
         {
 
         }

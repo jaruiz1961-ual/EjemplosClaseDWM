@@ -167,44 +167,29 @@
     private string SelectedDbKey;
 
 
-    private async Task Actualizar()
-    {
-        ContextProvider._AppState.TenantId = SelectedTenantId;
-        ContextProvider._AppState.DbKey = SelectedDbKey;
-        await ContextProvider.SaveAllContextAsync(ContextProvider);
-        // Opcional: recargar toda la página
-        // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
-    }
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await ContextProvider.ReadAllContext(true);
-            SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-            SelectedDbKey = ContextProvider._AppState.DbKey;
+            await ContextProvider.ReadAllContext(true);    
+             SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
+             SelectedDbKey = ContextProvider._AppState.DbKey;
         }
 
     }
 
+    private async Task Actualizar()
+    {
+        // ContextProvider._AppState.TenantId = SelectedTenantId;
+        // ContextProvider._AppState.DbKey = SelectedDbKey;
+        await ContextProvider.SetTenantDbkey(SelectedTenantId, SelectedDbKey);
+        // Opcional: recargar toda la página
+        // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+    }
+
     
 
-    protected override void OnInitialized()
-    {
-        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
-        // NavigationManager.LocationChanged += OnLocationChanged;
-        SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-        SelectedDbKey = ContextProvider._AppState.DbKey ?? "InMemory";
-    }
-
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
-    {
-        // currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
-        // StateHasChanged();
-    }
-
-    // public void Dispose()
-    // {
-    //     NavigationManager.LocationChanged -= OnLocationChanged;
-    // }
 }
 

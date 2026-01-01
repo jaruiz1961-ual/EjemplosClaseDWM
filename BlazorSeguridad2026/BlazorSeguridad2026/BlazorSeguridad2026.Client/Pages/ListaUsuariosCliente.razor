@@ -1,5 +1,5 @@
 ﻿@page "/ListaUsuariosCliente"
-@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: true))
 
 
 @using BlazorSeguridad2026.Base.Genericos
@@ -78,61 +78,51 @@ else
     private string estadoCultura;
     bool _isValidContext;
     public List<Usuario>? usuarios { get; set; } = new();
-    private ServicioUsuariosCliente? scUsuario;
 
-    // proxy síncrono para el evento
-    private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
+    private Action? _onContextChangedHandler;
 
+    protected override async Task OnInitializedAsync()
+    {
+
+        _onContextChangedHandler += async () =>
+        {
+            await ActualizarContextoAsync();
+            await CargarDatosAsync();
+
+        };
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
+
+    }
 
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender || _isInitializing || _initialized)
-            return;
+        if (firstRender)
+        {
+            await ActualizarContextoAsync();
+            await CargarDatosAsync();
+        }
+    }
 
-        _isInitializing = true;
+    private async Task ActualizarContextoAsync()
+    {
 
-        // 1. Suscribirse a eventos del contexto
-        ContextProvider.OnContextChanged += OnContextChangedProxy;
-
-        // 2. Inicializar desde localStorage (JS interop seguro aquí)
         await ContextProvider.ReadAllContext(true);
-
-        // 3. Leer estado actual
         estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
         estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-        estadoCultura = estadoServidor = ContextProvider.GetCultureName() ?? "Ninguno";
+        estadoCultura = ContextProvider.GetCultureName();
 
-
-        // 4. Persistir de nuevo en el contexto
-
-        await ContextProvider.UpdateEstadoContext();
-
-        _initialized = true;
-        _isInitializing = false;
-
-        await CargarAsync();
     }
 
 
-    private async Task HandleContextChangedAsync()
-    {
-        // 6. Reaccionar a cambios posteriores de contexto
-        await CargarAsync();
-        InvokeAsync(StateHasChanged);
-    }
-
-
-    private async Task CargarAsync()
+    private async Task CargarDatosAsync()
     {
         try
         {
             if (ContextProvider.IsValid())
             {
-                await ContextProvider.ReadAllContext(false);
-                if (scUsuario is null)
-                scUsuario = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
-                var list = await scUsuario.ObtenerTodosAsync(true);
+                var servicioUsuarios = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
+                var list = await servicioUsuarios.ObtenerTodosAsync(true);
                 if (list is null) return;
                 usuarios = list.ToList();
                 _isValidContext = true;
@@ -148,25 +138,14 @@ else
     }
 
 
-    private async void IncrementCount()
+    void IDisposable.Dispose()
     {
-
-        currentCount++;
-        // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
-        if (scUsuario != null)
-        {
-            var list = await scUsuario.ObtenerTodosAsync(false);
-            if (list is null) return;
-            usuarios = list.ToList();
-            await ContextProvider.UpdateEstadoContext();
-        }
+        Dispose();
     }
-  
 
     public void Dispose()
     {
         // 7. Desuscribirse para evitar fugas de memoria
-        ContextProvider.OnContextChanged -= OnContextChangedProxy;
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
     }
 }

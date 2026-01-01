@@ -1,3 +1,60 @@
 ﻿@page "/"
+@rendermode @(new InteractiveServerRenderMode(prerender: true))
+
+@using BlazorSeguridad2026.Base.Genericos
+@using BlazorSeguridad2026.Base.Seguridad
+@using BlazorSeguridad2026.Data.Modelo
+@using BlazorSeguridad2026.Data.Servicios
+@using Blazored.LocalStorage
+
+@inject IContextProvider ContextProvider
+@* @inject ILocalStorageService LocalStorage *@
+
+
+
+cliente: @estadoCliente
+servidor:@estadoServidor
+cultura:@estadoCultura
+token: @token;
+
+
+@code 
+{
+
+
+    private string estadoCliente = "";
+    private string estadoServidor;
+    private string estadoCultura;
+    private string token;
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+
+           // await ContextProvider.InitializeAsync();
+            await ActualizarContextoAsync();
+
+        }
+    }
+
+    private async Task ActualizarContextoAsync()
+    {
+        if (ContextProvider.IsValid())
+        {
+            await ContextProvider.ReadAllContext(true);
+            estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+            estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+            estadoCultura = ContextProvider.GetCultureName();
+            token = ContextProvider._AppState.Token;
+            StateHasChanged();
+
+            }
+    }
+ }
+
+
 
 

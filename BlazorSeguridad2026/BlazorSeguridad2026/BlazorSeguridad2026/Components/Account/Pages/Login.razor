@@ -138,7 +138,7 @@
 
             var loginToken = $"/LoginToken?email={Uri.EscapeDataString(Input.Email)}&password={Uri.EscapeDataString(Input.Password)}";
             RedirectManager.RedirectTo(loginToken);
-           // RedirectManager.RedirectTo(ReturnUrl);
+            // RedirectManager.RedirectTo(ReturnUrl);
         }
         else if (result.RequiresTwoFactor)
         {
@@ -149,7 +149,7 @@
         else if (result.IsLockedOut)
         {
             Logger.LogWarning("User account locked out.");
-            
+
             RedirectManager.RedirectTo("Account/Lockout");
         }
         else
@@ -162,15 +162,17 @@
     {
         if (!_initialized)
         {
-             await createContext();
-             _initialized = true;
-             await InvokeAsync(StateHasChanged);
+            await createContext();
+            _initialized = true;
+            await InvokeAsync(StateHasChanged);
         }
     }
 
 
     private async Task createContext()
     {
+        await ContextProvider.ReadAllContext(true);
+
         var appUser = await UserManager.FindByEmailAsync(Input.Email);
         var userClaims = await UserManager.GetClaimsAsync(appUser);
 
