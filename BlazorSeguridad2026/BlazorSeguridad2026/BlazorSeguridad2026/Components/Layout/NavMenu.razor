@@ -5,7 +5,7 @@
 @inject IContextProvider ContextProvider
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject IHttpContextAccessor HttpContextAccessor
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+
 
 
 //es fundamental para que no entre en un bucle de peticiones
@@ -83,8 +83,10 @@
     </Authorized>
 </AuthorizeView>
 
-
+@if (!esPaginaCliente)
+{
 <CultureSelector></CultureSelector>
+}
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="nav flex-column">
@@ -165,18 +167,36 @@
 
     private int SelectedTenantId;
     private string SelectedDbKey;
+    bool esPaginaCliente = false;
 
+    protected override void OnInitialized()
+    {
+        // CalcularPaginaCliente();
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
 
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        CalcularPaginaCliente();
+        StateHasChanged();
+    }
 
+    private void CalcularPaginaCliente()
+    {
+        ContextProvider.ReadAllContext(true);
+        esPaginaCliente = (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente) ?? "false") == "true";        
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await ContextProvider.ReadAllContext(true);    
-             SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-             SelectedDbKey = ContextProvider._AppState.DbKey;
+            CalcularPaginaCliente();
+            SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
+             SelectedDbKey = ContextProvider._AppState.DbKey;    
+            
         }
+        
 
     }
 

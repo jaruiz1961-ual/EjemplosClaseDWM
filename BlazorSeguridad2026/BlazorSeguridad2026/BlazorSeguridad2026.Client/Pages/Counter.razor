@@ -5,6 +5,7 @@
 
 
 @inject IContextProvider ContextProvider
+@implements IDisposable
 
 
 
@@ -15,22 +16,13 @@
 <p role="status">Current count: @currentCount</p>
 cliente: @estadoCliente
 servidor:@estadoServidor
+cultura: @estadoCultura
 <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+
 
 @code {
     private int currentCount = 0;
-
-
-    private async void IncrementCount()
-    {
-        currentCount++;
-
-        // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
-        await ContextProvider.UpdateEstadoContext();
-    }
-
-
     private string? AppState;
     private string? TenantId;
     private string? DbKey;
@@ -40,46 +32,68 @@ servidor:@estadoServidor
     private bool _isInitializing;
     private string estadoCliente = "";
     private string estadoServidor;
+    private string estadoCultura = "";
+    private Action? _onContextChangedHandler;
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        // Solo queremos ejecutar la inicialización una vez y evitar reentradas
-        if (!firstRender || _isInitializing || _initialized)
-            return;
 
-        _isInitializing = true;
-        
-        // 1. Suscribirse a eventos del contexto
-        ContextProvider.OnContextChanged += HandleContextChanged;
+        _onContextChangedHandler += async () =>
+        {
+            await ActualizarContextoAsync();
 
-        // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(true);
+        };
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
 
-        // 3. Leer estado actual
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-
-
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
-
-        _initialized = true;
-        _isInitializing = false;
-
-        // 5. Renderizar de nuevo con el estado definitivo
-        StateHasChanged();
     }
 
-    private void HandleContextChanged()
+    private async void IncrementCount()
     {
-        // 6. Reaccionar a cambios posteriores de contexto
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
-        InvokeAsync(StateHasChanged);
+        currentCount++;
+
+        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
+        await ContextProvider.UpdateEstadoContext();
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && !_initialized)
+        {
+            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "true");
+            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "false");
+            await ContextProvider.UpdateEstadoContext(false);
+            await ActualizarContextoAsync();
+            _initialized = true;
+
+        }
+    }
+
+    private async Task ActualizarContextoAsync()
+    {
+
+        await ContextProvider.ReadAllContext(true);
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCultura = ContextProvider.GetCultureName();
+
+
+    }
+
+
+   
+
+
+    void IDisposable.Dispose()
+    {
+        Dispose();
     }
 
     public void Dispose()
     {
         // 7. Desuscribirse para evitar fugas de memoria
-        ContextProvider.OnContextChanged -= HandleContextChanged;
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
     }
+
+
 
 }

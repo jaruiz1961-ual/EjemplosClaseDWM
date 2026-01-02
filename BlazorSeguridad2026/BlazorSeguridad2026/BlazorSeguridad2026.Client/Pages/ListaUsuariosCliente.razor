@@ -25,7 +25,7 @@
 cliente: @estadoCliente
 servidor:@estadoServidor
 cultura:@estadoCultura
-<CultureSelector/>
+
 
 @if (_isValidContext == false)
 {
@@ -111,6 +111,9 @@ else
         estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
         estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
         estadoCultura = ContextProvider.GetCultureName();
+        ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "true");
+        ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "false");
+        await ContextProvider.UpdateEstadoContext(false);
 
     }
 

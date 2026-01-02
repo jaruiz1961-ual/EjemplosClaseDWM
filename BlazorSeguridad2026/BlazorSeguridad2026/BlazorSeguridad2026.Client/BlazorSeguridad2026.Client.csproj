@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\BibliotecaContextosDb\BibliotecaContextosDb.csproj" />
     <ProjectReference Include="..\..\BlazorSeguridad2026.Seguridad\BlazorSeguridad2026.Base.csproj" />
   </ItemGroup>
 

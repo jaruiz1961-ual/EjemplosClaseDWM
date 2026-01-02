@@ -115,6 +115,9 @@ else
             estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
             estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
             estadoCultura = ContextProvider.GetCultureName();
+            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "true");
+            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "false");
+            await ContextProvider.UpdateEstadoContext(false);
         }
    
     }

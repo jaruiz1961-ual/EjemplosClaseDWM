@@ -11,6 +11,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
     public enum ClavesEstado
     {
         Theme,
+        EsPaginaCliente,
+        EsPaginaServidor,
         PaginaCliente,
         PaginaServidor,
         Otro
@@ -66,7 +68,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
             string culture);
         void SetClaveValor(ClavesEstado clave, string valor);
         Task SetCultureName(string culture);
-        Task UpdateEstadoContext();
+        Task UpdateEstadoContext(bool withEvent = true);
         Task UpdateContextFromToken(string token);
 
         Task SetTenantDbkey(int tenantId, string dbkey);
@@ -259,9 +261,10 @@ namespace BlazorSeguridad2026.Base.Seguridad
             return diccionario.TryGetValue(clave, out var valor) ? valor : null;
         }
 
-        public async Task UpdateEstadoContext()
+        public async Task UpdateEstadoContext(bool withEvent = true)
         {
             await _localStorage.SetItemAsync(StorageKey, _AppState);
+            if (withEvent)
             OnContextChanged?.Invoke();
         }
 
