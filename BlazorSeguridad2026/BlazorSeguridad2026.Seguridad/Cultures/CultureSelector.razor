@@ -60,9 +60,9 @@
         if (ContextProvider.IsValid())
         {
             Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
-            await ContextProvider.ReadAllContext(true);
+            //await ContextProvider.ReadAllContext(true);
             await ContextProvider.SetCultureName(_culture.Name);
-            await ContextProvider.UpdateEstadoContext();
+            //await ContextProvider.UpdateEstadoContext();
         }
     }
 }

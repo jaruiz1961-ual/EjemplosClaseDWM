@@ -100,10 +100,19 @@ namespace BlazorSeguridad2026.Base.Genericos
                 return Enumerable.Empty<TEntity>();
             }
 
-            var resultado = await response.Content
-                .ReadFromJsonAsync<IEnumerable<TEntity>>();
+            IEnumerable<TEntity>? resultado = null;
+            try
+            {
 
-            return resultado ?? Enumerable.Empty<TEntity>();
+                return resultado = await response.Content
+                    .ReadFromJsonAsync<IEnumerable<TEntity>>();
+            }
+            catch
+            {
+                return Enumerable.Empty<TEntity>();
+            }
+
+            
         }
 
         public async Task<IEnumerable<TEntity>> GetFilterAsync(Expression<Func<TEntity, bool>> predicate, bool reload)

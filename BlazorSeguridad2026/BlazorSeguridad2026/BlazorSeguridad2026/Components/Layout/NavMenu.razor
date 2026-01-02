@@ -186,7 +186,7 @@
         // ContextProvider._AppState.DbKey = SelectedDbKey;
         await ContextProvider.SetTenantDbkey(SelectedTenantId, SelectedDbKey);
         // Opcional: recargar toda la página
-        // NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+        NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
     

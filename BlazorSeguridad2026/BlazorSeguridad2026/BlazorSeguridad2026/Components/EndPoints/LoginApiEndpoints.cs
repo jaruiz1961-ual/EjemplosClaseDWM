@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Globalization;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Security.Claims;
@@ -26,6 +27,17 @@ namespace BlazorAppEFTenant.Components.EndPoints
         
         public static void LoginApis(this WebApplication app)
         {
+            app.MapGet("/Culture/Get", () =>
+            {
+                var culture = CultureInfo.CurrentCulture.Name;
+                var uiCulture = CultureInfo.CurrentUICulture.Name;
+
+                return Results.Ok(new
+                {
+                    Culture = culture,
+                    UICulture = uiCulture
+                });
+            });
             app.MapGet("/Culture/Set", (string culture, string redirectUri, HttpContext httpContext
                 , IContextProvider ContextProvider) =>
             {

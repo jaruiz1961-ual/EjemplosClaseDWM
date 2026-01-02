@@ -6,6 +6,9 @@ using BlazorSeguridad2026.Base.Seguridad;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Globalization;
+using System.Net.Http.Json;
 using System.Net.NetworkInformation;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -94,4 +97,33 @@ builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(Gene
 builder.Services.AddScoped(typeof(IUnitOfWorkAsync), typeof(UnitOfWorkAsync));
 builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
-await builder.Build().RunAsync();
+var host = builder.Build();
+
+// HttpClient del host para llamar a la minimal API de cultura
+var http = host.Services.GetRequiredService<HttpClient>();
+
+// Si tu minimal API devuelve DTO { culture, uiCulture }
+var cultureResponse = await http.GetFromJsonAsync<CultureInfoDto>(
+    $"{apiUrl}Culture/Get");
+
+var cultureName = cultureResponse?.Culture ?? "es-ES";
+
+var culture = new CultureInfo(cultureName);
+CultureInfo.DefaultThreadCurrentCulture = culture;
+CultureInfo.DefaultThreadCurrentUICulture = culture;
+
+// Opcional: guardar en localStorage/appstate para reutilizar
+var localStorageSrv = host.Services.GetRequiredService<ILocalStorageService>();
+var appState = await localStorageSrv.GetItemAsync<AppState>("appstate") ?? new AppState();
+appState.Culture = cultureName;
+await localStorageSrv.SetItemAsync("appstate", appState);
+
+// Ejecutar la app
+await host.RunAsync();
+
+// DTO para la respuesta de la minimal API
+public class CultureInfoDto
+{
+    public string Culture { get; set; } = default!;
+    public string UICulture { get; set; } = default!;
+}
