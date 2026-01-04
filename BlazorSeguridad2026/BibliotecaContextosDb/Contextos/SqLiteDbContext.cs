@@ -1,6 +1,7 @@
 ﻿//#define UPDATE_DATABASE 
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base.Seguridad;
 using BlazorSeguridad2026.Data.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -72,8 +73,9 @@ public class SqLiteDbContext : DbContext
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
-          
+            State? estado = _tenantInterceptor.ContextProvider.GetState();
+            TenantId = estado.TenantId;
+
         }
 #endif
 

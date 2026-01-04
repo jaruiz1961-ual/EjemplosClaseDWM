@@ -40,7 +40,10 @@ namespace BlazorSeguridad2026.Base.Genericos
         private void AssignTenantId(DbContext? context)
         {
             if (context == null) return;
-            var tenantId = ContextProvider._AppState.TenantId;
+
+            State? estado = ContextProvider.GetState();
+
+            var tenantId = estado.TenantId;
 
             foreach (var entry in context.ChangeTracker.Entries<ITenantEntity>())
             {

@@ -46,7 +46,7 @@ else
     {
         if (!firstRender || _initialized)
             return;
-        await ContextProvider.ReadAllContext(true);
+        await ContextProvider.ReadStates();
         // Si faltan datos, redirige directamente
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || string.IsNullOrWhiteSpace(UrlApi))
         {

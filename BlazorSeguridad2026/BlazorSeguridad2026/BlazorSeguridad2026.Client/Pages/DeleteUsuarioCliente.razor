@@ -17,13 +17,13 @@
 
 <PageTitle> Delete Cliente</PageTitle>
 
-<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
-<p>Mode <strong>@ContextProvider._AppState.ConnectionMode</strong>:</p>
+<p>TenantId <strong>@ContextProvider.GetState().TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.GetState().DbKey</strong>:</p>
+<p>Mode <strong>@ContextProvider.GetState().ConnectionMode</strong>:</p>
 
-@if (@ContextProvider._AppState.ConnectionMode != "Ef")
+@if (@ContextProvider.GetState().ConnectionMode != "Ef")
 {
-    <p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+    <p>ApiName <strong>@ContextProvider.GetState().ApiName</strong>:</p>
 }
 
 @if (NewUser != null)
@@ -129,16 +129,16 @@
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(false); // aquí se llama a localStorage
+        await ContextProvider.ReadStates(); // aquí se llama a localStorage
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente,StorageKeys.ClienteState) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor,StorageKeys.ServerState) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
 
-        await ContextProvider.UpdateEstadoContext();
+ 
 
         _initialized = true;
         _isInitializing = false;
@@ -189,7 +189,7 @@
             else 
             {
                 NewUser = new Usuario();
-                NewUser.TenantId = ContextProvider._AppState.TenantId;
+                NewUser.TenantId = ContextProvider.GetState().TenantId;
             }
             StateHasChanged();
         }

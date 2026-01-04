@@ -33,14 +33,16 @@ namespace BlazorSeguridad2026.Base.Seguridad
         bool EsWasm => RuntimeInformation.IsOSPlatform(OSPlatform.Create("Browser"));
 
 
-        public UserServiceMio(UserManager<ApplicationUser> userManager,IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
+        public UserServiceMio(UserManager<ApplicationUser> userManager,IContextProvider cp, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = contextKeyProvider.Copia();
-            _contextProvider._AppState.ApplyTenantFilter = true;
-            _contextProvider._AppState.DbKey = "Application";
-            if (EsWasm) _contextProvider._AppState.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
-            else _contextProvider._AppState.ConnectionMode = "Ef";
-            _contextProvider._AppState.DbKey="Application"; // Establece el contexto adecuado para la base de datos de usuarios
+            _contextProvider = cp;
+            State? estado = cp.GetState();
+
+            estado.ApplyTenantFilter = true;
+            estado.DbKey = "Application";
+            if (EsWasm) estado.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM
+            else estado.ConnectionMode = "Ef";
+            estado.DbKey="Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
             _userManager = userManager;
 

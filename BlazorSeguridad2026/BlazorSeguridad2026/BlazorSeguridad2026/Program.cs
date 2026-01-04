@@ -138,7 +138,7 @@ builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
 
-    var initialState = new AppState
+    var initialServerState = new State
     {
         TenantId = int.Parse(TenantId),
         DbKey = DataProvider,
@@ -147,8 +147,19 @@ builder.Services.AddScoped<ContextProvider>(sp =>
         DirBase = new Uri(UrlApi)
     };
 
-    var cp = new ContextProvider(localStorage);
-    cp._AppState = initialState;
+    var initialClientState = new State
+    {
+        TenantId = int.Parse(TenantId),
+        DbKey = DataProvider,
+        ConnectionMode = "Api",
+        ApiName = ApiName,
+        DirBase = new Uri(UrlApi)
+    };
+
+
+    var cp = new ContextProvider(localStorage,true);
+    cp.States[0] = initialClientState;
+    cp.States[1] = initialServerState;
 
     return cp;
 });

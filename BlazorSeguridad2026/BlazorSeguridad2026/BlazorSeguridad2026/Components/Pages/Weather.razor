@@ -52,8 +52,8 @@ else
 
 
         // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor,estadoServidor);
-        await ContextProvider.UpdateEstadoContext();
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor,estadoServidor,StorageKeys.ServerState);
+        
     }
 
 
@@ -93,10 +93,10 @@ else
         ContextProvider.OnContextChanged += HandleContextChanged;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(true);
+        await ContextProvider.ReadStates();
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "COUNTER=0";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente, StorageKeys.ServerState) ?? "COUNTER=0";
         var valores = estadoCliente.Split('=');
         int contador = int.Parse(valores[1]);
         if (contador >=5)
@@ -107,8 +107,8 @@ else
         // 4. Persistir de nuevo en el contexto
 
         // Después de calcular estadoServidor en OnAfterRenderAsync
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor);
-        await ContextProvider.UpdateEstadoContext();
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor,StorageKeys.ServerState);
+        await ContextProvider.SaveState( StorageKeys.ServerState);
 
 
 
@@ -122,8 +122,8 @@ else
     private void HandleContextChanged()
     {
         // 6. Reaccionar a cambios posteriores de contexto
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente);
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor);
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente, StorageKeys.ClienteState);
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor, StorageKeys.ServerState);
         InvokeAsync(StateHasChanged);
     }
 

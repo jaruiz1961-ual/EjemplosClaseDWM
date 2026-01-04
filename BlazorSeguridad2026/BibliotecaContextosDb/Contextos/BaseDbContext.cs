@@ -1,17 +1,16 @@
 ﻿//#define UPDATE_DATABASE
+using BlazorSeguridad2026.Base.Genericos;
+using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base.Seguridad;
+using BlazorSeguridad2026.Data.Modelo;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Identity.Client;
-
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-
-using BlazorSeguridad2026.Base.Modelo;
-using BlazorSeguridad2026.Base.Genericos;
-using BlazorSeguridad2026.Data.Modelo;
 
 
 
@@ -28,8 +27,9 @@ namespace BlazorSeguridad2026.Base.Contextos
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
-          
+            State? estado = _tenantInterceptor.ContextProvider.GetState();
+            TenantId = estado.TenantId;
+
         }
 
 

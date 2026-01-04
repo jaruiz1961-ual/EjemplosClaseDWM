@@ -42,13 +42,13 @@ token: @token;
 
     private async Task ActualizarContextoAsync()
     {
-        if (ContextProvider.IsValid())
+        if (ContextProvider.IsValidState(StorageKeys.ServerState))
         {
-            await ContextProvider.ReadAllContext(true);
-            estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-            estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-            estadoCultura = ContextProvider.GetCultureName();
-            token = ContextProvider._AppState.Token;
+            await ContextProvider.ReadStates();
+            estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente,StorageKeys.ClienteState) ?? "Ninguno";
+            estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor,StorageKeys.ServerState) ?? "Ninguno";
+            estadoCultura = ContextProvider.GetCultureName(StorageKeys.ServerState);
+            token = ContextProvider.GetState().Token;
             StateHasChanged();
 
             }

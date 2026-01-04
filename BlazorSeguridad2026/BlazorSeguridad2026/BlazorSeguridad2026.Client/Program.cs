@@ -66,16 +66,17 @@ builder.Services.AddBlazoredLocalStorage();
 IConfiguration configuration = builder.Configuration;
 var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:7013/";
 var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
-var ConnectionMode = "Api";
+var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
 var DataProvider = configuration["DataProvider"] ?? "SqlServer";
 var TenantId = configuration["TenantId"] ?? "0";
 
-// ContextProvider multitenant
+var serverMode = false;
+
 builder.Services.AddScoped<ContextProvider>(sp =>
 {
     var localStorage = sp.GetRequiredService<ILocalStorageService>();
 
-    var initialState = new AppState
+    var initialServerState = new State
     {
         TenantId = int.Parse(TenantId),
         DbKey = DataProvider,
@@ -84,12 +85,24 @@ builder.Services.AddScoped<ContextProvider>(sp =>
         DirBase = new Uri(UrlApi)
     };
 
-    var cp = new ContextProvider(localStorage);
-    cp._AppState = initialState;
+    var initialClientState = new State
+    {
+        TenantId = int.Parse(TenantId),
+        DbKey = DataProvider,
+        ConnectionMode = "Api",
+        ApiName = ApiName,
+        DirBase = new Uri(UrlApi)
+    };
+
+
+    var cp = new ContextProvider(localStorage, true);
+    cp.States[0] = initialClientState;
+    cp.States[1] = initialServerState;
 
     return cp;
 });
 builder.Services.AddScoped<IContextProvider>(sp => sp.GetRequiredService<ContextProvider>());
+
 
 builder.Services.AddScoped(typeof(IGenericRepositoryFactoryAsync<>), typeof(GenericRepositoryFactory<>));
 
@@ -114,7 +127,7 @@ CultureInfo.DefaultThreadCurrentUICulture = culture;
 
 // Opcional: guardar en localStorage/appstate para reutilizar
 var localStorageSrv = host.Services.GetRequiredService<ILocalStorageService>();
-var appState = await localStorageSrv.GetItemAsync<AppState>("appstate") ?? new AppState();
+var appState = await localStorageSrv.GetItemAsync<State>("appstate") ?? new State();
 appState.Culture = cultureName;
 await localStorageSrv.SetItemAsync("appstate", appState);
 

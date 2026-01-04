@@ -229,18 +229,18 @@
     {
         try
         {
-            if (ContextProvider.IsValid())
+            if (ContextProvider.IsValidState(StorageKeys.ServerState))
             {
-                await ContextProvider.ReadAllContext(true);
-                var cp = ContextProvider.Copia();
+                await ContextProvider.ReadStates();
+                var cp = ContextProvider.CopiaState(StorageKeys.ServerState);
                 // cp._AppState.DbKey = "Application";
                 // cp._AppState.ConnectionMode = "Api";
-                var user = new RoleServiceMio(RoleManager, cp, UnitOfWorkFactory);
-                var list = await user.GetAllAsync();
+                var roleService = new RoleServiceMio(RoleManager, ContextProvider, UnitOfWorkFactory);
+                var list = await roleService.GetAllAsync();
                 if (list is null) return;
                 roles = list.ToList();
-                newRoleModel.TenantId = ContextProvider._AppState.TenantId ?? 0;
-                newRoleModel.DbKey = ContextProvider._AppState.DbKey;
+                newRoleModel.TenantId = ContextProvider.GetState().TenantId ?? 0;
+                newRoleModel.DbKey = ContextProvider.GetState().DbKey;
                 _isValidContext = true;
             }
             else _isValidContext = false;
@@ -257,8 +257,8 @@
     {
         editingRoleId = role.Id;
         editRoleName = role.Name;
-        editDbKey = ContextProvider._AppState.DbKey ?? "";
-        editTenantId = ContextProvider._AppState.TenantId??0;
+        editDbKey = ContextProvider.GetState().DbKey ?? "";
+        editTenantId = ContextProvider.GetState().TenantId ?? 0;
         error = success = null;
     }
 

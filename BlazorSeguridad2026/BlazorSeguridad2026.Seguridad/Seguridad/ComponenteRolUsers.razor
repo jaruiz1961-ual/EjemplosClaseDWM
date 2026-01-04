@@ -10,7 +10,7 @@
 
 
 
-@inject IUserService UserService
+@inject IUserService UserServiceMio
 @inject RoleManager<ApplicationRole> RoleManager
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager Nav
@@ -160,7 +160,7 @@ else
         usersNotInRole.Clear();
 
         // Todos los usuarios
-        var allUsers = await UserService.GetAllAsync();
+        var allUsers = await UserServiceMio.GetAllAsync();
 
         // Usuarios en el rol (puedes usar GetUsersInRoleAsync o IsInRoleAsync por usuario)
         // Aquí uso GetUsersInRoleAsync para eficiencia

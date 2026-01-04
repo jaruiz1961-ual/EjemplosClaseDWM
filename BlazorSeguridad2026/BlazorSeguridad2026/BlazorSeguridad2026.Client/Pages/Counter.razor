@@ -52,16 +52,16 @@ cultura: @estadoCultura
         currentCount++;
 
         // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString());
-        await ContextProvider.UpdateEstadoContext();
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaCliente, "COUNTER=" + currentCount.ToString(),StorageKeys.ClienteState);
+        await ContextProvider.SaveState(StorageKeys.ClienteState);
     }
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender && !_initialized)
         {
-            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "true");
-            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "false");
-            await ContextProvider.UpdateEstadoContext(false);
+            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "true", StorageKeys.ClienteState);
+            ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "false", StorageKeys.ClienteState);
+            await ContextProvider.SaveState(StorageKeys.ClienteState);
             await ActualizarContextoAsync();
             _initialized = true;
 
@@ -71,10 +71,10 @@ cultura: @estadoCultura
     private async Task ActualizarContextoAsync()
     {
 
-        await ContextProvider.ReadAllContext(true);
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-        estadoCultura = ContextProvider.GetCultureName();
+        await ContextProvider.ReadStates();
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente, StorageKeys.ClienteState) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor, StorageKeys.ServerState) ?? "Ninguno";
+        estadoCultura = ContextProvider.GetCultureName(StorageKeys.ServerState);
 
 
     }

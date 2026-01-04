@@ -10,7 +10,7 @@
 @using BlazorSeguridad2026.Base.Modelo
 
 
-
+@inject IUserService UserServiceMio;
 @inject IUnitOfWorkFactory UnitOfWorkFactory
 @inject IContextProvider ContextProvider
 @* @attribute [Authorize(Roles = "Admin")] *@
@@ -196,7 +196,7 @@
     private string? error;
     private string? success;
     bool _isValidContext;
-    UserServiceMio userService;
+
     string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
     private int editingUserId;
@@ -242,19 +242,18 @@
     {
         try
         {
-            if (ContextProvider.IsValid())
+            if (ContextProvider.IsValidState(StorageKeys.ServerState))
             {
-                await ContextProvider.ReadAllContext(true);
-                var cp = ContextProvider.Copia();
-                // cp._AppState.DbKey = "Application";
-                // cp._AppState.ConnectionMode = "Api";
-                userService= new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
+                await ContextProvider.ReadStates();
+                var userService = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
                 var list = await userService.GetAllAsync();
-                if (list is null) return;           
+                if (list is null) return;
                 users = list.ToList();
-                newUserModel.TenantId = ContextProvider._AppState.TenantId;
-                newUserModel.DbKey = ContextProvider._AppState.DbKey;
+                newUserModel.TenantId = ContextProvider.GetState().TenantId ?? 0;
+                newUserModel.DbKey = ContextProvider.GetState().DbKey;
                 _isValidContext = true;
+
+
             }
             else _isValidContext = false;
             StateHasChanged();
@@ -272,8 +271,8 @@
         selectedUserId = u.Id;
 
         editEmail = u.Email;
-        editTenantId = ContextProvider._AppState.TenantId;
-        editKeyDb = ContextProvider._AppState.DbKey;
+        editTenantId = ContextProvider.GetState().TenantId;
+        editKeyDb = ContextProvider.GetState().DbKey;
 
         error = success = null;
     }
@@ -296,7 +295,7 @@
 
         error = success = null;
 
-        var result = await userService.UpdateUserAsync(
+        var result = await UserServiceMio.UpdateUserAsync(
             editingUserId,
             user =>
             {
@@ -325,7 +324,7 @@
     {
         error = success = null;
 
-        var result = await userService.DeleteAsync(id);
+        var result = await UserServiceMio.DeleteAsync(id);
         if (result.Succeeded)
         {
             success = "Usuario borrado.";
@@ -352,7 +351,7 @@
             return;
         }
 
-        var result = await userService.CreateAsync(
+        var result = await UserServiceMio.CreateAsync(
             newUserModel.Email,
             newUserModel.Password,
             newUserModel.TenantId,

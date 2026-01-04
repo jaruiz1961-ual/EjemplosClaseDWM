@@ -32,11 +32,10 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-                    cp._AppState.DbKey = contexto;
-                    cp._AppState.TenantId = tenantId;
-                    cp._AppState.ConnectionMode = "Ef";
+    
+                    cp.ServerMode = true;
 
-                    var service = new GenericDataService<T>(cp, uowFactory,false);
+                    var service = new GenericDataService<T>(cp, uowFactory);
                     try
                     {
                         var usuarios = await service.ObtenerTodosAsync(reload);
@@ -66,10 +65,9 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-                cp._AppState.DbKey = contexto;
-                cp._AppState.TenantId = tenantId;
-                cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory, false);
+
+                cp.ServerMode = true;
+                var service = new GenericDataService<T>(cp, uowFactory);
                 var usuarios = await service.ObtenerFiltradosCadenaAsync(filtro,reload);
                 return Results.Ok(usuarios);
             });
@@ -90,10 +88,9 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-                cp._AppState.DbKey = contexto;
-                cp._AppState.TenantId = tenantId;
-                cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory, false);
+
+                cp.ServerMode = true;
+                var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
                     var usuario = await service.ObtenerPorIdAsync(id, reload);
@@ -122,10 +119,10 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-                cp._AppState.DbKey = contexto;
-                cp._AppState.TenantId = tenantId;
-                cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory, false);
+
+
+                cp.ServerMode = true;
+                var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
                     await service.AñadirAsync(usuario,reload);
@@ -155,10 +152,9 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-                cp._AppState.DbKey = contexto;
-                cp._AppState.TenantId = tenantId;
-                cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory, false);
+
+                cp.ServerMode = true;
+                var service = new GenericDataService<T>(cp, uowFactory);
                 try
                 {
                     var actual = await service.ObtenerPorIdAsync(id,reload);
@@ -195,10 +191,9 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-                cp._AppState.DbKey = contexto;
-                cp._AppState.TenantId = tenantId;
-                cp._AppState.ConnectionMode = "Ef"; // Ajusta según tu lógica
-                var service = new GenericDataService<T>(cp, uowFactory, false);
+
+                cp.ServerMode = true;
+                var service = new GenericDataService<T>(cp, uowFactory);
                 var usuario = await service.ObtenerPorIdAsync(id,reload);
                 if (usuario is null)
                     return Results.NotFound();

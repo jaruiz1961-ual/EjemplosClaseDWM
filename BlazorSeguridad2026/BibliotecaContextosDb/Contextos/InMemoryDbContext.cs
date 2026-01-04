@@ -1,6 +1,7 @@
 ﻿
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Modelo;
+using BlazorSeguridad2026.Base.Seguridad;
 using BlazorSeguridad2026.Data.Modelo;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -26,8 +27,9 @@ namespace BlazorSeguridad2026.Base.Contextos
             : base(options) 
         {
             _tenantInterceptor = tenantInterceptor;
-            TenantId = _tenantInterceptor.ContextProvider._AppState.TenantId;
-          
+            State? estado = _tenantInterceptor.ContextProvider.GetState();
+            TenantId = estado.TenantId;
+
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

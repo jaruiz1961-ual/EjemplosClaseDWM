@@ -9,7 +9,7 @@
 
 @* @attribute [Authorize(Roles = "Admin")] *@
 
-@inject IUserService UserService
+@inject IUserService UserServiceMio
 @inject RoleManager<ApplicationRole> RoleManager
 @inject NavigationManager Nav
 
@@ -108,7 +108,7 @@ else
         isLoading = true;
         error = success = null;
     
-        user = await UserService.GetByIdAsync(userId);
+        user = await UserServiceMio.GetByIdAsync(userId);
         if (user is null)
         {
             isLoading = false;
@@ -129,7 +129,7 @@ else
             .ToList();
         // roles actuales del usuario Filtrados 
 
-        var userRoles = await UserService.GetUserRolesAsync(int.Parse(userId.ToString()));
+        var userRoles = await UserServiceMio.GetUserRolesAsync(int.Parse(userId.ToString()));
         selectedRoles = new HashSet<string>(userRoles, StringComparer.OrdinalIgnoreCase);
 
         isLoading = false;
@@ -154,7 +154,7 @@ else
             return;
         }
 
-        var result = await UserService.SetUserRolesAsync(user.Id, selectedRoles);
+        var result = await UserServiceMio.SetUserRolesAsync(user.Id, selectedRoles);
 
         if (result.Succeeded)
         {

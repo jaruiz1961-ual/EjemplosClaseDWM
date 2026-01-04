@@ -33,13 +33,10 @@ namespace BlazorSeguridad2026.Base.Genericos
 
         private readonly IContextProvider _contextProvider;
         private readonly string? _apiName;
-        public GenericDataService(IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory, bool isApi)
+        public GenericDataService(IContextProvider contextKeyProvider, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = contextKeyProvider;    
-            if (isApi)
-            {
-                _contextProvider._AppState.ConnectionMode = "Api";
-            }
+            _contextProvider = contextKeyProvider;
+             State ? estado = _contextProvider.GetState();
             _unitOfWorkFactory = uowFactory;       
         }
         public async Task<IEnumerable<T>> ObtenerTodosAsync(bool reload)

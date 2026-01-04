@@ -5,6 +5,7 @@
 @inject IContextProvider ContextProvider
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject IHttpContextAccessor HttpContextAccessor
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 
 
 
@@ -183,17 +184,18 @@
 
     private void CalcularPaginaCliente()
     {
-        ContextProvider.ReadAllContext(true);
-        esPaginaCliente = (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente) ?? "false") == "true";        
+        ContextProvider.ReadStates();
+        esPaginaCliente = (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente, StorageKeys.ServerState) ?? "false") == "true";
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            State? estado = ContextProvider.GetState();
             CalcularPaginaCliente();
-            SelectedTenantId = ContextProvider._AppState.TenantId ?? 0;
-             SelectedDbKey = ContextProvider._AppState.DbKey;    
+            SelectedTenantId = estado.TenantId??-1;
+            SelectedDbKey = estado.DbKey;    
             
         }
         

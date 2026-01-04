@@ -57,7 +57,7 @@
         var cultureEscaped = Uri.EscapeDataString(_culture.Name);
         var uriEscaped = Uri.EscapeDataString(uri);
 
-        if (ContextProvider.IsValid())
+        if (ContextProvider.IsValidState(StorageKeys.ServerState))
         {
             Navigation.NavigateTo($"Culture/Set?culture={cultureEscaped}&redirectUri={uriEscaped}", forceLoad: true);
             //await ContextProvider.ReadAllContext(true);

@@ -24,9 +24,9 @@
 <p>Prueba recurso: @UsuarioResources.User_Codigo_Label</p>
 
 
-<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+<p>TenantId <strong>@ContextProvider.GetState().TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.GetState().DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.GetState().ApiName</strong>:</p>
 
 <CultureSelector></CultureSelector>
 
@@ -133,16 +133,16 @@
         ContextProvider.OnContextChanged += OnContextChangedProxy;
 
         // 2. Inicializar desde localStorage (JS interop seguro aquí)
-        await ContextProvider.ReadAllContext(false);
+        await ContextProvider.ReadStates(); 
 
         // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente,StorageKeys.ServerState) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor, StorageKeys.ServerState) ?? "Ninguno";
 
 
         // 4. Persistir de nuevo en el contexto
 
-        await ContextProvider.UpdateEstadoContext();
+   
 
         _initialized = true;
         _isInitializing = false;

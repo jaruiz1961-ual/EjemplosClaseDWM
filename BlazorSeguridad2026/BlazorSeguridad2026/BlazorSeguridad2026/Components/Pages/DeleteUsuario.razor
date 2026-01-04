@@ -13,9 +13,9 @@
 @implements IDisposable
 
 
-<p>TenantId <strong>@ContextProvider._AppState.TenantId</strong>:</p>
-<p>ContextKeDb <strong>@ContextProvider._AppState.DbKey</strong>:</p>
-<p>ApiName <strong>@ContextProvider._AppState.ApiName</strong>:</p>
+<p>TenantId <strong>@ContextProvider.GetState().TenantId</strong>:</p>
+<p>ContextKeDb <strong>@ContextProvider.GetState().DbKey</strong>:</p>
+<p>ApiName <strong>@ContextProvider.GetState().ApiName</strong>:</p>
 
 @if (NewUser != null)
 {
@@ -107,7 +107,7 @@
     {
         if (firstRender)
         {
-            await ContextProvider.ReadAllContext(false);
+            await ContextProvider.ReadStates();
             await CargarAsync();
             StateHasChanged();
         }
@@ -153,7 +153,7 @@
             else 
             {
                 NewUser = new Usuario();
-                NewUser.TenantId = ContextProvider._AppState.TenantId;
+                NewUser.TenantId = ContextProvider.GetState().TenantId;
             }
 
         }

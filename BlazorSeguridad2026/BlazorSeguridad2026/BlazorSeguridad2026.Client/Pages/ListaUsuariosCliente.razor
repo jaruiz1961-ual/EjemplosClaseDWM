@@ -107,13 +107,13 @@ else
     private async Task ActualizarContextoAsync()
     {
 
-        await ContextProvider.ReadAllContext(true);
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente) ?? "Ninguno";
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor) ?? "Ninguno";
-        estadoCultura = ContextProvider.GetCultureName();
-        ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "true");
-        ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "false");
-        await ContextProvider.UpdateEstadoContext(false);
+        await ContextProvider.ReadStates();
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente,StorageKeys.ClienteState) ?? "Ninguno";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor,StorageKeys.ServerState) ?? "Ninguno";
+        estadoCultura = ContextProvider.GetCultureName(StorageKeys.ClienteState);
+        ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "true", StorageKeys.ClienteState);
+        ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "false", StorageKeys.ServerState);
+        await ContextProvider.SaveStates(false);
 
     }
 
@@ -122,7 +122,7 @@ else
     {
         try
         {
-            if (ContextProvider.IsValid())
+            if (ContextProvider.IsValidState(StorageKeys.ClienteState))
             {
                 var servicioUsuarios = new ServicioUsuariosCliente(ContextProvider, UnitOfWorkFactory);
                 var list = await servicioUsuarios.ObtenerTodosAsync(true);

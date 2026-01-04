@@ -95,7 +95,7 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     new Claim(ClaimTypes.Email, user.Email ?? ""),
                     new Claim("TenantId", (user.TenantId ?? 0).ToString()),
                     new Claim("DbKey", user.DbKey ?? "SqlServer"),
-                    new Claim("AppState", user.AppState ?? "")
+                    new Claim("State", user.AppState ?? "")
                 };
 
                 // Añadir roles

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace BlazorSeguridad2026.Base.Seguridad
@@ -41,138 +40,166 @@ namespace BlazorSeguridad2026.Base.Seguridad
         }
     }
 
+    public enum StorageKeys
+    {
+        ClienteState = 0,
+        ServerState = 1
+    }
+
     public interface IContextProvider
     {
-        AppState _AppState { get; set; }
+        bool ServerMode { get; set; }
+
+        State[] States { get; set; }
 
         event Action? OnContextChanged;
 
-        ContextProvider Copia();
         string[] GetApiNames();
-        string[] GetConnectionModes();
-        string[] GetContextDbKeys();
-        string GetCultureName();
         int[] GetTenantIds();
-        string? GetValor(ClavesEstado clave);
-        bool IsValid();
-        Task LogOutAsync();
-        Task<IContextProvider> ReadAllContext(bool force);
+        string[] GetContextDbKeys();
+        string[] GetConnectionModes();
 
-        Task SaveAllContextAsync(IContextProvider? cp);
-        Task SetPartialContext(
-            string? apiName,
-            Uri? dirBase,
-            string? conectionMode,
-            bool filter,
-            string? estado,
-            string culture);
-        void SetClaveValor(ClavesEstado clave, string valor);
+        string GetCultureName(StorageKeys key);
+
+        State CopiaState(StorageKeys key);
+        string? GetValor(ClavesEstado clave, StorageKeys key);
+        bool IsValidState(StorageKeys key);
+
+        State GetState();
+        Task ReadState(StorageKeys key);
+        Task ReadStates();
+
+        void SetClaveValor(ClavesEstado clave, string valor, StorageKeys key);
         Task SetCultureName(string culture);
-        Task UpdateEstadoContext(bool withEvent = true);
+        Task SaveState(StorageKeys key, bool withEvent = false);
+        Task SaveStates(bool withEvent = false);
         Task UpdateContextFromToken(string token);
-
         Task SetTenantDbkey(int tenantId, string dbkey);
-
-        bool ApplyTenantFilter { get; set; }
-
-
+        void ApplyTenantFilter(StorageKeys key);
+        Task LogOutAsync();
     }
 
     public class ContextProvider : IContextProvider
     {
-        private const string StorageKey = "appstate";
 
-        public AppState _AppState { get; set; } = new AppState();
+
+        public State[] States { get; set; }
 
         private readonly ILocalStorageService _localStorage;
 
         public event Action? OnContextChanged;
 
-        bool _initialized;
+        public bool ServerMode { get; set; }
 
-
-        private AppState? _initialState;
-
-        public ContextProvider(ILocalStorageService localStorage)
+        public State GetState()
+        {
+             return ServerMode ? States[(int)StorageKeys.ServerState] : States[(int)StorageKeys.ClienteState];        
+        }
+        public ContextProvider(ILocalStorageService localStorage, bool serverMode = false)
         {
             _localStorage = localStorage;
+            ServerMode = serverMode;
+            States = new State[2];
+
+            // Inicializar estados por defecto para evitar null
+            States[(int)StorageKeys.ClienteState] = new State();
+            States[(int)StorageKeys.ServerState] = new State();
         }
 
-        public bool ApplyTenantFilter
+        public void ApplyTenantFilter(StorageKeys key)
         {
-            get => _AppState.ApplyTenantFilter;
-            set => _AppState.ApplyTenantFilter = value;
+            var state = States[(int)key];
+            if (state == null) return;
+
+            state.ApplyTenantFilter = true;
         }
 
         public string[] GetContextDbKeys() => new[] { "SqlServer", "SqLite", "InMemory" };
         public string[] GetApiNames() => new[] { "ApiRest", "" };
         public int[] GetTenantIds() => new[] { 0, 1, 2 };
         public string[] GetConnectionModes() => new[] { "Ef", "Api" };
-        public string GetCultureName() => _AppState.Culture ?? CultureInfo.CurrentCulture.Name;
 
-       
-
-        /// <summary>
-        /// Lee todo el contexto desde localStorage y mezcla con el estado actual.
-        /// </summary>
-        public async Task<IContextProvider> ReadAllContext(bool force)
+        public string GetCultureName(StorageKeys key)
         {
-            if (_initialized && !force) return this;
-
-            var appState = await _localStorage.GetItemAsync<AppState>(StorageKey);
-            if (appState != null)
-            {
-                _AppState.Culture = appState.Culture ?? _AppState.Culture;
-                _AppState.DirBase = appState.DirBase ?? _AppState.DirBase;
-                _AppState.ConnectionMode = appState.ConnectionMode ?? _AppState.ConnectionMode;
-                _AppState.Status = appState.Status ?? _AppState.Status;
-                _AppState.DbKey = appState.DbKey ?? _AppState.DbKey;
-                _AppState.Token = appState.Token ?? _AppState.Token;
-                _AppState.TenantId = appState.TenantId ?? _AppState.TenantId;
-                _AppState.ApiName = appState.ApiName ?? _AppState.ApiName;
-                _AppState.ApplyTenantFilter = appState.ApplyTenantFilter;
-            }
-            _initialized = true;
-            return this;
+            var state = States[(int)key];
+            if (state is null) return CultureInfo.CurrentCulture.Name;
+            return state.Culture ?? CultureInfo.CurrentCulture.Name;
         }
 
-        public bool IsValid()
+        /// <summary>
+        /// Lee el estado para una clave desde localStorage y lo mezcla con el estado actual.
+        /// </summary>
+        public async Task ReadState(StorageKeys key)
         {
-            if (!_AppState.TenantId.HasValue) return false;
-            if (string.IsNullOrEmpty(_AppState.DbKey)) return false;
+            var state = this.States[(int)key];
+            if (state is null) return;
 
-            if (string.IsNullOrEmpty(_AppState.ConnectionMode) ||
-                _AppState.ConnectionMode.Equals("ef", StringComparison.OrdinalIgnoreCase))
+            var nombre = Enum.GetName(typeof(StorageKeys), key) ?? key.ToString();
+
+            var stored = await _localStorage.GetItemAsync<State>(nombre);
+
+            if (stored != null)
+            {
+                state.Culture = stored.Culture ?? state.Culture;
+                state.DirBase = stored.DirBase ?? state.DirBase;
+                state.ConnectionMode = stored.ConnectionMode ?? state.ConnectionMode;
+                state.Status = stored.Status ?? state.Status;
+                state.DbKey = stored.DbKey ?? state.DbKey;
+                state.Token = stored.Token ?? state.Token;
+                state.TenantId = stored.TenantId ?? state.TenantId;
+                state.ApiName = stored.ApiName ?? state.ApiName;
+                state.ApplyTenantFilter = stored.ApplyTenantFilter;
+            }
+            this.States[(int)key] = state;
+        }
+
+        public async Task ReadStates()
+        {
+            foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
+            {
+                await ReadState(key);
+            }
+        }
+
+        public bool IsValidState(StorageKeys key)
+        {
+            var state = States[(int)key];
+            if (state is null) return false;
+
+            if (!state.TenantId.HasValue) return false;
+            if (string.IsNullOrEmpty(state.DbKey)) return false;
+
+            if (string.IsNullOrEmpty(state.ConnectionMode) ||
+                state.ConnectionMode.Equals("ef", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-            if (_AppState.ConnectionMode.Equals("api", StringComparison.OrdinalIgnoreCase))
+            if (state.ConnectionMode.Equals("api", StringComparison.OrdinalIgnoreCase))
             {
-                if (string.IsNullOrEmpty(_AppState.Token)) return false;
-                if (string.IsNullOrEmpty(_AppState.ApiName)) return false;
-                if (_AppState.DirBase is null) return false;
+                if (string.IsNullOrEmpty(state.Token)) return false;
+                if (string.IsNullOrEmpty(state.ApiName)) return false;
+                if (state.DirBase is null) return false;
             }
 
             return true;
         }
 
-        public ContextProvider Copia()
+        public State CopiaState(StorageKeys key)
         {
-            var cp = new ContextProvider(_localStorage)
+            var state = States[(int)key];
+            if (state is null) return null!;
+
+            return new State
             {
-                _AppState = new AppState
-                {
-                    TenantId = _AppState.TenantId,
-                    DbKey = _AppState.DbKey,
-                    ConnectionMode = _AppState.ConnectionMode,
-                    ApiName = _AppState.ApiName,
-                    DirBase = _AppState.DirBase,
-                    Token = _AppState.Token,
-                    Status = _AppState.Status,
-                    ApplyTenantFilter = _AppState.ApplyTenantFilter,
-                    Culture = _AppState.Culture
-                }
+                TenantId = state.TenantId,
+                DbKey = state.DbKey,
+                ConnectionMode = state.ConnectionMode,
+                ApiName = state.ApiName,
+                DirBase = state.DirBase,
+                Token = state.Token,
+                Status = state.Status,
+                ApplyTenantFilter = state.ApplyTenantFilter,
+                Culture = state.Culture
             };
-            return cp;
         }
 
         private string DictionaryToString(Dictionary<ClavesEstado, string> diccionario)
@@ -197,106 +224,131 @@ namespace BlazorSeguridad2026.Base.Seguridad
         }
 
         /// <summary>
-        /// Login / cambio de contexto principal y persistencia completa.
-        /// </summary>
-        public async Task SetPartialContext(
-            string? apiName,
-            Uri? dirBase,
-            string? connectionMode,
-            bool filter,
-            string? estado,
-            string culture)
-        {
-          //  _AppState.TenantId = tenantId;
-          //  _AppState.DbKey = contextDbKey ?? _AppState.DbKey;
-            _AppState.ConnectionMode = connectionMode ?? _AppState.ConnectionMode;
-            _AppState.ApiName = apiName ?? _AppState.ApiName;
-            _AppState.DirBase = dirBase ?? _AppState.DirBase;
-          //  _AppState.Token = token ?? _AppState.Token;
-            _AppState.Status = estado ?? _AppState.Status ?? string.Empty;
-            _AppState.ApplyTenantFilter = filter;
-            _AppState.Culture = culture ?? _AppState.Culture ?? CultureInfo.CurrentCulture.Name;
-
-            await _localStorage.SetItemAsync(StorageKey, _AppState);
-            OnContextChanged?.Invoke();
-        }
-
-        /// <summary>
-        /// Actualiza solo el token y valores derivados del token.
+        /// Actualiza solo el token y valores derivados del token para todos los estados.
         /// </summary>
         public async Task UpdateContextFromToken(string token)
         {
-            _AppState.Token = token;
-
-            var dict = TokenService.GetClaims(token);
-            _AppState.DbKey = dict.TryGetValue("DbKey", out var dbk) && !string.IsNullOrEmpty(dbk)
-                ? dbk
-                : _AppState.DbKey;
-
-            if (dict.TryGetValue("TenantId", out var tidStr) &&
-                int.TryParse(tidStr, out var tid))
+            foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
             {
-                _AppState.TenantId = tid;
+                var state = States[(int)key];
+                if (state is null) continue;
+
+                var nombre = Enum.GetName(typeof(StorageKeys), key) ?? key.ToString();
+
+                state.Token = token;
+
+                var dict = TokenService.GetClaims(token);
+                state.DbKey = dict.TryGetValue("DbKey", out var dbk) && !string.IsNullOrEmpty(dbk)
+                    ? dbk
+                    : state.DbKey;
+
+                if (dict.TryGetValue("TenantId", out var tidStr) &&
+                    int.TryParse(tidStr, out var tid))
+                {
+                    state.TenantId = tid;
+                }
+
+                await _localStorage.SetItemAsync(nombre, state);
             }
 
-            await _localStorage.SetItemAsync(StorageKey, _AppState);
             OnContextChanged?.Invoke();
         }
 
-        public void SetClaveValor(ClavesEstado clave, string valor)
+        public void SetClaveValor(ClavesEstado clave, string valor, StorageKeys key)
         {
-            var diccionario = StringToDictionary(_AppState.Status);
+            var state = States[(int)key];
+            if (state is null) return;
+
+            var diccionario = StringToDictionary(state.Status);
 
             if (diccionario.ContainsKey(clave))
                 diccionario[clave] = valor;
             else
                 diccionario.Add(clave, valor);
 
-            _AppState.Status = DictionaryToString(diccionario);
+            state.Status = DictionaryToString(diccionario);
         }
 
-        public string? GetValor(ClavesEstado clave)
+        public string? GetValor(ClavesEstado clave, StorageKeys key)
         {
-            var diccionario = StringToDictionary(_AppState.Status);
+            var state = States[(int)key];
+            if (state is null) return null;
+
+            var diccionario = StringToDictionary(state.Status);
             return diccionario.TryGetValue(clave, out var valor) ? valor : null;
         }
 
-        public async Task UpdateEstadoContext(bool withEvent = true)
+        public async Task SaveState(StorageKeys key, bool withEvent = false)
         {
-            await _localStorage.SetItemAsync(StorageKey, _AppState);
+            var state = States[(int)key];
+            if (state is null) return;
+
+            var nombre = Enum.GetName(typeof(StorageKeys), key) ?? key.ToString();
+            await _localStorage.SetItemAsync(nombre, state);
+
             if (withEvent)
-            OnContextChanged?.Invoke();
+                OnContextChanged?.Invoke();
         }
 
-        public async Task SaveAllContextAsync(IContextProvider? cp)
+        public async Task SaveStates(bool withEvent = false)
         {
-            var state = cp?._AppState ?? _AppState;
-            await _localStorage.SetItemAsync(StorageKey, state);
-            OnContextChanged?.Invoke();
+            foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
+            {
+                await SaveState(key, false);
+            }
+
+            if (withEvent)
+                OnContextChanged?.Invoke();
         }
 
         public async Task SetCultureName(string culture)
         {
-            _AppState.Culture = culture;
-            await _localStorage.SetItemAsync(StorageKey, _AppState);
+            foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
+            {
+                var state = States[(int)key];
+                if (state is null) continue;
+
+                var nombre = Enum.GetName(typeof(StorageKeys), key) ?? key.ToString();
+
+                state.Culture = culture;
+                await _localStorage.SetItemAsync(nombre, state);
+            }
+
             OnContextChanged?.Invoke();
         }
 
         public async Task SetTenantDbkey(int tenantId, string dbkey)
         {
-            _AppState.TenantId = tenantId;
-            _AppState.DbKey = dbkey;
-            await _localStorage.SetItemAsync(StorageKey, _AppState);
+            foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
+            {
+                var state = States[(int)key];
+                if (state is null) continue;
+
+                var nombre = Enum.GetName(typeof(StorageKeys), key) ?? key.ToString();
+
+                state.TenantId = tenantId;
+                state.DbKey = dbkey;
+
+                await _localStorage.SetItemAsync(nombre, state);
+            }
+
             OnContextChanged?.Invoke();
         }
 
-
-
         public async Task LogOutAsync()
         {
-            await _localStorage.RemoveItemAsync(StorageKey);
-            _AppState = new AppState();
-            _initialized = false;
+            foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
+            {
+                var state = States[(int)key];
+                if (state is null) continue;
+
+                state.Token = null;
+                state.Status = null;
+
+                var nombre = Enum.GetName(typeof(StorageKeys), key) ?? key.ToString();
+                await _localStorage.RemoveItemAsync(nombre);
+            }
+
             OnContextChanged?.Invoke();
         }
     }

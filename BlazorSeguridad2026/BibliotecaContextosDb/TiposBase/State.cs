@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
+using System.Reflection.Metadata.Ecma335;
 using System.Security;
 using System.Text.Json;
 
@@ -7,10 +8,10 @@ namespace BlazorSeguridad2026.Base.Seguridad
 {
 
   
-    [TypeConverter(typeof(AppState))]
-    public class AppState 
+    [TypeConverter(typeof(State))]
+    public class State 
     {
-        public int? TenantId { get; set; } = 0;
+        public int? TenantId { get; set; } = null;
         public string DbKey { get; set; }
 
         public string ConnectionMode
@@ -19,6 +20,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
             set
             {
                  cm = value;
+                if (cm == "Api")
+                    cm = "Api";
             }
         }
 
@@ -58,7 +61,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         {
             if (value is string s)
             {
-                return JsonSerializer.Deserialize<AppState>(s);
+                return JsonSerializer.Deserialize<State>(s);
             }
             return base.ConvertFrom(context, culture, value);
         }
@@ -72,7 +75,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         // Convierte una ClaseDato en string JSON
         public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
         {
-            if (destinationType == typeof(string) && value is AppState dato)
+            if (destinationType == typeof(string) && value is State dato)
             {
                 return JsonSerializer.Serialize(dato);
             }
