@@ -6,6 +6,7 @@
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject IHttpContextAccessor HttpContextAccessor
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
+@implements IDisposable
 
 
 
@@ -170,48 +171,61 @@
     private string SelectedDbKey;
     bool esPaginaCliente = false;
 
-    protected override void OnInitialized()
+
+
+    protected override async Task OnInitializedAsync()
     {
-        // CalcularPaginaCliente();
+
         NavigationManager.LocationChanged += OnLocationChanged;
+
     }
 
-    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
-        CalcularPaginaCliente();
+        await CalcularPaginaCliente();
         StateHasChanged();
     }
 
-    private void CalcularPaginaCliente()
-    {
-        ContextProvider.ReadStates();
-        esPaginaCliente = (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente, StorageKeys.ServerState) ?? "false") == "true";
-    }
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            await CalcularPaginaCliente();
             State? estado = ContextProvider.GetState();
-            CalcularPaginaCliente();
-            SelectedTenantId = estado.TenantId??-1;
-            SelectedDbKey = estado.DbKey;    
             
+            SelectedTenantId = estado.TenantId.Value;
+            SelectedDbKey = estado.DbKey;      
         }
-        
+    }
 
+    private async Task CalcularPaginaCliente()
+    {
+        await ContextProvider.ReadStates();
+        esPaginaCliente = (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente, StorageKeys.ServerState) ?? "false") == "true";
     }
 
     private async Task Actualizar()
     {
         // ContextProvider._AppState.TenantId = SelectedTenantId;
         // ContextProvider._AppState.DbKey = SelectedDbKey;
-        await ContextProvider.SetTenantDbkey(SelectedTenantId, SelectedDbKey);
+        await ContextProvider.UpdateTenantDbkey(SelectedTenantId, SelectedDbKey,true);
         // Opcional: recargar toda la página
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
-    
+        void IDisposable.Dispose()
+    {
+        Dispose();
+    }
+
+    private void Dispose()
+    {
+  
+        NavigationManager.LocationChanged -= OnLocationChanged;
+
+    }
 
 }
 

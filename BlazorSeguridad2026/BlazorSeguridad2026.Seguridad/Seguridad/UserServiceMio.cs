@@ -35,9 +35,9 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         public UserServiceMio(UserManager<ApplicationUser> userManager,IContextProvider cp, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = cp;
-            State? estado = cp.GetState();
-
+            _contextProvider = cp.CopyContext();
+            State? estado = _contextProvider.GetState();
+            
             estado.ApplyTenantFilter = true;
             estado.DbKey = "Application";
             if (EsWasm) estado.ConnectionMode = "Api";  // Establece el contexto adecuado para la base de datos de usuarios en WASM

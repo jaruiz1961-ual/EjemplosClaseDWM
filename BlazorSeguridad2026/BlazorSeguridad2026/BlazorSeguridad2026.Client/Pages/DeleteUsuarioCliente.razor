@@ -116,7 +116,10 @@
     // proxy síncrono para el evento
     private void OnContextChangedProxy() => _ = HandleContextChangedAsync();
 
-
+    protected override async Task OnInitializedAsync()
+    {
+        ContextProvider.ServerMode = false;
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

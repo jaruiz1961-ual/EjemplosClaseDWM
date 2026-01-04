@@ -245,7 +245,8 @@
             if (ContextProvider.IsValidState(StorageKeys.ServerState))
             {
                 await ContextProvider.ReadStates();
-                var userService = new UserServiceMio(UserManager, ContextProvider, UnitOfWorkFactory);
+                var cp = ContextProvider.CopyContext();
+                var userService = new UserServiceMio(UserManager, cp, UnitOfWorkFactory);
                 var list = await userService.GetAllAsync();
                 if (list is null) return;
                 users = list.ToList();

@@ -12,10 +12,11 @@ namespace BlazorSeguridad2026.Base.Seguridad
     public interface IRoleService
     {
         Task<List<ApplicationRole>> GetAllAsync();
-        Task<IdentityResult> CreateAsync(string name);
+        Task<IdentityResult> CreateAsync(string name,int? TenantId, string KeyDb);
         Task<ApplicationRole?> GetByIdAsync(int id);
-        Task<IdentityResult> UpdateRoleAsync(int id, string newName);
+        Task<IdentityResult> UpdateRoleAsync(int id , Action<ApplicationRole> updateAction);
         Task<IdentityResult> DeleteAsync(int id);
+
     }
     public class RoleServiceMio : IRoleService
     {
@@ -30,8 +31,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         public RoleServiceMio(RoleManager<ApplicationRole> roleManager, IContextProvider cp, IUnitOfWorkFactory uowFactory)
         {
-            _contextProvider = cp;
-            State? estado = cp.GetState();
+            _contextProvider = cp.CopyContext();
+            State? estado = _contextProvider.GetState();
 
             estado.ApplyTenantFilter = true;
             estado.DbKey = "Application";
@@ -39,8 +40,6 @@ namespace BlazorSeguridad2026.Base.Seguridad
             else estado.ConnectionMode = "Ef";
             estado.DbKey = "Application"; // Establece el contexto adecuado para la base de datos de usuarios
             _unitOfWorkFactory = uowFactory;
-       
-            //original
             _roleManager = roleManager;
         }
 
@@ -60,25 +59,6 @@ namespace BlazorSeguridad2026.Base.Seguridad
             return lista;
         }
 
-
-
-        public async Task<IdentityResult> CreateAsync(string name)
-        {
-            var role = new ApplicationRole
-            {
-                Name = name.Trim(),
-                NormalizedName = name.Trim().ToUpperInvariant(),
-                TenantId = _tenantId,
-                DbKey = _dbKey
-            };
-
-            return await _roleManager.CreateAsync(role);
-        }
-
-        //original
-        //public Task<ApplicationRole?> GetByIdAsync(int id) =>
-    //Task.FromResult(_roleManager.Roles.FirstOrDefault(r => r.Id == id));
-
         public async Task<ApplicationRole?> GetByIdAsync(int id)
         {
             if (uow == null)
@@ -89,20 +69,40 @@ namespace BlazorSeguridad2026.Base.Seguridad
             var entity = await repo.GetByIdAsync(id, reload);
 
             return entity;
-            
+
         }
 
-        public async Task<IdentityResult> UpdateRoleAsync(int id, string newName)
+        public async Task<IdentityResult> CreateAsync(string name, int? tenantId, string keyDb)
+        {
+            var role = new ApplicationRole
+            {
+                Name = name.Trim(),
+                NormalizedName = name.Trim().ToUpperInvariant(),
+                TenantId = tenantId,
+                DbKey = keyDb
+            };
+
+            var result= await _roleManager.CreateAsync(role);
+            if (!result.Succeeded)
+                return result;
+
+            return IdentityResult.Success;
+        }
+
+        //original
+        //public Task<ApplicationRole?> GetByIdAsync(int id) =>
+    //Task.FromResult(_roleManager.Roles.FirstOrDefault(r => r.Id == id));
+
+
+
+        public async Task<IdentityResult> UpdateRoleAsync(int id, Action<ApplicationRole> updateAction)
         {
             var role = await _roleManager.FindByIdAsync(id.ToString());
             // O mejor: _roleManager.Roles.FirstOrDefaultAsync(r => r.Id == id)
             if (role is null)
                 return IdentityResult.Failed(new IdentityError { Description = "Role not found." });
+            updateAction(role);
 
-            role.Name = newName.Trim();
-            role.NormalizedName = role.Name.ToUpperInvariant();
-            role.TenantId = _tenantId;
-            role.DbKey = _dbKey;
             return await _roleManager.UpdateAsync(role);
         }
 
@@ -114,5 +114,8 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
             return await _roleManager.DeleteAsync(role);
         }
+
+      
     }
 }
+

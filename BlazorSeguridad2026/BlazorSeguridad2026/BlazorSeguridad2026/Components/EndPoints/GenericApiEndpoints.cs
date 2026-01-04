@@ -32,10 +32,13 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
-    
-                    cp.ServerMode = true;
+                    var cpp = cp.CopyContext();
+                    cpp.ServerMode = true;
+                    cpp.States[1].TenantId = tenantId;
+                    cpp.States[1].DbKey = contexto;
+                    cpp.States[1].ConnectionMode = "Ef";
 
-                    var service = new GenericDataService<T>(cp, uowFactory);
+                    var service = new GenericDataService<T>(cpp, uowFactory);
                     try
                     {
                         var usuarios = await service.ObtenerTodosAsync(reload);
@@ -65,9 +68,14 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
+                var cpp = cp.CopyContext();
+                cpp.ServerMode = true;
+                cpp.States[1].TenantId = tenantId;
+                cpp.States[1].DbKey = contexto;
+                cpp.States[1].ConnectionMode = "Ef";
 
-                cp.ServerMode = true;
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var service = new GenericDataService<T>(cpp, uowFactory);
+
                 var usuarios = await service.ObtenerFiltradosCadenaAsync(filtro,reload);
                 return Results.Ok(usuarios);
             });
@@ -89,8 +97,13 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     return Results.Unauthorized();
                 }
 
-                cp.ServerMode = true;
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var cpp = cp.CopyContext();
+                cpp.ServerMode = true;
+                cpp.States[1].TenantId = tenantId;
+                cpp.States[1].DbKey = contexto;
+                cpp.States[1].ConnectionMode = "Ef";
+
+                var service = new GenericDataService<T>(cpp, uowFactory);
                 try
                 {
                     var usuario = await service.ObtenerPorIdAsync(id, reload);
@@ -119,10 +132,13 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 {
                     return Results.Unauthorized();
                 }
+                var cpp = cp.CopyContext();
+                cpp.ServerMode = true;
+                cpp.States[1].TenantId = tenantId;
+                cpp.States[1].DbKey = contexto;
+                cpp.States[1].ConnectionMode = "Ef";
 
-
-                cp.ServerMode = true;
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var service = new GenericDataService<T>(cpp, uowFactory);
                 try
                 {
                     await service.AñadirAsync(usuario,reload);
@@ -153,8 +169,13 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     return Results.Unauthorized();
                 }
 
-                cp.ServerMode = true;
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var cpp = cp.CopyContext();
+                cpp.ServerMode = true;
+                cpp.States[1].TenantId = tenantId;
+                cpp.States[1].DbKey = contexto;
+                cpp.States[1].ConnectionMode = "Ef";
+
+                var service = new GenericDataService<T>(cpp, uowFactory);
                 try
                 {
                     var actual = await service.ObtenerPorIdAsync(id,reload);
@@ -192,8 +213,13 @@ namespace BlazorAppEFTenant.Components.EndPoints
                     return Results.Unauthorized();
                 }
 
-                cp.ServerMode = true;
-                var service = new GenericDataService<T>(cp, uowFactory);
+                var cpp = cp.CopyContext();
+                cpp.ServerMode = true;
+                cpp.States[1].TenantId = tenantId;
+                cpp.States[1].DbKey = contexto;
+                cpp.States[1].ConnectionMode = "Ef";
+
+                var service = new GenericDataService<T>(cpp, uowFactory);
                 var usuario = await service.ObtenerPorIdAsync(id,reload);
                 if (usuario is null)
                     return Results.NotFound();

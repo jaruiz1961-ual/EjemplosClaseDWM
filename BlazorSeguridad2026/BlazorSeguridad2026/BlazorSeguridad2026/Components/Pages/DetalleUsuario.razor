@@ -119,7 +119,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -142,12 +142,13 @@
 
         // 4. Persistir de nuevo en el contexto
 
-   
+
 
         _initialized = true;
         _isInitializing = false;
 
         await CargarAsync();
+        StateHasChanged();
     }
 
     private async Task HandleContextChangedAsync()

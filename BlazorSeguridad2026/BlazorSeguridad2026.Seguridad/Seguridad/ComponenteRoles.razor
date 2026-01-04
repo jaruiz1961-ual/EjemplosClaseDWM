@@ -232,9 +232,8 @@
             if (ContextProvider.IsValidState(StorageKeys.ServerState))
             {
                 await ContextProvider.ReadStates();
-                var cp = ContextProvider.CopiaState(StorageKeys.ServerState);
-                // cp._AppState.DbKey = "Application";
-                // cp._AppState.ConnectionMode = "Api";
+                var cp = ContextProvider.CopyContext();
+
                 var roleService = new RoleServiceMio(RoleManager, ContextProvider, UnitOfWorkFactory);
                 var list = await roleService.GetAllAsync();
                 if (list is null) return;
@@ -278,13 +277,22 @@
 
         error = success = null;
 
-        var result = await RoleServiceMio.UpdateRoleAsync(editingRoleId, editRoleName);
+        var result = await RoleServiceMio.UpdateRoleAsync(editingRoleId,
+            role => {
+                role.Name = editRoleName!;
+                    role.TenantId = editTenantId;
+                    role.DbKey = editDbKey;
+                });
+          
+    
 
         if (result.Succeeded)
         {
             success = "Rol actualizado.";
             editingRoleId = 0;
             editRoleName = null;
+
+
             await LoadRolesAsync();
         }
         else
@@ -303,7 +311,7 @@
             return;
         }
 
-        var result = await RoleServiceMio.CreateAsync(newRoleModel.Name);
+        var result = await RoleServiceMio.CreateAsync(newRoleModel.Name,newRoleModel.TenantId,newRoleModel.DbKey);
 
         if (result.Succeeded)
         {

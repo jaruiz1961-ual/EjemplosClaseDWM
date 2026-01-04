@@ -74,8 +74,10 @@ namespace BlazorSeguridad2026.Base.Seguridad
         Task SaveState(StorageKeys key, bool withEvent = false);
         Task SaveStates(bool withEvent = false);
         Task UpdateContextFromToken(string token);
-        Task SetTenantDbkey(int tenantId, string dbkey);
+        Task UpdateTenantDbkey(int tenantId, string dbkey, bool save);
         void ApplyTenantFilter(StorageKeys key);
+
+        IContextProvider CopyContext();
         Task LogOutAsync();
     }
 
@@ -90,10 +92,25 @@ namespace BlazorSeguridad2026.Base.Seguridad
         public event Action? OnContextChanged;
 
         public bool ServerMode { get; set; }
+        public string[] GetContextDbKeys() => new[] { "SqlServer", "SqLite", "InMemory" };
+        public string[] GetApiNames() => new[] { "ApiRest", "" };
+        public int[] GetTenantIds() => new[] { 0, 1, 2 };
+        public string[] GetConnectionModes() => new[] { "Ef", "Api" };
 
         public State GetState()
         {
              return ServerMode ? States[(int)StorageKeys.ServerState] : States[(int)StorageKeys.ClienteState];        
+        }
+
+        public IContextProvider CopyContext()
+        {
+            var nc = new ContextProvider(this._localStorage, this.ServerMode);
+            nc.ServerMode = this.ServerMode;
+            nc.OnContextChanged = this.OnContextChanged;
+            nc.States[(int)StorageKeys.ClienteState] = this.CopiaState(StorageKeys.ClienteState);
+            nc.States[(int)StorageKeys.ServerState] = this.CopiaState(StorageKeys.ServerState);
+
+            return nc;
         }
         public ContextProvider(ILocalStorageService localStorage, bool serverMode = false)
         {
@@ -114,10 +131,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
             state.ApplyTenantFilter = true;
         }
 
-        public string[] GetContextDbKeys() => new[] { "SqlServer", "SqLite", "InMemory" };
-        public string[] GetApiNames() => new[] { "ApiRest", "" };
-        public int[] GetTenantIds() => new[] { 0, 1, 2 };
-        public string[] GetConnectionModes() => new[] { "Ef", "Api" };
+     
 
         public string GetCultureName(StorageKeys key)
         {
@@ -317,7 +331,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
             OnContextChanged?.Invoke();
         }
 
-        public async Task SetTenantDbkey(int tenantId, string dbkey)
+        public async Task UpdateTenantDbkey(int tenantId, string dbkey, bool save)
         {
             foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
             {
@@ -329,6 +343,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
                 state.TenantId = tenantId;
                 state.DbKey = dbkey;
 
+                if (save)
                 await _localStorage.SetItemAsync(nombre, state);
             }
 
