@@ -20,10 +20,10 @@ namespace BlazorSeguridad2026.Base.Seguridad
             set
             {
                  cm = value;
-                if (cm == "Api")
-                    cm = "Api";
             }
         }
+
+        public string LastMode = "Server";
 
         private string cm;
         public string ApiName { get; set; }

@@ -11,7 +11,7 @@
 cliente: @estadoCliente
 servidor:@estadoServidor
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+<button class="btn btn-primary" @onclick="SetIndexCount">Click me</button>
 
 <p>This component demonstrates showing data.</p>
 
@@ -46,20 +46,26 @@ else
 
 @code {
     private WeatherForecast[]? forecasts;
-    //Seguridad seguridad = null;
-    private async void IncrementCount()
-    {
 
 
-        // 4. Persistir de nuevo en el contexto
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor,estadoServidor,StorageKeys.ServerState);
-        
-    }
+    private bool _initialized;
+    private bool _isInitializing;
+    private string estadoCliente = "";
+    private string estadoServidor = "";
+
+    private Action? _onContextChangedHandler;
 
 
     protected override async Task OnInitializedAsync()
     {
-       // await Task.Delay(500);   no se peuden poner await en la inicializacion 
+
+
+        _onContextChangedHandler += async () =>
+    {
+        await ActualizarContextoAsync();
+
+    };
+        ContextProvider.OnContextChanged += _onContextChangedHandler;
 
         var startDate = DateOnly.FromDateTime(DateTime.Now);
         var summaries = new[]
@@ -69,68 +75,61 @@ else
          };
 
         forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[index]
-        }).ToArray();
+            {
+                Date = startDate.AddDays(index),
+                TemperatureC = Random.Shared.Next(-20, 55),
+                Summary = summaries[index]
+            }).ToArray();
     }
 
-    private bool _initialized;
-    private bool _isInitializing;
-    private string estadoCliente = "";
-    private string estadoServidor = "";
+
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // Solo queremos ejecutar la inicialización una vez y evitar reentradas
-        if (!firstRender || _isInitializing || _initialized)
-            return;
+        if (firstRender && !_initialized)
+        {
+            await ActualizarContextoAsync();
+            _initialized = true;
 
-        _isInitializing = true;
+        }
+    }
 
-        // 1. Suscribirse a eventos del contexto
-        ContextProvider.OnContextChanged += HandleContextChanged;
+    private async Task ActualizarContextoAsync()
+    {
 
-        // 2. Inicializar desde localStorage (JS interop seguro aquí)
         await ContextProvider.ReadStates();
 
-        // 3. Leer estado actual
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente, StorageKeys.ServerState) ?? "COUNTER=0";
+
+        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente, StorageKeys.ClienteState) ?? "COUNTER=0";
+        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor, StorageKeys.ServerState) ?? "Ninguno";
+        ContextProvider.SetLastMode("Servidor");
+        await ContextProvider.SaveStates(false);
+
+
+
+        StateHasChanged();
+
+    }
+
+
+
+    private async void SetIndexCount()
+    {
         var valores = estadoCliente.Split('=');
         int contador = int.Parse(valores[1]);
-        if (contador >=5)
+        if (contador >= 5)
             contador = 0;
         if (forecasts == null) return;
         estadoServidor = forecasts[contador].Summary.ToString();
 
-        // 4. Persistir de nuevo en el contexto
+        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor, StorageKeys.ServerState);
+        ContextProvider.SaveState(StorageKeys.ServerState);
 
-        // Después de calcular estadoServidor en OnAfterRenderAsync
-        ContextProvider.SetClaveValor(ClavesEstado.PaginaServidor, estadoServidor,StorageKeys.ServerState);
-        await ContextProvider.SaveState( StorageKeys.ServerState);
-
-
-
-        _initialized = true;
-        _isInitializing = false;
-
-        // 5. Renderizar de nuevo con el estado definitivo
-        StateHasChanged();
     }
-
-    private void HandleContextChanged()
-    {
-        // 6. Reaccionar a cambios posteriores de contexto
-        estadoCliente = ContextProvider.GetValor(ClavesEstado.PaginaCliente, StorageKeys.ClienteState);
-        estadoServidor = ContextProvider.GetValor(ClavesEstado.PaginaServidor, StorageKeys.ServerState);
-        InvokeAsync(StateHasChanged);
-    }
-
     public void Dispose()
     {
         // 7. Desuscribirse para evitar fugas de memoria
-        ContextProvider.OnContextChanged -= HandleContextChanged;
+        ContextProvider.OnContextChanged -= _onContextChangedHandler;
     }
 
 

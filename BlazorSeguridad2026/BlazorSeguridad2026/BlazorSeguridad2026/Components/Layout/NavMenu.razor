@@ -1,16 +1,14 @@
-﻿@* @implements IDisposable *@
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
 
 @inject IContextProvider ContextProvider
 @inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
 @inject IHttpContextAccessor HttpContextAccessor
+
 @rendermode @(new InteractiveServerRenderMode(prerender: false))
 @implements IDisposable
 
-
-
-//es fundamental para que no entre en un bucle de peticiones
 @functions {
     string GetAntiforgeryToken()
     {
@@ -19,6 +17,7 @@
         return tokens.RequestToken!;
     }
 }
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">BlazorSeguridad2026</a>
@@ -27,32 +26,29 @@
 
 <input type="checkbox" title="Navigation menu" class="navbar-toggler" />
 
-<!-- Menú de administración solo autorizados-->
-
-<AuthorizeView >
+<AuthorizeView>
     <Authorized>
-<div class="nav-item px-3">
-    
-    
-    <div class="nav-link" @onclick="ToggleAdminMenu">
-        <span class="oi oi-lock-locked" aria-hidden="true"></span>
-        Administración
-    </div>
+        <div class="nav-item px-3">
+            <div class="nav-link" @onclick="ToggleAdminMenu">
+                <span class="oi oi-lock-locked" aria-hidden="true"></span>
+                Administración
+            </div>
 
-    @if (adminMenuExpanded)
-    {
-        <div class="nav-item px-4">
-            <NavLink class="nav-link" href="/seguridad/users">
-                <span class="oi oi-people" aria-hidden="true"></span>
-                Usuarios
-            </NavLink>
+            @if (adminMenuExpanded)
+            {
+                <div class="nav-item px-4">
+                    <!-- Páginas servidor -->
+                    <div class="nav-link" @onclick="IrUsuariosServidor">
+                        <span class="oi oi-people" aria-hidden="true"></span>
+                        Usuarios
+                    </div>
 
-            <NavLink class="nav-link" href="/seguridad/roles">
-                <span class="oi oi-key" aria-hidden="true"></span>
-                Roles
-            </NavLink>
- 
-                    <div class="d-flex flex-column gap-2">
+                    <div class="nav-link" @onclick="IrRolesServidor">
+                        <span class="oi oi-key" aria-hidden="true"></span>
+                        Roles
+                    </div>
+
+                    <div class="d-flex flex-column gap-2 mt-2">
                         <div class="d-flex align-items-center gap-2">
                             <select class="form-select form-select-sm w-auto" @bind="SelectedDbKey">
                                 @foreach (var opcion in ContextProvider.GetContextDbKeys())
@@ -77,17 +73,15 @@
                             </button>
                         </div>
                     </div>
-
-
-         </div>
-     }
-</div>
+                </div>
+            }
+        </div>
     </Authorized>
 </AuthorizeView>
 
 @if (!esPaginaCliente)
 {
-<CultureSelector></CultureSelector>
+    <CultureSelector></CultureSelector>
 }
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
@@ -109,11 +103,15 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
             </NavLink>
         </div>
+
+        <!-- Página servidor: ListaUsuarios -->
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="ListaUsuarios">
+            <div class="nav-link" @onclick="IrListaUsuariosServidor">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista Usuarios
-            </NavLink>
+            </div>
         </div>
+
+        <!-- Página cliente (WASM) -->
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="ListaUsuariosCliente">
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Lista U(Api)
@@ -133,12 +131,10 @@
                         <span class="bi bi-person-fill-nav-menu" aria-hidden="true"></span> @context.User.Identity?.Name
                     </NavLink>
                 </div>
-                <div class="nav-item px-3">                    
-                 
-                        <NavLink class="nav-link" href="Logout">
-                            <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Salir
-                        </NavLink>
-                
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="Logout">
+                        <span class="bi bi-arrow-bar-left-nav-menu" aria-hidden="true"></span> Salir
+                    </NavLink>
                 </div>
             </Authorized>
             <NotAuthorized>
@@ -157,27 +153,19 @@
     </nav>
 </div>
 
-
-
 @code {
-    private string? currentUrl;
     private bool adminMenuExpanded = false;
-    int TenantId = 0;
+    private int SelectedTenantId;
+    private string? SelectedDbKey;
+    private bool esPaginaCliente = false;
+    private bool _reloading; // NUEVO
 
     private void ToggleAdminMenu()
         => adminMenuExpanded = !adminMenuExpanded;
 
-    private int SelectedTenantId;
-    private string SelectedDbKey;
-    bool esPaginaCliente = false;
-
-
-
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-
         NavigationManager.LocationChanged += OnLocationChanged;
-
     }
 
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
@@ -186,46 +174,65 @@
         StateHasChanged();
     }
 
-
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await CalcularPaginaCliente();
-            State? estado = ContextProvider.GetState();
-            
-            SelectedTenantId = estado.TenantId.Value;
-            SelectedDbKey = estado.DbKey;      
+
+            var estado = ContextProvider.GetState();
+            if (estado != null)
+            {
+                SelectedTenantId = estado.TenantId ?? 0;
+                SelectedDbKey = estado.DbKey;
+            }
+
+            // >>> AQUÍ USAMOS LastMode <<<
+            if (!_reloading)
+            {
+                var lastMode = ContextProvider.GetLastMode();
+
+                if (string.Equals(lastMode, "Cliente", StringComparison.OrdinalIgnoreCase))
+                {
+                    _reloading = true;
+
+                    // Ya estamos en servidor, dejamos el modo en Server
+                    ContextProvider.SetLastMode("Server");
+                    await ContextProvider.SaveStates();
+
+                    // Forzamos recarga SOLO esta primera vez
+                    NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
+                }
+            }
         }
     }
 
     private async Task CalcularPaginaCliente()
     {
         await ContextProvider.ReadStates();
-        esPaginaCliente = (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente, StorageKeys.ServerState) ?? "false") == "true";
+        esPaginaCliente =
+            (ContextProvider.GetValor(ClavesEstado.EsPaginaCliente, StorageKeys.ServerState) ?? "false") == "true";
     }
 
     private async Task Actualizar()
     {
-        // ContextProvider._AppState.TenantId = SelectedTenantId;
-        // ContextProvider._AppState.DbKey = SelectedDbKey;
-        await ContextProvider.UpdateTenantDbkey(SelectedTenantId, SelectedDbKey,true);
-        // Opcional: recargar toda la página
+        await ContextProvider.UpdateTenantDbkey(SelectedTenantId, SelectedDbKey ?? "SqlServer", save: true);
+        // Recarga la página actual con el nuevo contexto
         NavigationManager.NavigateTo(NavigationManager.Uri, forceLoad: true);
     }
 
-        void IDisposable.Dispose()
-    {
-        Dispose();
-    }
+    // Navegación a páginas servidor con forceLoad explícito en clicks de menú
+    private void IrUsuariosServidor()
+        => NavigationManager.NavigateTo("/seguridad/users", forceLoad: true);
 
-    private void Dispose()
+    private void IrRolesServidor()
+        => NavigationManager.NavigateTo("/seguridad/roles", forceLoad: true);
+
+    private void IrListaUsuariosServidor()
+        => NavigationManager.NavigateTo("/ListaUsuarios", forceLoad: true);
+
+    public void Dispose()
     {
-  
         NavigationManager.LocationChanged -= OnLocationChanged;
-
     }
-
 }
-

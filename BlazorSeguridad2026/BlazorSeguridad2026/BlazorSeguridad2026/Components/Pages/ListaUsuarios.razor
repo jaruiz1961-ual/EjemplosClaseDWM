@@ -118,6 +118,7 @@ else
             estadoCultura = ContextProvider.GetCultureName( StorageKeys.ServerState);
             ContextProvider.SetClaveValor(ClavesEstado.EsPaginaServidor, "true", StorageKeys.ServerState);
             ContextProvider.SetClaveValor(ClavesEstado.EsPaginaCliente, "false", StorageKeys.ClienteState);
+            ContextProvider.SetLastMode("Servidor");
             await ContextProvider.SaveStates(false);
         }
    
