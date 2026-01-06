@@ -10,6 +10,7 @@
 @using BlazorSeguridad2026.Data.Servicios
 @using Microsoft.AspNetCore.Authorization
 @using BlazorSeguridad2026.Base.Cultures
+@using Microsoft.Extensions.Localization
 
 
 
@@ -20,7 +21,10 @@
 
 @attribute [Authorize]
 
+@inject IStringLocalizer<Usuario> LocalizerUsuario
+
 <h3>Listado de usuarios CLIENTE</h3>
+@LocalizerUsuario["User_Codigo_Label"]
 
 cliente: @estadoCliente
 servidor:@estadoServidor

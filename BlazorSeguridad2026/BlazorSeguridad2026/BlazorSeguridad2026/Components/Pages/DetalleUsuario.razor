@@ -36,7 +36,7 @@
                   OnInvalidSubmit="@HandleInvalidSubmit"
                   FormName="DetalleUsuarioForm">
 
-        <EditorForm TModel="UserModel"
+        <EditorForm TModel="UsuarioModel"
                     Model="@newUserModel"
                     ItemsPerRow="1"
                     RowType="RowType.Inline"
@@ -108,7 +108,7 @@
     private string estadoCliente = "";
     private string estadoServidor;
     bool _isValidContext;
-    public UserModel? newUserModel { get; set; } = new UserModel();
+    public UsuarioModel? newUserModel { get; set; } = new UsuarioModel();
 
     public Usuario? newUser { get; set; } = new Usuario();
 
@@ -201,7 +201,7 @@
                     servicioUsuario = new ServicioUsuarios(ContextProvider, UnitOfWorkFactory);
 
                 newUser = await servicioUsuario.ObtenerPorIdAsync(Id,true);
-                newUserModel = newUser.SaveToModel();
+                newUserModel = newUser.GetModel();
             }
             else 
             {

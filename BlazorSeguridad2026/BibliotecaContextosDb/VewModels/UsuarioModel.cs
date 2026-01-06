@@ -14,7 +14,7 @@ namespace BlazorSeguridad2026.Data.Modelo
     using System.Linq.Expressions;
   
 
-    public class UserModel
+    public class UsuarioModel
     {
         [Display(
             Name = "User_Codigo_Label",

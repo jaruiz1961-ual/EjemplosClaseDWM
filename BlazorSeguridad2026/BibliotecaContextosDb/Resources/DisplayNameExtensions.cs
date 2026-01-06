@@ -31,9 +31,9 @@ namespace BibliotecaContextosDb.Resources
             return displayAttr.GetName() ?? propInfo.Name;
         }
 
-        // Sobrecarga simplificada solo para UserModel
-        public static string GetDisplayName<TValue>(Expression<Func<UserModel, TValue>> expression)
-            => GetDisplayName<UserModel, TValue>(expression);
+        // Sobrecarga simplificada solo para UsuarioModel
+        public static string GetDisplayName<TValue>(Expression<Func<UsuarioModel, TValue>> expression)
+            => GetDisplayName<UsuarioModel, TValue>(expression);
     }
 
 }

@@ -12,9 +12,6 @@ namespace BlazorSeguridad2026.Data.Modelo
     public class Usuario: Entidad, IUpdatableFrom<Usuario>
     {
         public string Codigo { get; set; }
-
-        [Required(ErrorMessage = "Name is required")]
-        [StringLength(20, MinimumLength = 3, ErrorMessage = "Name cannot have less than 3 characters and more than 20 characters in length")]
         public string UserName { get; set; }
 
         public string Contexto { get; set; }
@@ -22,7 +19,7 @@ namespace BlazorSeguridad2026.Data.Modelo
         public string? Email { get; set; }
 
 
-        public void UpdateFromModel(UserModel source)
+        public void UpdateFromModel(UsuarioModel source)
         {
             // Copias solo los campos actualizables
             UserName = source.UserName;
@@ -44,9 +41,9 @@ namespace BlazorSeguridad2026.Data.Modelo
 
             // No tocas Id ni TenantId aquí
         }
-        public UserModel SaveToModel()
+        public UsuarioModel GetModel()
         {
-            return new UserModel
+            return new UsuarioModel
             {
                 UserName = this.UserName,
                 Password = this.Password,
