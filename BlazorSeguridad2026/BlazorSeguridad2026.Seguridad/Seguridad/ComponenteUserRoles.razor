@@ -1,29 +1,27 @@
-﻿@* @page "/seguridad/users/{UserId}/roles" *@
-@rendermode InteractiveAuto
+﻿@* //se llama como un componente desde una ventana modal en el componente Users ! *@
+
 @namespace BlazorSeguridad2026.Base.Seguridad
 
-@using Microsoft.AspNetCore.Authorization
+@using BibliotecaContextosDb.Resources
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Base.Modelo
 
-
-@* @attribute [Authorize(Roles = "Admin")] *@
+@using BootstrapBlazor.Components
 
 @inject IUserService UserServiceMio
 @inject RoleManager<ApplicationRole> RoleManager
 @inject UserManager<ApplicationUser> UserManager
 @inject NavigationManager Nav
 
-
 <h3>Asignar roles al usuario</h3>
 
 @if (!string.IsNullOrEmpty(error))
 {
-    <div class="alert alert-danger">@error</div>
+    <Alert Color="Color.Danger">@error</Alert>
 }
 @if (!string.IsNullOrEmpty(success))
 {
-    <div class="alert alert-success">@success</div>
+    <Alert Color="Color.Success">@success</Alert>
 }
 
 @if (isLoading)
@@ -32,119 +30,131 @@
 }
 else if (user is null)
 {
-    <div class="alert alert-warning">Usuario no encontrado.</div>
-    <button class="btn btn-secondary" @onclick="BackToUsers">
-        Volver a usuarios
-    </button>
+    <Alert Color="Color.Warning">Usuario no encontrado.</Alert>
 }
 else
 {
-    <div class="card mb-3">
-        <div class="card-body">
-            <p class="mb-1">
-                <strong>Usuario:</strong> @user.Email
-            </p>
-            <p class="mb-0 text-muted">
-                <strong>Id:</strong> @user.Id
-            </p>
-            <p class="mb-0 text-muted">
-                <strong>TenantId:</strong> @user.TenantId
-            </p>
-            <p class="mb-0 text-muted">
-                <strong>DbKey:</strong> @user.DbKey
-            </p>
-        </div>
-    </div>
+    <Card Color="Color.Primary" IsCenter="true" Class="mb-3">
+        <HeaderTemplate>
+            Usuario
+        </HeaderTemplate>
+
+        <BodyTemplate>
+            <p class="mb-1"><strong>Usuario:</strong> @user.Email</p>
+            <p class="mb-0 text-muted"><strong>Id:</strong> @user.Id</p>
+            <p class="mb-0 text-muted"><strong>TenantId:</strong> @user.TenantId</p>
+            <p class="mb-0 text-muted"><strong>DbKey:</strong> @user.DbKey</p>
+        </BodyTemplate>
+    </Card>
 
     <h4>Roles</h4>
 
-    @if (allRoles.Count == 0)
+    @if (!RoleItems.Any())
     {
         <p>No hay roles definidos.</p>
     }
     else
     {
-        <div class="mb-3">
-            @foreach (var role in allRoles)
-            {
-                <div class="form-check">
-                    <input class="form-check-input"
-                           type="checkbox"
-                           checked="@selectedRoles.Contains(role.Name!)"
-                           @onchange="e => ToggleRole(role.Name!, e.Value)" />
-                    <label class="form-check-label">
-                        @role.Name
-                    </label>
-                </div>
-            }
-        </div>
+        <CheckboxList TValue="IEnumerable<string>"
+                      Items="RoleItems"
+                      @bind-Value="SelectedRoleNames">
+            <ItemTemplate>
+                @if (context is RoleSelectedItem roleItem)
+                {
+                    @if (!string.IsNullOrEmpty(roleItem.Icon))
+                    {
+                        <i class="@roleItem.Icon me-1"></i>
+                    }
+                    <span>@roleItem.Text</span>
+                }
+                else
+                {
+                    <span>@context.Text</span>
+                }
+            </ItemTemplate>
+        </CheckboxList>
 
-        <button class="btn btn-primary me-2" @onclick="SaveRoles">
-            Guardar roles
-        </button>
-        <button class="btn btn-secondary" @onclick="BackToUsers">
-            Volver a usuarios
-        </button>
+        <div class="mt-3">
+            <Button Color="Color.Primary" Class="me-2" OnClick="SaveRoles">
+                Guardar roles
+            </Button>
+        </div>
     }
 }
 
 @code {
-    [Parameter]
-    public int userId { get; set; } 
-    [Parameter]
-    [SupplyParameterFromQuery]
-    public string? From { get; set; }
+    [Parameter, EditorRequired]  public ApplicationUser user { get; set; } 
+    [Parameter] public string? From { get; set; }
 
-    private ApplicationUser? user;
+
     private List<ApplicationRole> allRoles = new();
-    private HashSet<string> selectedRoles = new(StringComparer.OrdinalIgnoreCase);
+
+    // Items para CheckboxList (con icono opcional)
+    private IEnumerable<RoleSelectedItem> RoleItems { get; set; } = Array.Empty<RoleSelectedItem>();
+
+    // Roles seleccionados (nombres)
+    private IEnumerable<string> SelectedRoleNames { get; set; } = Array.Empty<string>();
 
     private bool isLoading = true;
     private string? error;
     private string? success;
-  
 
     protected override async Task OnParametersSetAsync()
     {
         isLoading = true;
         error = success = null;
-    
-        user = await UserManager.FindByIdAsync(userId.ToString());
+
+        
         if (user is null)
         {
             isLoading = false;
             return;
         }
+        // no es necesario user, ya que se pada por parametro
+        //user = await UserManager.FindByIdAsync(user.Id.ToString());
+
         await LoadRolesAsync();
         isLoading = false;
-
     }
 
     private async Task LoadRolesAsync()
     {
-        isLoading = true;
-        // todos los roles existentes
+        //filtrar todos los roles para ese tenant
         allRoles = RoleManager.Roles
-            .Where(r => r.TenantId == user.TenantId)
-        .OrderBy(r => r.Name)
+            .Where(r => r.TenantId == user!.TenantId)
+            .OrderBy(r => r.Name)
             .ToList();
-        // roles actuales del usuario Filtrados 
 
-        var userRoles = await UserServiceMio.GetUserRolesAsync(int.Parse(userId.ToString()));
-        selectedRoles = new HashSet<string>(userRoles, StringComparer.OrdinalIgnoreCase);
+        var userRoles = await UserServiceMio.GetUserRolesAsync(user.Id); // IEnumerable<string>
 
-        isLoading = false;
-   
+        RoleItems = allRoles
+            .Select(r =>
+            {
+                var roleName = r.Name!;
+                var resourceKey = $"Role_{roleName}";
 
-    }
+                // Texto localizado: UsuarioResources.Role_Admin, etc.
+                var text = UsuarioResources.ResourceManager.GetString(resourceKey)
+                           ?? roleName;
 
-    private void ToggleRole(string roleName, object? isChecked)
-    {
-        var check = isChecked is bool b && b;
-        if (check)
-            selectedRoles.Add(roleName);
-        else
-            selectedRoles.Remove(roleName);
+                var icon = roleName switch
+                {
+                    "Admin" => "fa-solid fa-user-shield",
+                    "User" => "fa-solid fa-user",
+                    "Manager" => "fa-solid fa-user-tie",
+                    _ => "fa-regular fa-square-check"
+                };
+
+                return new RoleSelectedItem
+                {
+                    Text = text,
+                    Value = roleName,
+                    Icon = icon
+                };
+            })
+            .ToList();
+
+        SelectedRoleNames = userRoles.ToArray();
     }
 
     private async Task SaveRoles()
@@ -155,24 +165,19 @@ else
             return;
         }
 
-        var result = await UserServiceMio.SetUserRolesAsync(user.Id, selectedRoles);
+        var selected = SelectedRoleNames.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var result = await UserServiceMio.SetUserRolesAsync(user.Id, selected);
 
         if (result.Succeeded)
-        {
             success = "Roles actualizados.";
-        }
         else
-        {
             error = string.Join(" ", result.Errors.Select(e => e.Description));
-        }
     }
 
-    private void BackToUsers()
-    {
-        if (!string.IsNullOrEmpty(From))
-            Nav.NavigateTo(From);
-        else
-            Nav.NavigateTo("/seguridad/users"); // fallback
 
+    public class RoleSelectedItem : SelectedItem
+    {
+        public string? Icon { get; set; }
     }
 }

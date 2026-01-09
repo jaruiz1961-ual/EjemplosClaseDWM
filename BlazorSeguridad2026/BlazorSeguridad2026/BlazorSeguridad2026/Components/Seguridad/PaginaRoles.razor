@@ -1,4 +1,9 @@
 ﻿@page "/seguridad/roles"
+@rendermode InteractiveServer
 @using Microsoft.AspNetCore.Authorization
 @* @attribute [Authorize(Roles = "Admin")] *@
-<ComponenteRoles />
+
+
+<BootstrapBlazorRoot>
+    <ComponenteRoles />
+</BootstrapBlazorRoot>

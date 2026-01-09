@@ -12,12 +12,15 @@
 @inject IContextProvider ContextProvider
 @* @inject ILocalStorageService LocalStorage *@
 
-
+@using BootstrapBlazor.Components
+@inject DialogService DialogService
 @UsuarioResources.User_Codigo_Label
 cliente: @estadoCliente
 servidor:@estadoServidor
 cultura:@estadoCultura
 token: @token;
+
+<Button Color="Color.Primary" OnClick="ShowTestDialog">Test dialog</Button>
 
 
 @code 
@@ -29,7 +32,16 @@ token: @token;
     private string estadoCultura;
     private string token;
 
+    private async Task ShowTestDialog()
+    {
+        var option = new DialogOption
+        {
+            Title = "Test",
+            BodyTemplate = b => b.AddContent(0, "DialogService funciona")
+        };
 
+        await DialogService.Show(option);   // <- aquí te falla ahora
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

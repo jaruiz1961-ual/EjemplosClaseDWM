@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.OpenApi.Models;
 using BlazorSeguridad2026.Base.Cultures;
+using BootstrapBlazor.Components;
 
 //using static TenantInterop;
 
@@ -23,9 +24,6 @@ using BlazorSeguridad2026.Base.Cultures;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
-
-
-
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -86,6 +84,8 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents()
     .AddInteractiveWebAssemblyComponents()
     .AddAuthenticationStateSerialization();
+
+builder.Services.AddBootstrapBlazor();
 
 // Autenticación/autorización (Identity + roles)
 builder.Services.AddCascadingAuthenticationState();
@@ -267,7 +267,7 @@ builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 builder.Services.AddRazorPages();
 
-// Blazor Server
+//Blazor Server
 builder.Services.AddServerSideBlazor().AddCircuitOptions(options =>
 {
     options.DetailedErrors = true;
@@ -277,10 +277,12 @@ builder.Services.AddLocalization();
 builder.Services.AddAntiforgery();
 builder.Services.AddHttpContextAccessor();
 
-builder.Services.AddBootstrapBlazor();
+builder.Services.AddScoped<DialogService>();
 
 
 var app = builder.Build();
+
+
 
 var localizationOptions = new RequestLocalizationOptions
 {
