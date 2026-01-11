@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BibliotecaContextosDb.Migrations.ApplicationBase
 {
     [DbContext(typeof(ApplicationBaseDbContext))]
-    [Migration("20251225193349_Inicial")]
+    [Migration("20260110181345_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -54,9 +54,12 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
+                        .HasDatabaseName("RoleNameIndex");
+
+                    b.HasIndex("TenantId", "NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("IX_Roles_Tenant_NormalizedName")
+                        .HasFilter("[TenantId] IS NOT NULL AND [NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
                 });
@@ -72,7 +75,7 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("State")
+                    b.Property<string>("AppState")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")

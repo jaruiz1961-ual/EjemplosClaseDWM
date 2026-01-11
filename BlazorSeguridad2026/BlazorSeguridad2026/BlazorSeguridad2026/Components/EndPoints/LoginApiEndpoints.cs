@@ -79,9 +79,11 @@ namespace BlazorAppEFTenant.Components.EndPoints
             LoginDataUser request,
             UserManager<ApplicationUser> userManager,
             RoleManager<ApplicationRole> roleManager, // opcional
-            ITokenService tokenService) =>
+            ITokenService tokenService,
+            SignInManager<ApplicationUser> signInManager) =>
             {
-                // Usa request.Email, no request.Username
+        
+                //var appUser = await userManager.GetUserAsync(user);   esto es una muejor alternativa al email ????
                 var user = await userManager.FindByEmailAsync(request.Email);
                 if (user == null || !await userManager.CheckPasswordAsync(user, request.Password))
                 {
@@ -106,6 +108,13 @@ namespace BlazorAppEFTenant.Components.EndPoints
                 }
 
                 var token = tokenService.GenerateToken(claims);
+
+                // RENOVACION DE COOKIES
+                var newPrincipal = await signInManager.CreateUserPrincipalAsync(user);
+                await signInManager.Context.SignInAsync(
+                    IdentityConstants.ApplicationScheme,
+                    newPrincipal
+                );  //esto es para renovar las cookies de autentificacion con el claim nuevo 
                 return Results.Ok(new { Token = token });
             }).AllowAnonymous();
 

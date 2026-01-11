@@ -1,4 +1,4 @@
-﻿//#define UPDATE_DATABASE
+﻿#define UPDATE_DATABASE
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Modelo;
 using BlazorSeguridad2026.Base.Seguridad;
@@ -121,6 +121,20 @@ namespace BlazorSeguridad2026.Base.Contextos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ApplicationRole>(b =>
+            {
+                // RoleNameIndex SIN unique
+                b.HasIndex(r => r.NormalizedName)
+                 .HasDatabaseName("RoleNameIndex")
+                 .IsUnique(false);
+
+                // Índice único por Tenant + NormalizedName
+                b.HasIndex(r => new { r.TenantId, r.NormalizedName })
+                 .HasDatabaseName("IX_Roles_Tenant_NormalizedName")
+                 .IsUnique();
+            });
+
             ModelCreatingTenant(modelBuilder);
 
         }

@@ -14,8 +14,11 @@
 @inject IUnitOfWorkFactory UnitOfWorkFactory
 @inject RoleManager<ApplicationRole> RoleManager
 @inject DialogService DialogService
+@inject ToastServiceMio ToastService
+
 
 <h3>Roles</h3>
+<ComponenteToast />
 
 @if (!_isValidContext)
 {
@@ -58,16 +61,10 @@ else
             </TableCellButton>
 
         </RowButtonTemplate>
+
     </Table>
 
-    @if (!string.IsNullOrEmpty(error))
-    {
-        <div class="alert alert-danger mt-2">@error</div>
-    }
-    @if (!string.IsNullOrEmpty(success))
-    {
-        <div class="alert alert-success mt-2">@success</div>
-    }
+
 
 }
 
@@ -80,7 +77,7 @@ else
 
     private string? error;
     private string? success;
-        
+
     string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
     static int TenantId;
@@ -144,7 +141,7 @@ else
             BodyTemplate = builder =>
             {
                 builder.OpenComponent(0, typeof(ComponenteRolUsers));
-                builder.AddAttribute(1, "RoleId", role.Id);
+                builder.AddAttribute(1, "Role", role);
                 builder.AddAttribute(2, "From", Nav.Uri);
                 builder.CloseComponent();
             }
@@ -160,7 +157,8 @@ else
     private static Task<ApplicationRole> OnEditAsync(ApplicationRole item)
         => Task.FromResult(item);
 
-   
+    @inject ToastServiceMio ToastService
+
     private async Task<bool> OnSaveAsync(ApplicationRole item, ItemChangedType changedType)
     {
         error = success = null;
@@ -170,9 +168,10 @@ else
             if (string.IsNullOrWhiteSpace(item.Name))
             {
                 error = "Name es obligatorio.";
+                ToastService.ShowError(error);
                 return false;
             }
-           
+
             var result = await RoleServiceMio.CreateAsync(
                 item.Name,
                 item.TenantId,
@@ -181,8 +180,13 @@ else
             if (!result.Succeeded)
             {
                 error = string.Join(" ", result.Errors.Select(e => e.Description));
+                ToastService.ShowError(error);
                 return false;
             }
+
+            success = "Registro creado correctamente.";
+            ToastService.ShowSuccess(success);
+            return true;
         }
         else
         {
@@ -198,16 +202,16 @@ else
             if (!result.Succeeded)
             {
                 error = string.Join(" ", result.Errors.Select(e => e.Description));
+                ToastService.ShowError(error);
                 return false;
             }
 
-           
+            success = "Registro actualizado correctamente.";
+            ToastService.ShowSuccess(success);
+            return true;
         }
-
-        await LoadRolesAsync();
-        success = "Rol actualizado.";
-        return true;  //cierra la ventana automaticamente
     }
+
 
     
 
@@ -231,8 +235,10 @@ else
     }
 
     // ------- Data loading del Table -------
-    private Task<QueryData<ApplicationRole>> OnQueryAsync(QueryPageOptions options)
+    private async Task<QueryData<ApplicationRole>> OnQueryAsync(QueryPageOptions options)
     {
+        await LoadRolesAsync();
+        
         IEnumerable<ApplicationRole> data = Items ?? new List<ApplicationRole>();
 
         var isSearch = false;
@@ -261,7 +267,7 @@ else
             IsSearch = isSearch
         };
 
-        return Task.FromResult(result);
+        return await Task.FromResult(result);
     }
 
     private void Dispose()

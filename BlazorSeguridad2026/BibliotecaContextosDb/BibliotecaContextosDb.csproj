@@ -50,5 +50,8 @@
 		    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		  </EmbeddedResource>
 		</ItemGroup>
+		<ItemGroup>
+		  <Folder Include="Migrations\ApplicationBase\" />
+		</ItemGroup>
 
 </Project>

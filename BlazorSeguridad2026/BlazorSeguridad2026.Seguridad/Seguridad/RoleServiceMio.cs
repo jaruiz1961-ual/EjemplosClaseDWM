@@ -9,6 +9,10 @@ using System.Runtime.InteropServices;
 
 namespace BlazorSeguridad2026.Base.Seguridad
 {
+
+   
+
+
     public interface IRoleService
     {
         Task<List<ApplicationRole>> GetAllAsync();
@@ -77,10 +81,11 @@ namespace BlazorSeguridad2026.Base.Seguridad
             var role = new ApplicationRole
             {
                 Name = name.Trim(),
-                NormalizedName = name.Trim().ToUpperInvariant(),
+                NormalizedName = keyDb+"-"+tenantId.ToString()+"-"+name.Trim().ToUpperInvariant(),
                 TenantId = tenantId,
                 DbKey = keyDb
             };
+
 
             var result= await _roleManager.CreateAsync(role);
             if (!result.Succeeded)

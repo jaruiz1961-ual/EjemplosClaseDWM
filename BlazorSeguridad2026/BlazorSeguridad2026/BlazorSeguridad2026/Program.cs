@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.OpenApi.Models;
 using BlazorSeguridad2026.Base.Cultures;
 using BootstrapBlazor.Components;
+using BibliotecaContextosDb.TiposBase;
 
 //using static TenantInterop;
 
@@ -24,6 +25,8 @@ using BootstrapBlazor.Components;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+
+
 
 var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -122,7 +125,31 @@ builder.Services
     .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationBaseDbContext>()
     .AddSignInManager()
-    .AddDefaultTokenProviders();
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<ApplicationUserClaimsPrincipalFactory>(); //claims en roles
+
+//Toast 
+builder.Services.AddSingleton<BlazorSeguridad2026.Base.Seguridad.ToastServiceMio>();
+
+
+//politicas de permiso
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(Permissions.UsersView, policy =>
+        policy.RequireClaim(CustomClaimTypes.Permission, Permissions.UsersView));
+
+    options.AddPolicy(Permissions.UsersEdit, policy =>
+        policy.RequireClaim(CustomClaimTypes.Permission, Permissions.UsersEdit));
+
+    options.AddPolicy(Permissions.RolesView, policy =>
+        policy.RequireClaim(CustomClaimTypes.Permission, Permissions.RolesView));
+
+    options.AddPolicy(Permissions.RolesEdit, policy =>
+        policy.RequireClaim(CustomClaimTypes.Permission, Permissions.RolesEdit));
+});
+
+
+
 
 // Servicios de seguridad
 builder.Services.AddScoped<IRoleService, RoleServiceMio>();
@@ -174,7 +201,7 @@ builder.Services.AddHttpClient(ApiName, (sp, client) =>
 
 //http minimal APIs y Blazor
 
-
+builder.Services.AddScoped<ILookupNormalizer, TenantLookupNormalizer>();
 
 // Interceptor multitenant
 builder.Services.AddTransient<TenantSaveChangesInterceptor>();

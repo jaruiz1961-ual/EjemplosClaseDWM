@@ -1,5 +1,6 @@
 ﻿@page "/"
 @rendermode @(new InteractiveServerRenderMode(prerender: true))
+@layout MainLayout
 
 @using BibliotecaContextosDb.Resources
 @using BlazorSeguridad2026.Base.Genericos
@@ -20,11 +21,19 @@ servidor:@estadoServidor
 cultura:@estadoCultura
 token: @token;
 
-<Button Color="Color.Primary" OnClick="ShowTestDialog">Test dialog</Button>
+@inject ToastServiceMio ToastService
 
+@*   <ComponenteToast /> *@
 
-@code 
-{
+<h3>Prueba ToastMio</h3>
+<button class="btn btn-primary" @onclick="ShowTestToast">
+    Mostrar toast
+</button>
+
+@code {
+    private void ShowTestToast()
+        => ToastService.ShowSuccess("Toast de prueba");
+
 
 
     private string estadoCliente = "";
@@ -32,16 +41,7 @@ token: @token;
     private string estadoCultura;
     private string token;
 
-    private async Task ShowTestDialog()
-    {
-        var option = new DialogOption
-        {
-            Title = "Test",
-            BodyTemplate = b => b.AddContent(0, "DialogService funciona")
-        };
 
-        await DialogService.Show(option);   // <- aquí te falla ahora
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {

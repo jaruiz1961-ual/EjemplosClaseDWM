@@ -169,11 +169,16 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Roles_Tenant_NormalizedName",
+                table: "AspNetRoles",
+                columns: new[] { "TenantId", "NormalizedName" },
+                unique: true,
+                filter: "[TenantId] IS NOT NULL AND [NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
-                column: "NormalizedName",
-                unique: true,
-                filter: "[NormalizedName] IS NOT NULL");
+                column: "NormalizedName");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",

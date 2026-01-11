@@ -1,6 +1,8 @@
-﻿@using BlazorSeguridad2026.Base.Genericos
+﻿@using BibliotecaContextosDb.TiposBase
+@using BlazorSeguridad2026.Base.Genericos
 @using BlazorSeguridad2026.Base.Modelo
 @using BootstrapBlazor.Components
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
 
 @inject IContextProvider ContextProvider
@@ -8,9 +10,11 @@
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserService UserServiceMio
 @inject NavigationManager Nav
+@inject DialogService DialogService
 
-
-
+@inject IAuthorizationService AuthorizationService
+@inject AuthenticationStateProvider AuthStateProvider
+@attribute [Authorize(Policy = Permissions.RolesEdit)]
 
 
 <h3>Usuarios</h3>
@@ -48,15 +52,19 @@ else
             <TableColumn @bind-Field="context.DbKey" Text="DbKey" />
         </TableColumns>
         <!-- Botones DESPUÉS de los estándar -->
+
+        
         <RowButtonTemplate Context="item">
+            <AuthorizeView Policy="@Permissions.RolesEdit">
             <TableCellButton Color="Color.Warning"
                              Size="Size.Small"
                              OnClick="@(() => OpenRolesDialogAsync(item))"
                              class="ms-1">
                 Roles
             </TableCellButton>
-
+            </AuthorizeView>
         </RowButtonTemplate>
+       
     </Table>
 
     @if (!string.IsNullOrEmpty(error))
@@ -87,6 +95,8 @@ else
     static int TenantId;
     static string DbKey;
 
+    bool CanEditUsers;
+
     protected override async Task OnInitializedAsync()
     {
         _onContextChangedHandler = async () => await LoadUsersAsync();
@@ -97,6 +107,11 @@ else
     {
         if (firstRender)
             await LoadUsersAsync();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        var result = await AuthorizationService.AuthorizeAsync(user, "Roles.Edit");
+        CanEditUsers = result.Succeeded;
     }
 
     private async Task LoadUsersAsync()
@@ -134,7 +149,7 @@ else
     // ------- CRUD del Table -------
 
     // ====== Apertura del modal de roles ======
-    @inject DialogService DialogService
+
 
     private async Task OpenRolesDialogAsync(ApplicationUser user)
     {

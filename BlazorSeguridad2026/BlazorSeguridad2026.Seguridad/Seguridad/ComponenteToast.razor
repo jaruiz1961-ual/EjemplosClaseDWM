@@ -1,0 +1,41 @@
+﻿@* ComponenteToast.razor *@
+@inject ToastServiceMio ToastService
+
+<div style="position:fixed; top:0.5rem; right:0.5rem; z-index:3000; min-width:250px;">
+    @foreach (var toast in _toasts)
+    {
+        <div class="alert alert-@toast.Type alert-dismissible fade show mb-2" role="alert">
+            @toast.Message
+            <button type="button" class="btn-close" @onclick="() => Close(toast)"></button>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly List<(string Type, string Message)> _toasts = new();
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += HandleShow;
+    }
+
+    private void HandleShow(string type, string msg)
+    {
+        var toast = (type, msg);
+        _toasts.Add(toast);
+        _ = InvokeAsync(StateHasChanged);
+
+        // quitarlo a los 5 segundos
+        _ = Task.Run(async () =>
+        {
+            await Task.Delay(5000);
+            _toasts.Remove(toast);
+            await InvokeAsync(StateHasChanged);
+        });
+    }
+
+    private void Close((string Type, string Message) toast)
+    {
+        _toasts.Remove(toast);
+    }
+}
