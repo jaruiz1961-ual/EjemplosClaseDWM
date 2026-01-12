@@ -75,7 +75,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         Task SaveState(StorageKeys key, bool withEvent = false);
         Task SaveStates(bool withEvent = false);
         Task UpdateContextFromToken(string token);
-        Task UpdateTenantDbkey(int tenantId, string dbkey, bool save);
+        Task UpdateTenantDbkey(int? tenantId, string dbkey, bool save);
         void ApplyTenantFilter(StorageKeys key);
         string GetLastMode();
 
@@ -359,7 +359,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
                 return States[(int)StorageKeys.ClienteState].LastMode;
         }
 
-        public async Task UpdateTenantDbkey(int tenantId, string dbkey, bool save)
+        public async Task UpdateTenantDbkey(int? tenantId, string dbkey, bool save)
         {
             foreach (StorageKeys key in Enum.GetValues(typeof(StorageKeys)))
             {

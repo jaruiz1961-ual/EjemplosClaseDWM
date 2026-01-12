@@ -80,7 +80,7 @@ else
 
     string fromUrl => Nav.ToBaseRelativePath(Nav.Uri);
 
-    static int TenantId;
+    static int? TenantId;
     static string DbKey;
 
     private Action? _onContextChangedHandler;
@@ -112,7 +112,7 @@ else
             var cp = ContextProvider.CopyContext();
 
             DbKey = cp.States[(int)StorageKeys.ServerState].DbKey ?? string.Empty;
-            TenantId = cp.States[(int)StorageKeys.ServerState].TenantId ?? 0;
+            TenantId = cp.States[(int)StorageKeys.ServerState].TenantId;
 
             var roleService = new RoleServiceMio(RoleManager, cp, UnitOfWorkFactory);
             var list = await roleService.GetAllAsync();

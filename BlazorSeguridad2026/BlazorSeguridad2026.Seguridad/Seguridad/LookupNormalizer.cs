@@ -8,11 +8,11 @@ using System.Security.Claims;
 namespace BlazorSeguridad2026.Base.Seguridad
 {
 
-    public class TenantLookupNormalizer : ILookupNormalizer
+    public class LookupNormalizer : ILookupNormalizer
     {
         private readonly IContextProvider _contextProvider;
 
-        public TenantLookupNormalizer(IContextProvider contextProvider)
+        public LookupNormalizer(IContextProvider contextProvider)
         {
             _contextProvider = contextProvider;
         }
@@ -21,6 +21,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         {
             if (string.IsNullOrWhiteSpace(name))
                 return name;
+            // return name.ToUpperInvariant();
 
             return $"{_contextProvider.States[(int)StorageKeys.ServerState].DbKey}|" +
                 $"{_contextProvider.States[(int)StorageKeys.ServerState].TenantId}|" +
@@ -32,7 +33,9 @@ namespace BlazorSeguridad2026.Base.Seguridad
             if (string.IsNullOrWhiteSpace(email))
                 return email;
 
-            return $"{email.ToUpperInvariant()}";
+            return $"{_contextProvider.States[(int)StorageKeys.ServerState].DbKey}|" +
+    $"{_contextProvider.States[(int)StorageKeys.ServerState].TenantId}|" +
+    $"{email.ToUpperInvariant()}";
         }
     }
 }

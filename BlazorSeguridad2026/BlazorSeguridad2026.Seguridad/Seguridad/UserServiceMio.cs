@@ -48,31 +48,39 @@ namespace BlazorSeguridad2026.Base.Seguridad
 
         }
 
-        public async Task<List<ApplicationUser>> GetAllAsync()
+        public Task<List<ApplicationUser>> GetAllAsync()
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
-
-            var repo = uow.GetRepository<ApplicationUser>(reload);
-
-            var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
-            var lista = allEntities.ToList();
-            return lista;                 
+            var tenantId = _contextProvider.States[(int)StorageKeys.ServerState].TenantId;
+            return Task.FromResult(_userManager.Users.Where(u => u.TenantId == tenantId).ToList());
         }
 
-    //    public Task<ApplicationUser?> GetByIdAsync(int id) =>
-    //Task.FromResult(_userManager.Users.FirstOrDefault(u => u.Id == id));
-        public async Task<ApplicationUser?> GetByIdAsync(int id) 
-        {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<ApplicationUser>(reload);
+
+        //public async Task<List<ApplicationUser>> GetAllAsync()
+        //{
+        //    if (uow == null)
+        //        uow = _unitOfWorkFactory.Create(_contextProvider);
+
+        //    var repo = uow.GetRepository<ApplicationUser>(reload);
+
+        //    var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
+        //    var lista = allEntities.ToList();
+        //    return lista;                 
+        //}
+
+        public Task<ApplicationUser?> GetByIdAsync(int id) =>
+        Task.FromResult(_userManager.Users.FirstOrDefault(u => u.Id == id));
+
+        //public async Task<ApplicationUser?> GetByIdAsync(int id) 
+        //{
+        //    if (uow == null)
+        //        uow = _unitOfWorkFactory.Create(_contextProvider);
+        //    var repo = uow.GetRepository<ApplicationUser>(reload);
        
-            var entity = await repo.GetByIdAsync(id, reload);
+        //    var entity = await repo.GetByIdAsync(id, reload);
 
-            return entity;
+        //    return entity;
             
-        }
+        //}
 
         public async Task<IdentityResult> CreateAsync(string email, string password, int? tenantId, string keyDb)
         {

@@ -8,6 +8,7 @@
 @inject IContextProvider ContextProvider
 @inject IUnitOfWorkFactory UnitOfWorkFactory
 @inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<ApplicationRole> RoleManager
 @inject IUserService UserServiceMio
 @inject NavigationManager Nav
 @inject DialogService DialogService
@@ -92,7 +93,7 @@ else
 
     private Action? _onContextChangedHandler;
 
-    static int TenantId;
+    static int? TenantId;
     static string DbKey;
 
     bool CanEditUsers;
@@ -101,12 +102,18 @@ else
     {
         _onContextChangedHandler = async () => await LoadUsersAsync();
         ContextProvider.OnContextChanged += _onContextChangedHandler;
+
+
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
+        {
             await LoadUsersAsync();
+            RolePermissionSeeder sedder = new RolePermissionSeeder(RoleManager);
+            await sedder.SeedSuperAdminPermissionsAsync();
+        }
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
 
@@ -129,7 +136,7 @@ else
             var cp = ContextProvider.CopyContext();
 
             DbKey = cp.States[(int)StorageKeys.ServerState].DbKey ?? string.Empty;
-            TenantId = cp.States[(int)StorageKeys.ServerState].TenantId ?? 0;
+            TenantId = cp.States[(int)StorageKeys.ServerState].TenantId;
 
             // servicio recreado para lectura con el contexto actual
             var userServiceLectura = new UserServiceMio(UserManager, cp, UnitOfWorkFactory);

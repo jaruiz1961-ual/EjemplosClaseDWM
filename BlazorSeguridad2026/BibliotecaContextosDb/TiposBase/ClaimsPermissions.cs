@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using BlazorSeguridad2026.Base.Modelo;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -22,20 +23,20 @@ namespace BibliotecaContextosDb.TiposBase
 
     public class RolePermissionSeeder
     {
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<ApplicationRole> _roleManager;
 
-        public RolePermissionSeeder(RoleManager<IdentityRole> roleManager)
+        public RolePermissionSeeder(RoleManager<ApplicationRole> roleManager)
         {
             _roleManager = roleManager;
         }
 
-        public async Task SeedAdminPermissionsAsync()
+        public async Task SeedSuperAdminPermissionsAsync()
         {
             var roleName = "Admin";
             var role = await _roleManager.FindByNameAsync(roleName);
             if (role == null)
             {
-                role = new IdentityRole(roleName);
+                role = new ApplicationRole(roleName);
                 await _roleManager.CreateAsync(role);
             }
 

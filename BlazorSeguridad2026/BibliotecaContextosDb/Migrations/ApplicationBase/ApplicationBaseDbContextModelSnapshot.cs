@@ -51,14 +51,19 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                     b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
-                        .HasDatabaseName("RoleNameIndex");
-
-                    b.HasIndex("TenantId", "NormalizedName")
                         .IsUnique()
-                        .HasDatabaseName("IX_Roles_Tenant_NormalizedName")
-                        .HasFilter("[TenantId] IS NOT NULL AND [NormalizedName] IS NOT NULL");
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1,
+                            Name = "Super@Admin",
+                            NormalizedName = "SUPER@ADMIN"
+                        });
                 });
 
             modelBuilder.Entity("BlazorSeguridad2026.Base.Modelo.ApplicationUser", b =>
@@ -136,6 +141,24 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = -1,
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "fbc0f742-1223-4f21-99a8-248a05b0284a",
+                            Email = "Super@Admin",
+                            EmailConfirmed = true,
+                            LockoutEnabled = true,
+                            NormalizedEmail = "SUPER@ADMIN",
+                            NormalizedUserName = "SUPER@ADMIN",
+                            PasswordHash = "AQAAAAIAAYagAAAAEFzH+eEnCsPsffghU3f62z4lnMhzl5W/aIRX6Lku7oAa61N93obvvsXW44v01AIu0w==",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "5RPWQNWJLMCUSOJBACRXDRL6NSLPRMBY",
+                            TwoFactorEnabled = false,
+                            UserName = "Super@Admin"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -220,6 +243,13 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                     b.HasIndex("RoleId");
 
                     b.ToTable("AspNetUserRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = -1,
+                            RoleId = -1
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>

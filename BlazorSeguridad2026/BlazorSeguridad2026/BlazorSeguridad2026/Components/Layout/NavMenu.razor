@@ -155,7 +155,7 @@
 
 @code {
     private bool adminMenuExpanded = false;
-    private int SelectedTenantId;
+    private int? SelectedTenantId;
     private string? SelectedDbKey;
     private bool esPaginaCliente = false;
     private bool _reloading; // NUEVO
@@ -183,7 +183,7 @@
             var estado = ContextProvider.GetState();
             if (estado != null)
             {
-                SelectedTenantId = estado.TenantId ?? 0;
+                SelectedTenantId = estado.TenantId;
                 SelectedDbKey = estado.DbKey;
             }
 

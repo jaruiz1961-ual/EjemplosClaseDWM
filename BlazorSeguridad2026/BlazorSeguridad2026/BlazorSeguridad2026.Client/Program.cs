@@ -68,7 +68,7 @@ var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:701
 var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
 var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
 var DataProvider = configuration["DataProvider"] ?? "SqlServer";
-var TenantId = configuration["TenantId"] ?? "0";
+var TenantId = configuration["TenantId"];
 
 var serverMode = false;
 

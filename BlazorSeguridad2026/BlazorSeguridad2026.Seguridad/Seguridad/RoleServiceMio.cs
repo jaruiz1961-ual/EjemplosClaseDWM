@@ -48,40 +48,49 @@ namespace BlazorSeguridad2026.Base.Seguridad
         }
 
         //original
-    //    public Task<List<ApplicationRole>> GetAllAsync() =>
-    //Task.FromResult(_roleManager.Roles.ToList());
-        public async Task<List<ApplicationRole>> GetAllAsync()
+        public Task<List<ApplicationRole>> GetAllAsync()
         {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
+    
 
-            var repo = uow.GetRepository<ApplicationRole>(reload);
+            var tenantId = _contextProvider.States[(int)StorageKeys.ServerState].TenantId;
 
-            var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
-            if (allEntities == null) return null;
-            var lista = allEntities.ToList();
-            return lista;
+            return Task.FromResult(_roleManager.Roles.Where(u => u.TenantId == tenantId).ToList());
         }
 
-        public async Task<ApplicationRole?> GetByIdAsync(int id)
-        {
-            if (uow == null)
-                uow = _unitOfWorkFactory.Create(_contextProvider);
-            var repo = uow.GetRepository<ApplicationRole>(reload);
-            if (repo == null) return null;
+        //public async Task<List<ApplicationRole>> GetAllAsync()
+        //{
+        //    if (uow == null)
+        //        uow = _unitOfWorkFactory.Create(_contextProvider);
 
-            var entity = await repo.GetByIdAsync(id, reload);
+        //    var repo = uow.GetRepository<ApplicationRole>(reload);
 
-            return entity;
+        //    var allEntities = await repo.GetAllAsync(reload); // IEnumerable<ApplicationUser> o similar 
+        //    if (allEntities == null) return null;
+        //    var lista = allEntities.ToList();
+        //    return lista;
+        //}
 
-        }
+        public Task<ApplicationRole?> GetByIdAsync(int id) =>
+ Task.FromResult(_roleManager.Roles.FirstOrDefault(u => u.Id == id));
+        //public async Task<ApplicationRole?> GetByIdAsync(int id)
+        //{
+        //    if (uow == null)
+        //        uow = _unitOfWorkFactory.Create(_contextProvider);
+        //    var repo = uow.GetRepository<ApplicationRole>(reload);
+        //    if (repo == null) return null;
+
+        //    var entity = await repo.GetByIdAsync(id, reload);
+
+        //    return entity;
+
+        //}
 
         public async Task<IdentityResult> CreateAsync(string name, int? tenantId, string keyDb)
         {
             var role = new ApplicationRole
             {
                 Name = name.Trim(),
-                NormalizedName = keyDb+"-"+tenantId.ToString()+"-"+name.Trim().ToUpperInvariant(),
+               // NormalizedName = keyDb+"-"+tenantId.ToString()+"-"+name.Trim().ToUpperInvariant(),
                 TenantId = tenantId,
                 DbKey = keyDb
             };

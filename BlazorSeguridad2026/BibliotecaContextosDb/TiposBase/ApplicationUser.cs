@@ -17,6 +17,9 @@ namespace BlazorSeguridad2026.Base.Modelo
     {
         public int? TenantId { get; set; }
         public string? DbKey { get; set; }
+
+        public ApplicationRole() : base() { }
+        public ApplicationRole(string role) : base(role) { }
     }
 
 

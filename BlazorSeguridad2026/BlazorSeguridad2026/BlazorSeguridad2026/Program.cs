@@ -77,7 +77,7 @@ var UrlApi = configuration["ConnectionStrings:UrlApi"] ?? "https://localhost:701
 var ApiName = configuration["ConnectionStrings:ApiName"] ?? "ApiRest";
 var ConnectionMode = configuration["ConnectionStrings:ConnectionMode"] ?? "Ef";
 var DataProvider = configuration["DataProvider"] ?? "SqlServer";
-var TenantId = configuration["TenantId"] ?? "0";
+var TenantId = configuration["TenantId"] ;
 
 var applicationConnectionString = configuration.GetConnectionString("ApplicationDbContext")
     ?? throw new InvalidOperationException("Connection string 'ApplicationDbContext' not found.");
@@ -119,8 +119,19 @@ builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
-        options.SignIn.RequireConfirmedAccount = true;
-        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+        options.SignIn.RequireConfirmedAccount = false;
+        options.Stores.SchemaVersion = IdentitySchemaVersions.Version2;
+
+        options.User.AllowedUserNameCharacters = string.Empty; // desactiva la “whitelist” [web:473][web:480]
+        options.User.RequireUniqueEmail = false;
+
+        // Contraseña: requisitos mínimos
+        options.Password.RequiredLength = 1;
+        options.Password.RequireDigit = false;
+        options.Password.RequireLowercase = false;
+        options.Password.RequireUppercase = false;
+        options.Password.RequireNonAlphanumeric = false;
+        options.Password.RequiredUniqueChars = 1;
     })
     .AddRoles<ApplicationRole>()
     .AddEntityFrameworkStores<ApplicationBaseDbContext>()
@@ -130,6 +141,8 @@ builder.Services
 
 //Toast 
 builder.Services.AddSingleton<BlazorSeguridad2026.Base.Seguridad.ToastServiceMio>();
+
+
 
 
 //politicas de permiso
@@ -201,7 +214,7 @@ builder.Services.AddHttpClient(ApiName, (sp, client) =>
 
 //http minimal APIs y Blazor
 
-builder.Services.AddScoped<ILookupNormalizer, TenantLookupNormalizer>();
+builder.Services.AddScoped<ILookupNormalizer, LookupNormalizer>();
 
 // Interceptor multitenant
 builder.Services.AddTransient<TenantSaveChangesInterceptor>();

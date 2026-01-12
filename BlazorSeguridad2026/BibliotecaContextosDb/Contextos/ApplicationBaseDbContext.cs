@@ -2,6 +2,8 @@
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Modelo;
 using BlazorSeguridad2026.Base.Seguridad;
+using BlazorSeguridad2026.Data.Modelo;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -120,20 +122,37 @@ namespace BlazorSeguridad2026.Base.Contextos
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            var hasher = new PasswordHasher<object>();
+            string passwordHash = hasher.HashPassword(null, "Super@Admin");
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Ignore<IdentityUserPasskey<int>>();
             modelBuilder.Entity<ApplicationRole>(b =>
             {
-                // RoleNameIndex SIN unique
-                b.HasIndex(r => r.NormalizedName)
-                 .HasDatabaseName("RoleNameIndex")
-                 .IsUnique(false);
+    
 
-                // Índice único por Tenant + NormalizedName
-                b.HasIndex(r => new { r.TenantId, r.NormalizedName })
-                 .HasDatabaseName("IX_Roles_Tenant_NormalizedName")
-                 .IsUnique();
             });
+
+
+            modelBuilder.Entity<ApplicationRole>().HasData
+       (new ApplicationRole { Id = -1, TenantId=null, DbKey=null, Name="Admin", NormalizedName="ADMIN",ConcurrencyStamp=null });
+
+            modelBuilder.Entity<ApplicationUser>().HasData
+(new ApplicationUser { Id = -1, TenantId = null, DbKey = null, UserName = "Super@Admin", NormalizedUserName = "SUPER@ADMIN", 
+Email= "Super@Admin", NormalizedEmail= "SUPER@ADMIN", EmailConfirmed=true, 
+    PasswordHash= passwordHash,  //Super@Admin
+    SecurityStamp= "5RPWQNWJLMCUSOJBACRXDRL6NSLPRMBY",
+    ConcurrencyStamp = "fbc0f742-1223-4f21-99a8-248a05b0284a",
+    PhoneNumber=null,
+    PhoneNumberConfirmed = false,
+    TwoFactorEnabled=false,
+    LockoutEnd = null,
+    LockoutEnabled = true,
+    AccessFailedCount = 0
+});
+            modelBuilder.Entity<IdentityUserRole<int>>().HasData
+                (new IdentityUserRole<int> { RoleId = -1, UserId = -1 });
 
             ModelCreatingTenant(modelBuilder);
 

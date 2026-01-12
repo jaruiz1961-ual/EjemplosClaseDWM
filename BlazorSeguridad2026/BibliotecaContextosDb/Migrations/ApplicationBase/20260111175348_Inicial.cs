@@ -163,22 +163,32 @@ namespace BibliotecaContextosDb.Migrations.ApplicationBase
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "AspNetRoles",
+                columns: new[] { "Id", "ConcurrencyStamp", "DbKey", "Name", "NormalizedName", "TenantId" },
+                values: new object[] { -1, null, null, "Super@Admin", "SUPER@ADMIN", null });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUsers",
+                columns: new[] { "Id", "AccessFailedCount", "AppState", "ConcurrencyStamp", "DbKey", "Email", "EmailConfirmed", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TenantId", "TwoFactorEnabled", "UserName" },
+                values: new object[] { -1, 0, null, "fbc0f742-1223-4f21-99a8-248a05b0284a", null, "Super@Admin", true, true, null, "SUPER@ADMIN", "SUPER@ADMIN", "AQAAAAIAAYagAAAAEFzH+eEnCsPsffghU3f62z4lnMhzl5W/aIRX6Lku7oAa61N93obvvsXW44v01AIu0w==", null, false, "5RPWQNWJLMCUSOJBACRXDRL6NSLPRMBY", null, false, "Super@Admin" });
+
+            migrationBuilder.InsertData(
+                table: "AspNetUserRoles",
+                columns: new[] { "RoleId", "UserId" },
+                values: new object[] { -1, -1 });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roles_Tenant_NormalizedName",
-                table: "AspNetRoles",
-                columns: new[] { "TenantId", "NormalizedName" },
-                unique: true,
-                filter: "[TenantId] IS NOT NULL AND [NormalizedName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "AspNetRoles",
-                column: "NormalizedName");
+                column: "NormalizedName",
+                unique: true,
+                filter: "[NormalizedName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
