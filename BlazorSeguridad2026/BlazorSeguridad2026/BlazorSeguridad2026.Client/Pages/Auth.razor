@@ -14,7 +14,8 @@
 <h1>You are authenticated in Cliente App</h1>
 
 <AuthorizeView>
-    Hello @context.User.Identity?.Name!
-    RoleManager.
-@if (@context.User.IsInRole("Admin")) { <p> Eres Administrador !!</p> }
-    </AuthorizeView>
+
+        Debug: Rol Admin? @context.User.IsInRole("Admin")<br />
+        Claims: @string.Join(", ", context.User.Claims.Select(c => $"{c.Type}={c.Value}"))
+
+</AuthorizeView>

@@ -4,6 +4,7 @@
 @using BootstrapBlazor.Components
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Identity
+@using System.Security.Claims
 
 @inject IContextProvider ContextProvider
 @inject IUnitOfWorkFactory UnitOfWorkFactory
@@ -13,12 +14,40 @@
 @inject NavigationManager Nav
 @inject DialogService DialogService
 
+
 @inject IAuthorizationService AuthorizationService
 @inject AuthenticationStateProvider AuthStateProvider
 @attribute [Authorize(Policy = Permissions.RolesEdit)]
 
+<style>
+    /* Fix Table RowButtonTemplate hidden BootstrapBlazor */
+    .bb-table .table-actions,
+    .bb-table tbody tr td:last-child {
+        display: table-cell !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        min-width: 80px !important;
+    }
+</style>
+
 
 <h3>Usuarios</h3>
+<AuthorizeView>
+        Debug: Rol Admin? @context.User.IsInRole("Admin")<br />
+        Claims: @string.Join(", ", context.User.Claims.Select(c => $"{c.Type}={c.Value}"))
+</AuthorizeView>
+
+
+
+<!-- En botón -->
+<AuthorizeView Policy="@Permissions.RolesEdit">
+    <Authorized>✅ BOTÓN</Authorized>
+    <NotAuthorized>
+        ❌ AuthenticationState Claims:
+        @string.Join(", ", context.User.Claims.Select(c => c.Value))
+    </NotAuthorized>
+</AuthorizeView>
+
 
 @if (!_isValidContext)
 {
@@ -28,7 +57,7 @@
 }
 else
 {
-    <Table TItem="ApplicationUser"
+    <Table @ref="UsersTable" TItem="ApplicationUser"
            IsPagination="true"
            PageItemsSource="@PageItemsSource"
            IsStriped="true"
@@ -51,20 +80,35 @@ else
             <TableColumn @bind-Field="context.UserName" Text="Usuario" />
             <TableColumn @bind-Field="context.TenantId" Text="Tenant" />
             <TableColumn @bind-Field="context.DbKey" Text="DbKey" />
+            <TableColumn @bind-Field="context.PasswordHash" Text="Password" />
+
+
+
         </TableColumns>
         <!-- Botones DESPUÉS de los estándar -->
+        <!-- Fix Context Ambiguity + Render -->
+@*         <RowButtonTemplate Context="rowData">
 
-        
+                    <TableCellButton Color="Color.Warning"
+                                     Size="Size.Small"
+                                     OnClick="@(() => OpenRolesDialogAsync(rowData))"
+                                     class="ms-1">
+                        Roles
+                    </TableCellButton>
+
+        </RowButtonTemplate> *@
+
         <RowButtonTemplate Context="item">
-            <AuthorizeView Policy="@Permissions.RolesEdit">
-            <TableCellButton Color="Color.Warning"
-                             Size="Size.Small"
-                             OnClick="@(() => OpenRolesDialogAsync(item))"
-                             class="ms-1">
-                Roles
-            </TableCellButton>
-            </AuthorizeView>
+            @if (User.HasClaim("Permission", Permissions.RolesEdit))
+            {
+                <TableCellButton Color="Color.Warning" Size="Size.Small"
+                                 OnClick="@(() => OpenRolesDialogAsync(item))"
+                                 class="ms-1">
+                    Roles
+                </TableCellButton>
+            }
         </RowButtonTemplate>
+
        
     </Table>
 
@@ -79,9 +123,12 @@ else
 }
 
 @code {
-
+    [CascadingParameter] private Task<AuthenticationState> authenticationStateTask { get; set; } = default!;
+    private ClaimsPrincipal User => authenticationStateTask?.Result.User ?? new();
 
     private static IEnumerable<int> PageItemsSource => new[] { 4, 10, 20 };
+
+    private Table<ApplicationUser>? UsersTable;
 
     private List<ApplicationUser> Items { get; set; } = new();
     private bool _isValidContext;
@@ -106,13 +153,14 @@ else
 
     }
 
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await LoadUsersAsync();
-            RolePermissionSeeder sedder = new RolePermissionSeeder(RoleManager);
-            await sedder.SeedSuperAdminPermissionsAsync();
+
         }
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
@@ -190,9 +238,12 @@ else
     private static Task<ApplicationUser> OnEditAsync(ApplicationUser item)
         => Task.FromResult(item);
 
-    private async Task<bool> OnSaveAsync(ApplicationUser item, ItemChangedType changedType)
+
+
+    private async Task<bool> OnSaveAsync(ApplicationUser item,  ItemChangedType changedType)
     {
         error = success = null;
+        
 
         if (changedType == ItemChangedType.Add)
         {
@@ -203,11 +254,11 @@ else
             }
 
             // aquí deberías pedir password de forma real (modal, form, etc.)
-            var password = "P@ssw0rd!";
-
+            string password = string.IsNullOrWhiteSpace(item.PasswordHash) ? item.UserName : item.PasswordHash;
+            
             var result = await UserServiceMio.CreateAsync(
                 item.Email,
-                password,
+                item.PasswordHash,
                 item.TenantId,
                 item.DbKey);
 
@@ -219,6 +270,7 @@ else
         }
         else
         {
+
             var result = await UserServiceMio.UpdateUserAsync(
                 item.Id,
                 u =>

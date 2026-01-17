@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using System.Linq.Expressions;
 using System.Text;
@@ -25,12 +26,12 @@ namespace BlazorSeguridad2026.Base.Contextos
     public class ApplicationBaseDbContextFactory : IDesignTimeDbContextFactory<ApplicationBaseDbContext>
     {
         public ApplicationBaseDbContext CreateDbContext(string[] args)
-        { 
+        {
 
-             var config = new ConfigurationBuilder()
-                    .SetBasePath(Directory.GetCurrentDirectory())
-                    .AddJsonFile("appsettings.json", optional: false)
-                    .Build();
+            var config = new ConfigurationBuilder()
+                   .SetBasePath(Directory.GetCurrentDirectory())
+                   .AddJsonFile("appsettings.json", optional: false)
+                   .Build();
             if (config != null)
             {
 
@@ -41,7 +42,7 @@ namespace BlazorSeguridad2026.Base.Contextos
 
                 return new ApplicationBaseDbContext(optionsBuilder.Options);
             }
-            
+
             var optionsBuilder2 = new DbContextOptionsBuilder<ApplicationBaseDbContext>();
             optionsBuilder2.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=App; AttachDbFilename=c:\temp\App.mdf ;Trusted_Connection=True;MultipleActiveResultSets=true");
             return new ApplicationBaseDbContext(optionsBuilder2.Options);
@@ -79,7 +80,7 @@ namespace BlazorSeguridad2026.Base.Contextos
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (UseFilter)
-            optionsBuilder.AddInterceptors(_tenantInterceptor);
+                optionsBuilder.AddInterceptors(_tenantInterceptor);
             base.OnConfiguring(optionsBuilder);
         }
 
@@ -123,42 +124,45 @@ namespace BlazorSeguridad2026.Base.Contextos
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            var hasher = new PasswordHasher<object>();
-            string passwordHash = hasher.HashPassword(null, "Super@Admin");
             base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Ignore<IdentityUserPasskey<int>>();
             modelBuilder.Entity<ApplicationRole>(b =>
             {
-    
+
 
             });
 
 
-            modelBuilder.Entity<ApplicationRole>().HasData
-       (new ApplicationRole { Id = -1, TenantId=null, DbKey=null, Name="Admin", NormalizedName="ADMIN",ConcurrencyStamp=null });
 
-            modelBuilder.Entity<ApplicationUser>().HasData
-(new ApplicationUser { Id = -1, TenantId = null, DbKey = null, UserName = "Super@Admin", NormalizedUserName = "SUPER@ADMIN", 
-Email= "Super@Admin", NormalizedEmail= "SUPER@ADMIN", EmailConfirmed=true, 
-    PasswordHash= passwordHash,  //Super@Admin
-    SecurityStamp= "5RPWQNWJLMCUSOJBACRXDRL6NSLPRMBY",
-    ConcurrencyStamp = "fbc0f742-1223-4f21-99a8-248a05b0284a",
-    PhoneNumber=null,
-    PhoneNumberConfirmed = false,
-    TwoFactorEnabled=false,
-    LockoutEnd = null,
-    LockoutEnabled = true,
-    AccessFailedCount = 0
-});
-            modelBuilder.Entity<IdentityUserRole<int>>().HasData
-                (new IdentityUserRole<int> { RoleId = -1, UserId = -1 });
+
 
             ModelCreatingTenant(modelBuilder);
-
         }
-        
 
+        public static async Task SeedAdminAsync(IServiceProvider services)
+        {
+            using var scope = services.CreateScope();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+
+            var admin = new ApplicationUser
+            {
+                UserName = "Admin",
+                Email = "[email protected]",
+                TenantId = 0, // si tienes multi-tenancy
+                DbKey = "SqlServer" // si lo tienes
+            };
+
+            // ← AQUÍ metes la contraseña en texto plano
+            var result = await userManager.CreateAsync(admin, "Admin");
+
+            if (result.Succeeded)
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                if (!await roleManager.RoleExistsAsync("Admin"))
+                {
+                    await roleManager.CreateAsync(new ApplicationRole { Name = "Admin" });
+                }
+                await userManager.AddToRoleAsync(admin, "Admin");
+            }
+        }
     }
-
 }

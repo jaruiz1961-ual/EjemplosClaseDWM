@@ -30,35 +30,38 @@ namespace BibliotecaContextosDb.TiposBase
             _roleManager = roleManager;
         }
 
-        public async Task SeedSuperAdminPermissionsAsync()
+        public async Task RolesPermissionsAsync(string roleName)
         {
-            var roleName = "Admin";
-            var role = await _roleManager.FindByNameAsync(roleName);
-            if (role == null)
+            if (roleName == "Admin")
             {
-                role = new ApplicationRole(roleName);
-                await _roleManager.CreateAsync(role);
-            }
-
-            var existingClaims = await _roleManager.GetClaimsAsync(role);
-
-            async Task EnsurePermission(string permission)
-            {
-                if (!existingClaims.Any(c =>
-                        c.Type == CustomClaimTypes.Permission &&
-                        c.Value == permission))
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role == null)
                 {
-                    await _roleManager.AddClaimAsync(
-                        role,
-                        new Claim(CustomClaimTypes.Permission, permission));
+                    role = new ApplicationRole(roleName);
+                    await _roleManager.CreateAsync(role);
                 }
-            }
 
-            await EnsurePermission(Permissions.UsersView);
-            await EnsurePermission(Permissions.UsersEdit);
-            await EnsurePermission(Permissions.RolesView);
-            await EnsurePermission(Permissions.RolesEdit);
+                var existingClaims = await _roleManager.GetClaimsAsync(role);
+
+                async Task EnsurePermission(string permission)
+                {
+                    if (!existingClaims.Any(c =>
+                            c.Type == CustomClaimTypes.Permission &&
+                            c.Value == permission))
+                    {
+                        await _roleManager.AddClaimAsync(
+                            role,
+                            new Claim(CustomClaimTypes.Permission, permission));
+                    }
+                }
+
+                await EnsurePermission(Permissions.UsersView);
+                await EnsurePermission(Permissions.UsersEdit);
+                await EnsurePermission(Permissions.RolesView);
+                await EnsurePermission(Permissions.RolesEdit);
+            }
         }
+        
     }
 
 

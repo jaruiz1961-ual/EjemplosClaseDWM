@@ -120,7 +120,7 @@ builder.Services
     .AddIdentityCore<ApplicationUser>(options =>
     {
         options.SignIn.RequireConfirmedAccount = false;
-        options.Stores.SchemaVersion = IdentitySchemaVersions.Version2;
+        options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
 
         options.User.AllowedUserNameCharacters = string.Empty; // desactiva la “whitelist” [web:473][web:480]
         options.User.RequireUniqueEmail = false;
@@ -322,7 +322,7 @@ builder.Services.AddScoped<DialogService>();
 
 var app = builder.Build();
 
-
+ApplicationBaseDbContext.SeedAdminAsync(app.Services);
 
 var localizationOptions = new RequestLocalizationOptions
 {

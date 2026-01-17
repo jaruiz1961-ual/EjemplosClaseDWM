@@ -1,11 +1,14 @@
 ﻿@page "/Account/Login"
 
 @using System.ComponentModel.DataAnnotations
+@using BibliotecaContextosDb.TiposBase
 @using Microsoft.AspNetCore.Authentication
 @using Microsoft.AspNetCore.Identity
 @using BlazorSeguridad2026.Data
 
 @inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<ApplicationRole> RoleManager
+
 @inject SignInManager<ApplicationUser> SignInManager
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
@@ -174,29 +177,36 @@
         await ContextProvider.ReadStates();
 
         var appUser = await UserManager.FindByEmailAsync(Input.Email);
-        var userClaims = await UserManager.GetClaimsAsync(appUser);
 
-        // añadir roles si no están como claims:
+        // ✅ 1. Lista para TODOS los claims
+        var allClaims = new List<Claim>(await UserManager.GetClaimsAsync(appUser));
+
+        // ✅ 2. Agregar claims de ROLES
         var roles = await UserManager.GetRolesAsync(appUser);
-            foreach (var role in roles)
-            {
-                string rol = role;
-                string claimType = System.Security.Claims.ClaimTypes.Role;
-                userClaims.Add( new System.Security.Claims.Claim(claimType,rol));
-            }
+        foreach (var roleName in roles)
+        {
+            // Rol claim
+            allClaims.Add(new Claim(ClaimTypes.Role, roleName));
 
-   
-        // generar JWT
-        var token = TokenService.GenerateToken(userClaims);
+            // Permission claims del rol
+            var role = await RoleManager.FindByNameAsync(roleName);
+            var roleClaims = await RoleManager.GetClaimsAsync(role);
+            allClaims.AddRange(roleClaims);  // ✅ Permission=Roles.Edit
+        }
 
-        // guardar token y limpiar estado en tu ContextProvider para toda la app
+        // ✅ 3. Eliminar duplicados
+        allClaims = allClaims
+            .GroupBy(c => c.Type + c.Value)
+            .Select(g => g.First())
+            .ToList();
+
+        // ✅ 4. JWT con Permission claims
+        var token = TokenService.GenerateToken(allClaims);
         await ContextProvider.UpdateContextFromToken(token);
-        
 
         Logger.LogInformation("User logged in.");
         RedirectManager.RedirectTo(ReturnUrl);
     }
-    
 
 
     private sealed class InputModel
