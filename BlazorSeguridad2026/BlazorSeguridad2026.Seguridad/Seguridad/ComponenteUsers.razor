@@ -13,6 +13,7 @@
 @inject IUserService UserServiceMio
 @inject NavigationManager Nav
 @inject DialogService DialogService
+@inject ILookupNormalizer Normalizer
 
 
 @inject IAuthorizationService AuthorizationService
@@ -76,8 +77,8 @@ else
            IsExtendButtonsInRowHeader="false">
 
         <TableColumns>
-            <TableColumn @bind-Field="context.Email" Text="Email" />
             <TableColumn @bind-Field="context.UserName" Text="Usuario" />
+            <TableColumn @bind-Field="context.Email" Text="Email" />           
             <TableColumn @bind-Field="context.TenantId" Text="Tenant" />
             <TableColumn @bind-Field="context.DbKey" Text="DbKey" />
             <TableColumn @bind-Field="context.PasswordHash" Text="Password" />
@@ -243,7 +244,7 @@ else
     private async Task<bool> OnSaveAsync(ApplicationUser item,  ItemChangedType changedType)
     {
         error = success = null;
-        
+
 
         if (changedType == ItemChangedType.Add)
         {
@@ -255,9 +256,13 @@ else
 
             // aquí deberías pedir password de forma real (modal, form, etc.)
             string password = string.IsNullOrWhiteSpace(item.PasswordHash) ? item.UserName : item.PasswordHash;
-            
+
             var result = await UserServiceMio.CreateAsync(
+                item.UserName,
+                item.NormalizedUserName = Normalizer.NormalizeName(item.UserName),
                 item.Email,
+                item.NormalizedEmail = Normalizer.NormalizeName(item.UserName),
+   
                 item.PasswordHash,
                 item.TenantId,
                 item.DbKey);
@@ -271,12 +276,17 @@ else
         else
         {
 
+            item.EmailConfirmed = true; // Si admin confirma
             var result = await UserServiceMio.UpdateUserAsync(
                 item.Id,
                 u =>
                 {
-                    u.Email = item.Email;
                     u.UserName = item.UserName;
+                    u.NormalizedUserName = Normalizer.NormalizeName(item.UserName);
+                    u.Email = item.Email;
+                    u.NormalizedEmail = Normalizer.NormalizeName(item.UserName);
+
+                    u.EmailConfirmed = true;
                     u.TenantId = item.TenantId;
                     u.DbKey = item.DbKey;
                 });
@@ -286,6 +296,8 @@ else
                 error = string.Join(" ", result.Errors.Select(e => e.Description));
                 return false;
             }
+
+           
         }
 
        

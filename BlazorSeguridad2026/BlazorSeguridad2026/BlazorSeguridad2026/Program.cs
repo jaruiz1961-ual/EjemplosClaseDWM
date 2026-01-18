@@ -322,7 +322,7 @@ builder.Services.AddScoped<DialogService>();
 
 var app = builder.Build();
 
-ApplicationBaseDbContext.SeedAdminAsync(app.Services);
+
 
 var localizationOptions = new RequestLocalizationOptions
 {
@@ -348,10 +348,13 @@ using (var scope = app.Services.CreateScope())
         using var db = factory.CreateDbContext();
         migrator(db);
     }
-
+    //InitDb<ApplicationBaseDbContext>(db => db.Database.Migrate());
     //InitDb<SqlServerDbContext>(db => db.Database.Migrate());
     //InitDb<SqLiteDbContext>(db => db.Database.Migrate());
     //InitDb<InMemoryDbContext>(db => db.Database.EnsureCreated());
+
+    await ApplicationBaseDbContext.SeedAdminAsync(app.Services);
+
 }
 
 // Pipeline HTTP

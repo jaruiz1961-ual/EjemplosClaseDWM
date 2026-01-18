@@ -14,7 +14,7 @@ namespace BlazorSeguridad2026.Base.Seguridad
         Task<List<ApplicationUser>> GetAllAsync();
         Task<ApplicationUser?> GetByIdAsync(int id);
 
-        Task<IdentityResult> CreateAsync(string email, string password, int? TenantId, string KeyDb);
+        Task<IdentityResult> CreateAsync(string username, string normalizedName, string email, string normalizedEmail, string password, int? tenantId, string keyDb);
         Task<IdentityResult> UpdateUserAsync(int id, Action<ApplicationUser> updateAction);
 
         Task<IdentityResult> DeleteAsync(int id);
@@ -82,16 +82,22 @@ namespace BlazorSeguridad2026.Base.Seguridad
             
         //}
 
-        public async Task<IdentityResult> CreateAsync(string email, string password, int? tenantId, string keyDb)
+        public async Task<IdentityResult> CreateAsync(string username, string normalizedName, string email, string normalizedEmail,string password, int? tenantId, string keyDb)
         {
             // 1) Crear la entidad de Identity
             var user = new ApplicationUser
             {
-                UserName = email,
+                UserName = username,
                 Email = email,
                 TenantId = tenantId,
-                DbKey = keyDb
+                DbKey = keyDb,
+                NormalizedEmail = normalizedEmail,
+                NormalizedUserName = normalizedName,
+                EmailConfirmed = true
+                
             };
+            // normalizar 
+
 
             // 2) Crear el usuario con Identity (valida password, etc.)
             var identityResult = await _userManager.CreateAsync(user, password);

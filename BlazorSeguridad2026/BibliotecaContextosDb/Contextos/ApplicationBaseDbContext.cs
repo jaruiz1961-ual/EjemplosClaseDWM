@@ -1,4 +1,5 @@
 ﻿#define UPDATE_DATABASE
+using BibliotecaContextosDb.TiposBase;
 using BlazorSeguridad2026.Base.Genericos;
 using BlazorSeguridad2026.Base.Modelo;
 using BlazorSeguridad2026.Base.Seguridad;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Client;
 using System.Linq.Expressions;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -138,31 +140,58 @@ namespace BlazorSeguridad2026.Base.Contextos
             ModelCreatingTenant(modelBuilder);
         }
 
+
         public static async Task SeedAdminAsync(IServiceProvider services)
         {
             using var scope = services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+            var  Normalizer = scope.ServiceProvider.GetRequiredService<ILookupNormalizer>();
 
+            // ← Check EXISTE ya (evita duplicados)
+            var adminUser = await userManager.FindByNameAsync("Admin");
+            if (adminUser != null) return; // Ya existe
+
+            var adminEmail = "";
             var admin = new ApplicationUser
             {
                 UserName = "Admin",
-                Email = "[email protected]",
-                TenantId = 0, // si tienes multi-tenancy
-                DbKey = "SqlServer" // si lo tienes
+                Email = adminEmail,
+                NormalizedUserName = Normalizer.NormalizeName("Admin"),
+                NormalizedEmail = Normalizer.NormalizeName("Admin"),
+                EmailConfirmed = true, // ← Antes, simplifica
+                TenantId = 0,
+                DbKey = "SqlServer",
+                LockoutEnabled = false
             };
 
-            // ← AQUÍ metes la contraseña en texto plano
-            var result = await userManager.CreateAsync(admin, "Admin");
-
+            var result = await userManager.CreateAsync(admin, "Admin"); // ← Password COMPLEJO (Identity rules)
             if (result.Succeeded)
             {
-                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+                // Role
                 if (!await roleManager.RoleExistsAsync("Admin"))
                 {
-                    await roleManager.CreateAsync(new ApplicationRole { Name = "Admin" });
+                    await roleManager.CreateAsync(new ApplicationRole
+                    {
+                        Name = "Admin",
+                        NormalizedName = "ADMIN"
+                    });
                 }
                 await userManager.AddToRoleAsync(admin, "Admin");
+                await userManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Permissions.RolesEdit));
+                await userManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Permissions.UsersEdit));
+                await userManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Permissions.RolesView));
+                await userManager.AddClaimAsync(admin, new Claim(CustomClaimTypes.Permission, Permissions.UsersView));
+
+                Console.WriteLine("✅ Admin creado: User=Admin, Pass=Admin");
+            }
+            else
+            {
+                Console.WriteLine($"❌ Seed fail: {string.Join(", ", result.Errors.Select(e => e.Description))}");
             }
         }
+
+
     }
 }
+
